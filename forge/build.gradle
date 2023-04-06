@@ -1,0 +1,75 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+loom {
+    forge {
+        mixinConfig "$project.mod_id-common.mixins.json"
+        mixinConfig "${project.mod_id}.mixins.json"
+    }
+}
+
+configurations {
+    common
+    shadowCommon
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:$rootProject.minecraft_version-$rootProject.forge_version"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    modCompileOnly "mezz.jei:jei-$rootProject.minecraft_version-forge-api:$rootProject.jei_version"
+    modLocalRuntime("mezz.jei:jei-$rootProject.minecraft_version-forge:$rootProject.jei_version") { transitive = false }
+
+    modApi "com.teamresourceful.resourcefullib:resourcefullib-forge-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching("META-INF/mods.toml") {
+        expand "version": rootProject.version,
+                "github_name": rootProject.github_name,
+                "resourcefullib_version": rootProject.resourcefullib_version
+    }
+}
+
+shadowJar {
+    exclude "fabric.mod.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    archiveClassifier.set null
+}
+
+jar {
+    archiveClassifier.set "dev"
+    archivesBaseName = "$mod_id-forge-$minecraft_version"
+}
+
+sourcesJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}

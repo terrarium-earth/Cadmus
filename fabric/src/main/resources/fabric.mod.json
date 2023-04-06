@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "cadmus",
+  "version": "${version}",
+  "name": "Cadmus",
+  "description": "idk",
+  "authors": [
+    "Alex Nijjar"
+  ],
+  "contributors": [
+  ],
+  "contact": {
+    "website": "https://modrinth.com/mod/cadmus",
+    "repo": "https://github.com/terrarium-earth/${github_name}",
+    "issues": "https://github.com/terrarium-earth/${github_name}/issues"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "earth.terrarium.cadmus.fabric.CadmusFabric"
+    ],
+    "client": [
+      "earth.terrarium.cadmus.client.fabric.CadmusClientFabric"
+    ]
+  },
+  "mixins": [
+    "cadmus.mixins.json",
+    "cadmus-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19",
+    "resourcefullib": ">=${resourcefullib_version}"
+  }
+}

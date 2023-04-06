@@ -1,0 +1,15 @@
+architectury {
+    common(rootProject.enabled_platforms.split(","))
+}
+
+dependencies {
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    modApi "com.teamresourceful.resourcefullib:resourcefullib-common-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
+}
+
+processResources {
+    inputs.property "version", rootProject.version
+    inputs.property "github_name", rootProject.github_name
+    inputs.property "resourcefullib_version", rootProject.resourcefullib_version
+}
