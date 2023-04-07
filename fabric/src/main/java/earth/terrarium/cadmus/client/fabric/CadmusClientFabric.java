@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.client.fabric;
 
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.client.screen.ClaimsScreen;
+import earth.terrarium.cadmus.client.map.ClaimScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -19,7 +19,7 @@ public class CadmusClientFabric implements ClientModInitializer {
     private static void registerClientCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
                 dispatcher.register(ClientCommandManager.literal("claim").executes(context -> {
-                    CadmusClient.screen = new ClaimsScreen();
+                    CadmusClient.screen = new ClaimScreen();
                     return 0;
                 })));
     }

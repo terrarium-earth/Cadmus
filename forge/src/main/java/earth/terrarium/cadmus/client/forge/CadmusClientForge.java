@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.client.forge;
 
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.client.screen.ClaimsScreen;
+import earth.terrarium.cadmus.client.map.ClaimScreen;
 import net.minecraft.commands.Commands;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -21,7 +21,7 @@ public class CadmusClientForge {
 
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register((Commands.literal("claim").executes(context -> {
-            CadmusClient.screen = new ClaimsScreen();
+            CadmusClient.screen = new ClaimScreen();
             return 0;
         })));
     }
