@@ -41,7 +41,6 @@ public class ClaimScreen extends Screen {
         poseStack.popPose();
     }
 
-
     @Override
     public boolean isPauseScreen() {
         return false;

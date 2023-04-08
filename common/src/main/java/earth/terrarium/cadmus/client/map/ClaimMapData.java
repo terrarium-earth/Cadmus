@@ -1,9 +1,9 @@
 package earth.terrarium.cadmus.client.map;
 
 public class ClaimMapData {
-    public byte[] colors;
+    public int[][] colors;
 
-    public ClaimMapData(byte[] colors) {
+    public ClaimMapData(int[][] colors) {
         this.colors = colors;
     }
 }

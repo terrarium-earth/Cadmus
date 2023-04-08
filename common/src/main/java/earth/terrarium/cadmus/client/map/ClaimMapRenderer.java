@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.material.MaterialColor;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
@@ -80,13 +79,12 @@ public class ClaimMapRenderer implements AutoCloseable {
         if (texture == null || data == null) return;
         for (int i = 0; i < scale; ++i) {
             for (int j = 0; j < scale; ++j) {
-                int pixel = j + i * scale;
                 NativeImage nativeImage = this.texture.getPixels();
-                if (nativeImage == null || pixel > this.data.colors.length) {
+                if (nativeImage == null || i > this.data.colors.length || j > this.data.colors[i].length) {
                     this.texture.upload();
                     return;
                 }
-                nativeImage.setPixelRGBA(j, i, MaterialColor.getColorFromPackedId(this.data.colors[pixel]));
+                nativeImage.setPixelRGBA(i, j, this.data.colors[i][j]);
             }
         }
 
