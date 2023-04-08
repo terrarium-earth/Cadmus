@@ -60,16 +60,16 @@ public class ClaimMapRenderer implements AutoCloseable {
         if (renderType == null) return;
         MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         VertexConsumer vertexConsumer = bufferSource.getBuffer(this.renderType);
-        int imageScale = 200;
         int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
         try (var ignored = new CloseablePoseStack(poseStack)) {
-            poseStack.translate(screenWidth / 2.0f - imageScale / 2f, screenHeight / 2.0f - imageScale / 2f, 0.0);
+            // render map at the center of the screen
+            poseStack.translate(screenWidth / 2.0f - ClaimScreen.MAP_SIZE / 2f, screenHeight / 2.0f - ClaimScreen.MAP_SIZE / 2f, 0.0);
 
             Matrix4f matrix4f = poseStack.last().pose();
-            vertexConsumer.vertex(matrix4f, 0.0F, imageScale, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
-            vertexConsumer.vertex(matrix4f, imageScale, imageScale, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
-            vertexConsumer.vertex(matrix4f, imageScale, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, 0.0F, ClaimScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, ClaimScreen.MAP_SIZE, ClaimScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, ClaimScreen.MAP_SIZE, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
             vertexConsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
         }
         bufferSource.endBatch();
@@ -77,9 +77,9 @@ public class ClaimMapRenderer implements AutoCloseable {
 
     private void updateTexture() {
         if (texture == null || data == null) return;
+        NativeImage nativeImage = this.texture.getPixels();
         for (int i = 0; i < scale; ++i) {
             for (int j = 0; j < scale; ++j) {
-                NativeImage nativeImage = this.texture.getPixels();
                 if (nativeImage == null || i > this.data.colors.length || j > this.data.colors[i].length) {
                     this.texture.upload();
                     return;
