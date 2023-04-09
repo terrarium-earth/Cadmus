@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.client.claim;
+package earth.terrarium.cadmus.client.claiming;
 
 public enum ClaimTool {
     PENCIL,

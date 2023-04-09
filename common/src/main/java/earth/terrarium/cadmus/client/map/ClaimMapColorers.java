@@ -17,10 +17,10 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MaterialColor;
 
 public class ClaimMapColorers {
-
     public static final int BRIGHTER_COLOR = 0xff030303;
 
-    public static int[][] setColors(int[][] colors, int minBlockX, int minBlockZ, int maxBlockX, int maxBlockZ, ClientLevel level, Player player) {
+    public static int[][] setColors(int minBlockX, int minBlockZ, int maxBlockX, int maxBlockZ, ClientLevel level, Player player) {
+        int[][] colors = new int[maxBlockX - minBlockX][maxBlockZ - minBlockZ];
         BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
 
@@ -67,7 +67,7 @@ public class ClaimMapColorers {
 
                     MaterialColor.Brightness brightness;
                     if (color == MaterialColor.WATER) {
-                        double darkness = (double) fluidDepth * 0.1 + (double) (x + z & 1) * 0.2;
+                        double darkness = fluidDepth * 0.1 + (double) (x + z & 1) * 0.2;
                         if (darkness < 0.5) {
                             brightness = MaterialColor.Brightness.HIGH;
                         } else if (darkness > 0.9) {
@@ -125,7 +125,7 @@ public class ClaimMapColorers {
         } else if (state != null) {
             int tintColor = Minecraft.getInstance().getBlockColors().getColor(state, level, pos, 0);
             if (tintColor == -1) {
-                return MapColors.getColor(color.id, brightness);
+                return ClaimMapColors.getColor(color.id, brightness);
             }
             int intColor = rgb2abgr(Minecraft.getInstance().getBlockColors().getColor(state, level, pos));
             return switch (brightness) {

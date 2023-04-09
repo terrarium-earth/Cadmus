@@ -33,7 +33,8 @@ public class ClaimMapRenderer implements AutoCloseable {
         this.textureManager = Minecraft.getInstance().getTextureManager();
     }
 
-    public void update(ClaimMapData mapData, int scale) {
+    public void update(ClaimMapData mapData) {
+        int scale = mapData.scale;
         if (this.scale != scale) {
             this.scale = scale;
 
@@ -64,12 +65,12 @@ public class ClaimMapRenderer implements AutoCloseable {
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
         try (var ignored = new CloseablePoseStack(poseStack)) {
             // render map at the center of the screen
-            poseStack.translate(screenWidth / 2.0f - ClaimScreen.MAP_SIZE / 2f, screenHeight / 2.0f - ClaimScreen.MAP_SIZE / 2f, 0.0);
+            poseStack.translate(screenWidth / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, screenHeight / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, 0.0);
 
             Matrix4f matrix4f = poseStack.last().pose();
-            vertexConsumer.vertex(matrix4f, 0.0F, ClaimScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
-            vertexConsumer.vertex(matrix4f, ClaimScreen.MAP_SIZE, ClaimScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
-            vertexConsumer.vertex(matrix4f, ClaimScreen.MAP_SIZE, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, 0.0F, ClaimMapScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, ClaimMapScreen.MAP_SIZE, ClaimMapScreen.MAP_SIZE, -0.01F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
+            vertexConsumer.vertex(matrix4f, ClaimMapScreen.MAP_SIZE, 0.0F, -0.01F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
             vertexConsumer.vertex(matrix4f, 0.0F, 0.0F, -0.01F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(LightTexture.FULL_BRIGHT).endVertex();
         }
         bufferSource.endBatch();

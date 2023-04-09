@@ -1,0 +1,4 @@
+{
+  "gui.cadmus.claim_map.claimed_chunks": "%d / %d Claimed Chunks",
+  "gui.cadmus.claim_map.force_loaded_chunks": "%d / %d Force Loaded Chunks"
+}

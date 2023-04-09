@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.client;
 
-import earth.terrarium.cadmus.client.map.ClaimScreen;
+import earth.terrarium.cadmus.client.map.ClaimMapScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -18,7 +18,7 @@ public class CadmusClient {
             screen = null;
         }
 
-        if (Minecraft.getInstance().screen instanceof ClaimScreen claimsScreen) {
+        if (Minecraft.getInstance().screen instanceof ClaimMapScreen claimsScreen) {
             claimsScreen.update();
         }
     }

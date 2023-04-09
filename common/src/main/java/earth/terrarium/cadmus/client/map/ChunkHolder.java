@@ -2,7 +2,7 @@ package earth.terrarium.cadmus.client.map;
 
 import net.minecraft.world.level.ChunkPos;
 
-public interface ClaimChunkHolder {
+public interface ChunkHolder {
 
     ChunkPos cadmus$getChunkPos();
 
