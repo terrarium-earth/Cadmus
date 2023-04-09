@@ -5,16 +5,19 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+
 public class ClaimMapUpdater {
     private static int prevScale;
 
-    public static ClaimMapData update(boolean forceUpdate, @NotNull ClaimMapScreen screen, @NotNull LocalPlayer player, @NotNull ClientLevel level) {
+    public static void update(boolean forceUpdate, @NotNull LocalPlayer player, @NotNull ClientLevel level, Consumer<ClaimMapData> callback) {
         if (level instanceof ChunkHolder holder) {
             int scale = getScaledRenderDistance();
             var playerChunkPos = player.chunkPosition();
             // Don't update if the player hasn't moved chunks
             if (!forceUpdate && playerChunkPos.equals(holder.cadmus$getChunkPos()) && prevScale == scale) {
-                return null;
+                return;
             }
 
             holder.cadmus$setChunkPos(playerChunkPos);
@@ -26,10 +29,12 @@ public class ClaimMapUpdater {
             int maxBlockX = chunkPos.getMaxBlockX() + scale + 1;
             int maxBlockZ = chunkPos.getMaxBlockZ() + scale + 1;
 
-            int[][] colors = ClaimMapColorers.setColors(minBlockX, minBlockZ, maxBlockX, maxBlockZ, level, player);
-            return new ClaimMapData(colors, getChunkScale(scale));
+            ClaimMapScreen.calculatingMap = true;
+            CompletableFuture.supplyAsync(() -> {
+                int[][] colors = ClaimMapColorers.setColors(minBlockX, minBlockZ, maxBlockX, maxBlockZ, level, player);
+                return new ClaimMapData(colors, getChunkScale(scale));
+            }).thenAcceptAsync(callback, Minecraft.getInstance());
         }
-        return null;
     }
 
     public static int getChunkScale(int mapScale) {
@@ -37,7 +42,7 @@ public class ClaimMapUpdater {
     }
 
     public static int getScaledRenderDistance() {
-        int scale = Math.min(Minecraft.getInstance().options.renderDistance().get(), ClaimMapScreen.MAX_MAP_SIZE) * 8;
+        int scale = Math.min(Minecraft.getInstance().options.renderDistance().get(), ClaimMapScreen.MAX_MAP_SIZE * 2) * 8;
         scale -= scale % 16;
         return scale;
     }

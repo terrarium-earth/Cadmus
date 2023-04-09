@@ -34,6 +34,7 @@ public class ClaimMapRenderer implements AutoCloseable {
     }
 
     public void update(ClaimMapData mapData) {
+        ClaimMapScreen.calculatingMap = false;
         int scale = mapData.scale;
         if (this.scale != scale) {
             this.scale = scale;

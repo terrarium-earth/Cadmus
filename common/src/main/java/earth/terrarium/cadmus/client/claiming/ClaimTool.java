@@ -1,8 +1,9 @@
 package earth.terrarium.cadmus.client.claiming;
 
 public enum ClaimTool {
-    PENCIL,
+    NONE,
+    BRUSH,
     ERASER,
-    FORCE_LOAD_PENCIL,
-    FORCE_LOAD_ERASER,
+    CHUNK_LOAD_BRUSH,
+    CHUNK_LOAD_ERASER,
 }

@@ -125,7 +125,7 @@ public class ClaimMapColorers {
         } else if (state != null) {
             int tintColor = Minecraft.getInstance().getBlockColors().getColor(state, level, pos, 0);
             if (tintColor == -1) {
-                return ClaimMapColors.getColor(color.id, brightness);
+                return ClaimMapColorPalette.getColor(color.id, brightness);
             }
             int intColor = rgb2abgr(Minecraft.getInstance().getBlockColors().getColor(state, level, pos));
             return switch (brightness) {
