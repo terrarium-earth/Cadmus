@@ -70,12 +70,12 @@ public class ClaimMapScreen extends Screen {
         var level = Minecraft.getInstance().level;
         if (level == null) return;
 
-        this.addRenderableWidget(new ImageButton((int) (this.width / 1.5) + 3, 21, 12, 12, 218, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
                 CONTAINER_BACKGROUND,
                 button -> clearDimension(level.dimension())
         )).setTooltip(Tooltip.create(Component.translatable("tooltip.cadmus.claim_map.clear_dimension")));
 
-        this.addRenderableWidget(new ImageButton((int) (this.width / 1.5) + 18, 21, 12, 12, 230, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
                 CONTAINER_BACKGROUND,
                 button -> clearAll()
         )).setTooltip(Tooltip.create(Component.translatable("tooltip.cadmus.claim_map.clear_all")));
