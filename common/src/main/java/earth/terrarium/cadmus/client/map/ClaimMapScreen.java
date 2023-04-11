@@ -2,14 +2,16 @@ package earth.terrarium.cadmus.client.map;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.claiming.ClaimTool;
 import earth.terrarium.cadmus.common.claiming.ClaimType;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
+import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.network.message.server.RequestClaimedChunksPacket;
+import earth.terrarium.cadmus.common.network.message.server.UpdateClaimedChunksPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ImageButton;
@@ -17,10 +19,13 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ClaimMapScreen extends Screen {
     public static final int MAP_SIZE = 200;
@@ -32,15 +37,19 @@ public class ClaimMapScreen extends Screen {
     public static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
     private static final ClaimMapRenderer MAP_RENDERER = new ClaimMapRenderer();
 
-    // Temporary until server stuff is implemented
-    public static final Object2ObjectOpenHashMap<Pair<ResourceKey<Level>, ChunkPos>, ClaimType> CLAIMED_CHUNKS = new Object2ObjectOpenHashMap<>();
     public static boolean calculatingMap;
+    public static boolean waitingForServerData;
+
+    private static final Map<ChunkPos, ClaimType> FRIENDLY_CHUNKS = new HashMap<>();
+    private static final Map<ChunkPos, ClaimType> UNFRIENDLY_CHUNKS = new HashMap<>();
 
     private ClaimTool tool = ClaimTool.NONE;
 
     public ClaimMapScreen() {
         super(Component.empty());
         update();
+        ClaimMapScreen.waitingForServerData = true;
+        NetworkHandler.CHANNEL.sendToServer(new RequestClaimedChunksPacket(Minecraft.getInstance().options.renderDistance().get()));
     }
 
     @Override
@@ -50,18 +59,16 @@ public class ClaimMapScreen extends Screen {
         if (player == null) return;
 
         fill(poseStack, (width - 200) / 2, (height - 200) / 2, (width + 200) / 2, (height + 200) / 2, 0xff000000);
-        if (!calculatingMap) {
-            MAP_RENDERER.render(poseStack);
-            renderPlayerAvatar(player, poseStack);
-        }
         renderBackgroundTexture(poseStack);
-        renderChunkButtons(player, poseStack, mouseX, mouseY);
-
-        renderText(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTick);
-        if (calculatingMap) {
+        if (!calculatingMap && !waitingForServerData) {
+            MAP_RENDERER.render(poseStack);
+            renderChunkButtons(player, poseStack, mouseX, mouseY);
+            renderPlayerAvatar(player, poseStack);
+        } else {
             GuiComponent.drawCenteredString(poseStack, font, Component.translatable("gui.cadmus.claim_map.loading"), (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
         }
+        renderText(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
     @Override
@@ -72,7 +79,7 @@ public class ClaimMapScreen extends Screen {
 
         this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
                 CONTAINER_BACKGROUND,
-                button -> clearDimension(level.dimension())
+                button -> clearDimension()
         )).setTooltip(Tooltip.create(Component.translatable("tooltip.cadmus.claim_map.clear_dimension")));
 
         this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
@@ -115,7 +122,6 @@ public class ClaimMapScreen extends Screen {
         float chunkScale = scale / 16f;
         float pixelScale = MAP_SIZE / scale;
         ChunkPos playerChunk = player.chunkPosition();
-        var dimension = player.level.dimension();
 
         for (int i = 0; i < chunkScale; i++) {
             for (int j = 0; j < chunkScale; j++) {
@@ -129,40 +135,47 @@ public class ClaimMapScreen extends Screen {
                 int playerChunkZ = Math.round(playerChunk.z - chunkScale / 2);
 
                 ChunkPos chunkPos = new ChunkPos(playerChunkX + i, playerChunkZ + j);
-                var claim = CLAIMED_CHUNKS.getOrDefault(Pair.of(dimension, new ChunkPos(chunkPos.x, chunkPos.z)), null);
+                var claim = FRIENDLY_CHUNKS.getOrDefault(new ChunkPos(chunkPos.x, chunkPos.z), null);
+                boolean owned = true;
+                if (claim == null) {
+                    claim = UNFRIENDLY_CHUNKS.getOrDefault(new ChunkPos(chunkPos.x, chunkPos.z), null);
+                    if (claim != null) {
+                        owned = false;
+                    }
+                }
 
                 boolean shouldRender = claim != null;
+                int color = owned ? claim == ClaimType.CLAIMED ? 0xff00ff00 : 0xfff59a22 : 0xffbd2025;
                 boolean isHovering = false;
 
-                int color = claim == ClaimType.CLAIMED ? 0xff00ff00 : 0xfff59a22;
                 if (mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
-                    if (this.tool != ClaimTool.NONE) {
+                    if (this.tool != ClaimTool.NONE && owned) {
                         ClaimType claimType = switch (this.tool) {
-                            case BRUSH -> ClaimType.CLAIMED;
+                            case BRUSH, CHUNK_LOAD_ERASER -> ClaimType.CLAIMED;
                             case CHUNK_LOAD_BRUSH -> ClaimType.CHUNK_LOADED;
-                            case CHUNK_LOAD_ERASER -> claim != null ? ClaimType.CLAIMED : null;
                             default -> null;
                         };
 
                         if (claimType != null) {
-                            if (this.tool == ClaimTool.CHUNK_LOAD_ERASER || (this.tool == ClaimTool.BRUSH && CLAIMED_CHUNKS.size() < MAX_CLAIMED_CHUNKS) || (this.tool == ClaimTool.CHUNK_LOAD_BRUSH && getChunkLoaded() < MAX_CHUNK_LOADED_CHUNKS)) {
+                            if (this.tool == ClaimTool.CHUNK_LOAD_ERASER || (this.tool == ClaimTool.BRUSH && FRIENDLY_CHUNKS.size() < MAX_CLAIMED_CHUNKS) || (this.tool == ClaimTool.CHUNK_LOAD_BRUSH && getChunkLoaded() < MAX_CHUNK_LOADED_CHUNKS)) {
                                 if (this.tool != ClaimTool.BRUSH || claim != ClaimType.CHUNK_LOADED) {
-                                    CLAIMED_CHUNKS.put(Pair.of(dimension, chunkPos), claimType);
+                                    FRIENDLY_CHUNKS.put(chunkPos, claimType);
                                 }
                             }
                         } else if (this.tool != ClaimTool.ERASER || claim != ClaimType.CHUNK_LOADED) {
-                            CLAIMED_CHUNKS.remove(Pair.of(dimension, chunkPos));
+                            FRIENDLY_CHUNKS.remove(chunkPos);
                         }
+                    } else if (owned) {
+                        isHovering = true;
+                        color = Screen.hasShiftDown() ? 0xfff59a22 : tool == ClaimTool.ERASER ? 0xffff0000 : 0xff00ff00;
                     }
-                    isHovering = true;
-                    color = Screen.hasShiftDown() ? 0xfff59a22 : tool == ClaimTool.ERASER ? 0xffff0000 : 0xff00ff00;
                 }
 
                 if (shouldRender || isHovering) {
-                    boolean north = j == 0 || CLAIMED_CHUNKS.getOrDefault(Pair.of(dimension, new ChunkPos(playerChunkX + i, playerChunkZ + j - 1)), null) != claim;
-                    boolean east = i == chunkScale - 1 || CLAIMED_CHUNKS.getOrDefault(Pair.of(dimension, new ChunkPos(playerChunkX + i + 1, playerChunkZ + j)), null) != claim;
-                    boolean south = j == chunkScale - 1 || CLAIMED_CHUNKS.getOrDefault(Pair.of(dimension, new ChunkPos(playerChunkX + i, playerChunkZ + j + 1)), null) != claim;
-                    boolean west = i == 0 || CLAIMED_CHUNKS.getOrDefault(Pair.of(dimension, new ChunkPos(playerChunkX + i - 1, playerChunkZ + j)), null) != claim;
+                    boolean north = j == 0 || getClaimType(new ChunkPos(playerChunkX + i, playerChunkZ + j - 1)) != claim;
+                    boolean east = i == chunkScale - 1 || getClaimType(new ChunkPos(playerChunkX + i + 1, playerChunkZ + j)) != claim;
+                    boolean south = j == chunkScale - 1 || getClaimType(new ChunkPos(playerChunkX + i, playerChunkZ + j + 1)) != claim;
+                    boolean west = i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j)) != claim;
 
                     // Do CTM on the claimed chunks
                     int roundedX = Math.round(x);
@@ -188,19 +201,23 @@ public class ClaimMapScreen extends Screen {
         }
     }
 
+    private ClaimType getClaimType(ChunkPos chunkPos) {
+        return FRIENDLY_CHUNKS.getOrDefault(chunkPos, UNFRIENDLY_CHUNKS.getOrDefault(chunkPos, null));
+    }
+
     private void renderText(PoseStack poseStack) {
-        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.claimed_chunks", CLAIMED_CHUNKS.size(), MAX_CLAIMED_CHUNKS), 5, height - 24, 0xffffff);
+        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.claimed_chunks", FRIENDLY_CHUNKS.size(), MAX_CLAIMED_CHUNKS), 5, height - 24, 0xffffff);
         this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.force_loaded_chunks", getChunkLoaded(), MAX_CHUNK_LOADED_CHUNKS), 5, height - 12, 0xffffff);
     }
 
     private int getChunkLoaded() {
-        int chunksForceLoaded = 0;
-        for (ClaimType value : CLAIMED_CHUNKS.values()) {
+        int chunkLoadedCount = 0;
+        for (ClaimType value : FRIENDLY_CHUNKS.values()) {
             if (value == ClaimType.CHUNK_LOADED) {
-                chunksForceLoaded++;
+                chunkLoadedCount++;
             }
         }
-        return chunksForceLoaded;
+        return chunkLoadedCount;
     }
 
     @Override
@@ -232,11 +249,28 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void clearAll() {
-        CLAIMED_CHUNKS.clear();
+        // TODO: Clear all dimensions
     }
 
-    public void clearDimension(ResourceKey<Level> dimension) {
-        CLAIMED_CHUNKS.entrySet().removeIf(entry -> entry.getKey().getFirst() == dimension);
+    public void clearDimension() {
+        FRIENDLY_CHUNKS.clear();
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    public static void update(Set<ClaimedChunk> friendlyChunks, Set<ClaimedChunk> unfriendlyChunks) {
+        waitingForServerData = false;
+        FRIENDLY_CHUNKS.clear();
+        UNFRIENDLY_CHUNKS.clear();
+        for (ClaimedChunk chunk : friendlyChunks) {
+            FRIENDLY_CHUNKS.put(chunk.pos(), chunk.type());
+        }
+        for (ClaimedChunk chunk : unfriendlyChunks) {
+            UNFRIENDLY_CHUNKS.put(chunk.pos(), chunk.type());
+        }
     }
 
     public void update() {
@@ -246,13 +280,14 @@ public class ClaimMapScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-
-    @Override
     public void removed() {
-        // TODO send claimed chunks to server
         super.removed();
+        Set<ClaimedChunk> claimedChunks = new HashSet<>();
+        for (var entry : FRIENDLY_CHUNKS.entrySet()) {
+            claimedChunks.add(new ClaimedChunk(entry.getKey(), entry.getValue()));
+        }
+        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(claimedChunks));
+        FRIENDLY_CHUNKS.clear();
+        UNFRIENDLY_CHUNKS.clear();
     }
 }

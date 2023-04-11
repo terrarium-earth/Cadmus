@@ -6,7 +6,7 @@ import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ClientLevel.class)
-public class ClientLevelMixin implements ChunkHolder {
+public abstract class ClientLevelMixin implements ChunkHolder {
     private ChunkPos cadmus$chunkPos;
 
     @Override

@@ -74,10 +74,10 @@ public class ClaimMapColorPalette {
         }
 
         return COLORS[index][switch (brightness) {
-            case LOWEST -> 3;
-            case LOW -> 2;
-            case NORMAL -> 1;
-            case HIGH -> 0;
+            case LOWEST -> 0;
+            case LOW -> 1;
+            case NORMAL -> 2;
+            case HIGH -> 3;
         }];
     }
 

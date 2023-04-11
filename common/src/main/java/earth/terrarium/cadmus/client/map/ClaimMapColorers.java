@@ -138,11 +138,8 @@ public class ClaimMapColorers {
         return 0x00000000;
     }
 
-    private static int rgb2abgr(int rgb) {
-        int red = (rgb >> 16) & 0xFF;
-        int green = (rgb >> 8) & 0xFF;
-        int blue = rgb & 0xFF;
-        return (blue << 16) | (green << 8) | red | 0xff000000;
+    public static int rgb2abgr(int rgb) {
+        return (rgb & 0xFF00FF00) | ((rgb & 0xFF) << 16) | ((rgb >> 16) & 0xFF) | 0xFF000000;
     }
 
     private static int darker(int abgr) {
