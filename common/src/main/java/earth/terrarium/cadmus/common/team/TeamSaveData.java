@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.team;
 
+import com.teamresourceful.resourcefullib.common.lib.Constants;
 import earth.terrarium.cadmus.common.claiming.ClaimType;
 import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -24,18 +25,21 @@ public class TeamSaveData extends SavedData {
     }
 
     public TeamSaveData(CompoundTag tag) {
-        tag.getAllKeys().forEach(key -> {
-            var teamTag = tag.getCompound(key);
-            Set<ClaimedChunk> chunks = teams.getOrDefault(key, new HashSet<>());
-            int size = teamTag.getInt("Size");
-            for (int i = 0; i < size; i++) {
-                CompoundTag chunkTag = teamTag.getCompound("Chunk_" + i);
-                int x = chunkTag.getInt("X");
-                int z = chunkTag.getInt("Z");
-                ClaimType type = ClaimType.values()[chunkTag.getByte("Type")];
-                chunks.add(new ClaimedChunk(new ChunkPos(x, z), type));
+        tag.getAllKeys().forEach(teamKey -> {
+            var teamTag = tag.getCompound(teamKey);
+            Set<ClaimedChunk> chunks = teams.getOrDefault(teamKey, new HashSet<>());
+            for (String key : teamTag.getAllKeys()) {
+                try {
+                    long longPos = Long.parseLong(key);
+                    var pos = new ChunkPos(longPos);
+                    ClaimType type = ClaimType.values()[teamTag.getByte(key)];
+                    chunks.add(new ClaimedChunk(pos, type));
+                } catch (Exception e) {
+                    Constants.LOGGER.error("Failed to load claimed chunk for {}", key);
+                    e.printStackTrace();
+                }
             }
-            teams.put(key, chunks);
+            teams.put(teamKey, chunks);
         });
     }
 
@@ -43,16 +47,7 @@ public class TeamSaveData extends SavedData {
     public CompoundTag save(CompoundTag tag) {
         teams.forEach((team, chunks) -> {
             var teamTag = new CompoundTag();
-            int i = 0;
-            teamTag.putInt("Size", chunks.size());
-            for (ClaimedChunk chunk : chunks) {
-                CompoundTag chunkTag = new CompoundTag();
-                chunkTag.putInt("X", chunk.pos().x);
-                chunkTag.putInt("Z", chunk.pos().z);
-                chunkTag.putByte("Type", (byte) chunk.type().ordinal());
-                teamTag.put("Chunk_" + i, chunkTag);
-                i++;
-            }
+            chunks.forEach(chunk -> teamTag.putByte(String.valueOf(chunk.pos().toLong()), (byte) chunk.type().ordinal()));
             tag.put(team, teamTag);
         });
         return tag;

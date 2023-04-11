@@ -10,8 +10,7 @@ public record ClaimedChunk(ChunkPos pos, ClaimType type) {
     public static void encode(Set<ClaimedChunk> chunks, FriendlyByteBuf buf) {
         buf.writeVarInt(chunks.size());
         chunks.forEach(claimedChunks -> {
-            buf.writeVarInt(claimedChunks.pos().x);
-            buf.writeVarInt(claimedChunks.pos().z);
+            buf.writeVarLong(claimedChunks.pos().toLong());
             buf.writeEnum(claimedChunks.type());
         });
     }
@@ -20,7 +19,7 @@ public record ClaimedChunk(ChunkPos pos, ClaimType type) {
         int size = buf.readVarInt();
         Set<ClaimedChunk> chunks = new HashSet<>();
         for (int i = 0; i < size; i++) {
-            ChunkPos chunkPos = new ChunkPos(buf.readVarInt(), buf.readVarInt());
+            ChunkPos chunkPos = new ChunkPos(buf.readVarLong());
             ClaimType claimType = buf.readEnum(ClaimType.class);
             chunks.add(new ClaimedChunk(chunkPos, claimType));
         }
