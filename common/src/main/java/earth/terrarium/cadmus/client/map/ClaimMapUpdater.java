@@ -5,23 +5,23 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class ClaimMapUpdater {
-    private static int prevScale;
+    private static int lastScale;
 
     public static void update(boolean forceUpdate, @NotNull LocalPlayer player, @NotNull ClientLevel level, Consumer<ClaimMapData> callback) {
         if (level instanceof ChunkHolder holder) {
             int scale = getScaledRenderDistance();
             var playerChunkPos = player.chunkPosition();
             // Don't update if the player hasn't moved chunks
-            if (!forceUpdate && playerChunkPos.equals(holder.cadmus$getChunkPos()) && prevScale == scale) {
+            if (!forceUpdate && playerChunkPos.equals(holder.cadmus$getChunkPos()) && lastScale == scale) {
                 return;
             }
 
             holder.cadmus$setChunkPos(playerChunkPos);
-            prevScale = scale;
+            lastScale = scale;
 
             var chunkPos = holder.cadmus$getChunkPos();
             int minBlockX = chunkPos.getMinBlockX() - scale;

@@ -4,12 +4,13 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.common.claiming.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.message.client.SendClaimedChunksPacket;
-import earth.terrarium.cadmus.common.team.TeamSaveData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -46,10 +47,10 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
         public PacketContext handle(RequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
-                var friendlyChunks = TeamSaveData.get((ServerPlayer) player);
+                var friendlyChunks = ClaimChunkSaveData.get((ServerPlayer) player);
 
                 Set<ClaimedChunk> unfriendlyChunks = new HashSet<>();
-                for (var chunk : TeamSaveData.getAll((ServerPlayer) player)) {
+                for (var chunk : ClaimChunkSaveData.getAll((ServerLevel) player.level)) {
                     var chunkPos = new ChunkPos(start.x - chunk.pos().x, start.z - chunk.pos().z);
                     if (chunkPos.x < message.renderDistance && chunkPos.x > -message.renderDistance && chunkPos.z < message.renderDistance && chunkPos.z > -message.renderDistance) {
                         if (!friendlyChunks.contains(chunk)) {

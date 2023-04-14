@@ -4,9 +4,18 @@
   "package": "earth.terrarium.cadmus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "chunkprotection.AbstractArrowMixin",
+    "chunkprotection.BasePressurePlateBlockMixin",
+    "chunkprotection.ButtonBlockMixin",
+    "chunkprotection.EntityMixin",
+    "chunkprotection.FireBlockMixin",
+    "chunkprotection.HangingEntityMixin",
+    "chunkprotection.PointedDripstoneBlockMixin",
+    "chunkprotection.WaterlilyBlockMixin",
+    "ServerPlayerMixin"
   ],
   "client": [
-    "ClientLevelMixin"
+    "client.ClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1

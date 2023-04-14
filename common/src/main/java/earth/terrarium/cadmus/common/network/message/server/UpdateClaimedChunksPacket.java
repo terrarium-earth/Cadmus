@@ -4,8 +4,9 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.common.claiming.ClaimChunkSaveData;
+import earth.terrarium.cadmus.common.claiming.ClaimUtils;
 import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
-import earth.terrarium.cadmus.common.team.TeamSaveData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,7 +43,10 @@ public record UpdateClaimedChunksPacket(Set<ClaimedChunk> claimedChunks) impleme
         @Override
         public PacketContext handle(UpdateClaimedChunksPacket message) {
             // TODO use team provider
-            return (player, level) -> TeamSaveData.set((ServerPlayer) player, player.getTeam() == null ? "" : player.getTeam().getName(), message.claimedChunks());
+            return (player, level) -> {
+                ClaimChunkSaveData.set((ServerPlayer) player, ClaimUtils.getTeamName(player), message.claimedChunks());
+                ClaimUtils.sendSyncPacket((ServerPlayer) player);
+            };
         }
     }
 }

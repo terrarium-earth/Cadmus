@@ -1,13 +1,13 @@
-package earth.terrarium.cadmus.common.team;
+package earth.terrarium.cadmus.common.claiming;
 
 import com.teamresourceful.resourcefullib.common.lib.Constants;
-import earth.terrarium.cadmus.common.claiming.ClaimType;
-import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
+import earth.terrarium.cadmus.client.CadmusClient;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -15,16 +15,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @MethodsReturnNonnullByDefault
-public class TeamSaveData extends SavedData {
+public class ClaimChunkSaveData extends SavedData {
     private final Map<String, Set<ClaimedChunk>> teams = new HashMap<>();
 
-    public TeamSaveData() {
+    public ClaimChunkSaveData() {
     }
 
-    public TeamSaveData(CompoundTag tag) {
+    public ClaimChunkSaveData(CompoundTag tag) {
         tag.getAllKeys().forEach(teamKey -> {
             var teamTag = tag.getCompound(teamKey);
             Set<ClaimedChunk> chunks = teams.getOrDefault(teamKey, new HashSet<>());
@@ -53,12 +52,12 @@ public class TeamSaveData extends SavedData {
         return tag;
     }
 
-    public static TeamSaveData read(ServerLevel level) {
+    public static ClaimChunkSaveData read(ServerLevel level) {
         return read(level.getServer().overworld().getDataStorage());
     }
 
-    public static TeamSaveData read(DimensionDataStorage storage) {
-        return storage.computeIfAbsent(TeamSaveData::new, TeamSaveData::new, "cadmus_claimed_chunks");
+    public static ClaimChunkSaveData read(DimensionDataStorage storage) {
+        return storage.computeIfAbsent(ClaimChunkSaveData::new, ClaimChunkSaveData::new, "cadmus_claimed_chunks");
     }
 
     public static void set(ServerPlayer player, String team, Set<ClaimedChunk> chunks) {
@@ -70,11 +69,23 @@ public class TeamSaveData extends SavedData {
     public static Set<ClaimedChunk> get(ServerPlayer player) {
         var data = read((ServerLevel) player.level);
         // TODO use team provider
-        return data.teams.getOrDefault(player.getTeam() == null ? "" : player.getTeam().getName(), new HashSet<>());
+        return data.teams.getOrDefault(ClaimUtils.getTeamName(player), new HashSet<>());
     }
 
-    public static Set<ClaimedChunk> getAll(ServerPlayer player) {
-        var data = read((ServerLevel) player.level);
-        return data.teams.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+    public static Set<ClaimedChunk> getAll(ServerLevel level) {
+        var data = read(level);
+        var mergedSet = new HashSet<ClaimedChunk>();
+        for (var chunks : data.teams.values()) {
+            mergedSet.addAll(chunks);
+        }
+        return mergedSet;
+    }
+
+    public static Map<String, Set<ClaimedChunk>> getTeams(Level level) {
+        if (level.isClientSide()) {
+            return CadmusClient.TEAMS;
+        } else {
+            return read((ServerLevel) level).teams;
+        }
     }
 }

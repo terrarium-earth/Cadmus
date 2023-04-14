@@ -39,6 +39,7 @@ public class ClaimMapScreen extends Screen {
 
     public static boolean calculatingMap;
     public static boolean waitingForServerData;
+    private static boolean isDirty;
 
     private static final Map<ChunkPos, ClaimType> FRIENDLY_CHUNKS = new HashMap<>();
     private static final Map<ChunkPos, ClaimType> UNFRIENDLY_CHUNKS = new HashMap<>();
@@ -99,18 +100,23 @@ public class ClaimMapScreen extends Screen {
     private void renderPlayerAvatar(LocalPlayer player, PoseStack poseStack) {
         float left = (this.width) / 2f;
         float top = (this.height) / 2f;
-        double x = (player.getX() % 16) - 8;
-        double y = (player.getZ() % 16) - 8;
-        float scale = ClaimMapUpdater.getScaledRenderDistance();
-        scale = ClaimMapUpdater.getChunkScale((int) scale);
-        scale = MAP_SIZE / scale;
+
+        double playerX = player.getX();
+        double playerZ = player.getZ();
+        double x = (playerX % 16) + (playerX >= 0 ? -8 : 8);
+        double y = (playerZ % 16) + (playerZ >= 0 ? -8 : 8);
+
+        float renderDistance = ClaimMapUpdater.getScaledRenderDistance();
+        float chunkScale = ClaimMapUpdater.getChunkScale((int) renderDistance);
+        float scale = MAP_SIZE / chunkScale;
+
         x *= scale;
         y *= scale;
         RenderUtils.bindTexture(MAP_ICONS_LOCATION);
         try (var ignored = new CloseablePoseStack(poseStack)) {
             poseStack.translate(left + x, top + y, 0);
             poseStack.mulPose(Axis.ZP.rotationDegrees(player.getYRot()));
-            poseStack.translate(-4, -4, 0);
+            poseStack.translate(-8, -8, 0);
             blit(poseStack, 0, 0, 40, 0, 8, 8, 128, 128);
         }
     }
@@ -160,10 +166,12 @@ public class ClaimMapScreen extends Screen {
                             if (this.tool == ClaimTool.CHUNK_LOAD_ERASER || (this.tool == ClaimTool.BRUSH && FRIENDLY_CHUNKS.size() < MAX_CLAIMED_CHUNKS) || (this.tool == ClaimTool.CHUNK_LOAD_BRUSH && getChunkLoaded() < MAX_CHUNK_LOADED_CHUNKS)) {
                                 if (this.tool != ClaimTool.BRUSH || claim != ClaimType.CHUNK_LOADED) {
                                     FRIENDLY_CHUNKS.put(chunkPos, claimType);
+                                    isDirty = true;
                                 }
                             }
-                        } else if (this.tool != ClaimTool.ERASER || claim != ClaimType.CHUNK_LOADED) {
+                        } else if (this.tool == ClaimTool.ERASER || claim != ClaimType.CHUNK_LOADED) {
                             FRIENDLY_CHUNKS.remove(chunkPos);
+                            isDirty = true;
                         }
                     } else if (owned) {
                         isHovering = true;
@@ -253,7 +261,7 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void clearDimension() {
-        FRIENDLY_CHUNKS.clear();
+        // TODO: Clear current dimension
     }
 
     @Override
@@ -282,6 +290,8 @@ public class ClaimMapScreen extends Screen {
     @Override
     public void removed() {
         super.removed();
+        if (!isDirty) return;
+        isDirty = false;
         Set<ClaimedChunk> claimedChunks = new HashSet<>();
         for (var entry : FRIENDLY_CHUNKS.entrySet()) {
             claimedChunks.add(new ClaimedChunk(entry.getKey(), entry.getValue()));

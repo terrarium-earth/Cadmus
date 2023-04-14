@@ -1,12 +1,14 @@
-package earth.terrarium.cadmus.mixin;
+package earth.terrarium.cadmus.mixin.client;
 
 import earth.terrarium.cadmus.client.map.ChunkHolder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin implements ChunkHolder {
+    @Nullable
     private ChunkPos cadmus$chunkPos;
 
     @Override

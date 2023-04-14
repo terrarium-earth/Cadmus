@@ -3,5 +3,6 @@
   "gui.cadmus.claim_map.force_loaded_chunks": "%d / %d Chunk Loaded",
   "gui.cadmus.claim_map.loading": "Loading...",
   "tooltip.cadmus.claim_map.clear_dimension": "Clear All Claimed Chunks In Dimension",
-  "tooltip.cadmus.claim_map.clear_all": "Clear All Claimed Chunks"
+  "tooltip.cadmus.claim_map.clear_all": "Clear All Claimed Chunks",
+  "message.cadmus.wilderness": "§2Wilderness"
 }

@@ -7,9 +7,6 @@ import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import earth.terrarium.cadmus.Cadmus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
@@ -63,7 +60,7 @@ public class ClaimMapRenderer implements AutoCloseable {
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
         try (var ignored = new CloseablePoseStack(poseStack)) {
             // render map at the center of the screen
-            poseStack.translate(screenWidth / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, screenHeight / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, 0.01);
+            poseStack.translate(screenWidth / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, screenHeight / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, 1.0);
 
             Matrix4f matrix4f = poseStack.last().pose();
             builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);

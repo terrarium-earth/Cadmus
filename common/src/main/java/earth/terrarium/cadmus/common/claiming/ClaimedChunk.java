@@ -16,8 +16,8 @@ public record ClaimedChunk(ChunkPos pos, ClaimType type) {
     }
 
     public static Set<ClaimedChunk> decode(FriendlyByteBuf buf) {
-        int size = buf.readVarInt();
         Set<ClaimedChunk> chunks = new HashSet<>();
+        int size = buf.readVarInt();
         for (int i = 0; i < size; i++) {
             ChunkPos chunkPos = new ChunkPos(buf.readVarLong());
             ClaimType claimType = buf.readEnum(ClaimType.class);
