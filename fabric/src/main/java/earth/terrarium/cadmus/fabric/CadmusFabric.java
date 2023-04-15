@@ -2,15 +2,21 @@ package earth.terrarium.cadmus.fabric;
 
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claiming.ClaimUtils;
+import earth.terrarium.cadmus.compat.fabric.cpa.CommonProtectionApiCompat;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.InteractionResult;
 
 public class CadmusFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         Cadmus.init();
+
+        if (FabricLoader.getInstance().isModLoaded("common-protection-api")) {
+            CommonProtectionApiCompat.init();
+        }
 
         // Send chunk data to client
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ClaimUtils.sendSyncPacket(handler.player));

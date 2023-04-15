@@ -15,6 +15,15 @@ configurations {
     developmentFabric.extendsFrom common
 }
 
+repositories {
+    maven {
+        url "https://maven.nucleoid.xyz/"
+        content {
+            includeGroup 'eu.pb4'
+        }
+    }
+}
+
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
     modApi "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version+$rootProject.minecraft_version"
@@ -23,6 +32,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modApi "com.teamresourceful.resourcefullib:resourcefullib-fabric-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
+    modImplementation "eu.pb4:common-protection-api:$rootProject.common_protection_api_version"
 }
 
 processResources {

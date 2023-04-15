@@ -78,12 +78,10 @@ public class ClaimChunkSaveData extends SavedData {
 
     @Nullable
     public static ClaimInfo get(Level level, ChunkPos pos) {
-        var data = read(level);
-        return data.claims.getOrDefault(pos, null);
+        return read(level).claims.get(pos);
     }
 
     public static Map<ChunkPos, ClaimInfo> getAll(Level level) {
-        var data = read(level);
-        return data.claims;
+        return read(level).claims;
     }
 }
