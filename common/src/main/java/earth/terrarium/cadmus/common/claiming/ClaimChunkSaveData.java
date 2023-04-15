@@ -1,91 +1,89 @@
 package earth.terrarium.cadmus.common.claiming;
 
-import com.teamresourceful.resourcefullib.common.lib.Constants;
-import earth.terrarium.cadmus.client.CadmusClient;
+import com.mojang.datafixers.util.Pair;
+import earth.terrarium.cadmus.common.team.TeamSaveData;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @MethodsReturnNonnullByDefault
 public class ClaimChunkSaveData extends SavedData {
-    private final Map<String, Set<ClaimedChunk>> teams = new HashMap<>();
+    private static final ClaimChunkSaveData CLIENT_SIDE = new ClaimChunkSaveData();
+    private final Map<ChunkPos, ClaimInfo> claims = new HashMap<>();
 
     public ClaimChunkSaveData() {
     }
 
-    public ClaimChunkSaveData(CompoundTag tag) {
-        tag.getAllKeys().forEach(teamKey -> {
-            var teamTag = tag.getCompound(teamKey);
-            Set<ClaimedChunk> chunks = teams.getOrDefault(teamKey, new HashSet<>());
-            for (String key : teamTag.getAllKeys()) {
-                try {
-                    long longPos = Long.parseLong(key);
-                    var pos = new ChunkPos(longPos);
-                    ClaimType type = ClaimType.values()[teamTag.getByte(key)];
-                    chunks.add(new ClaimedChunk(pos, type));
-                } catch (Exception e) {
-                    Constants.LOGGER.error("Failed to load claimed chunk for {}", key);
-                    e.printStackTrace();
-                }
+    public ClaimChunkSaveData(CompoundTag tag, ServerLevel server) {
+        tag.getAllKeys().forEach(key -> {
+            var team = TeamSaveData.get(server, UUID.fromString(key));
+            var teamTag = tag.getCompound(key);
+            for (String key1 : teamTag.getAllKeys()) {
+                var pos = new ChunkPos(Long.parseLong(key1));
+                var type = ClaimType.values()[teamTag.getByte(key1)];
+                var claimInfo = new ClaimInfo(team, type);
+                claims.put(pos, claimInfo);
             }
-            teams.put(teamKey, chunks);
         });
     }
 
     @Override
     public CompoundTag save(CompoundTag tag) {
-        teams.forEach((team, chunks) -> {
-            var teamTag = new CompoundTag();
-            chunks.forEach(chunk -> teamTag.putByte(String.valueOf(chunk.pos().toLong()), (byte) chunk.type().ordinal()));
-            tag.put(team, teamTag);
+        Map<UUID, List<Pair<ChunkPos, ClaimType>>> parsedClaims = new HashMap<>();
+        claims.forEach((pos, info) -> parsedClaims.compute(info.team().teamId(), (key, pairs) -> {
+            if (pairs == null) {
+                pairs = new ArrayList<>();
+            }
+            pairs.add(Pair.of(pos, info.type()));
+            return pairs;
+        }));
+        parsedClaims.forEach((id, claims) -> {
+            CompoundTag claimsTag = new CompoundTag();
+            for (Pair<ChunkPos, ClaimType> claim : claims) {
+                claimsTag.putByte(String.valueOf(claim.getFirst().toLong()), ((byte) claim.getSecond().ordinal()));
+            }
+            tag.put(id.toString(), claimsTag);
         });
         return tag;
     }
 
+    public static ClaimChunkSaveData read(Level level) {
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return CLIENT_SIDE;
+        }
+        return read(serverLevel);
+    }
+
     public static ClaimChunkSaveData read(ServerLevel level) {
-        return read(level.getServer().overworld().getDataStorage());
+        return level.getDataStorage().computeIfAbsent(tag -> new ClaimChunkSaveData(tag, level), ClaimChunkSaveData::new, "cadmus_claimed_chunks");
     }
 
-    public static ClaimChunkSaveData read(DimensionDataStorage storage) {
-        return storage.computeIfAbsent(ClaimChunkSaveData::new, ClaimChunkSaveData::new, "cadmus_claimed_chunks");
-    }
-
-    public static void set(ServerPlayer player, String team, Set<ClaimedChunk> chunks) {
-        var data = read((ServerLevel) player.level);
-        data.teams.put(team, chunks);
+    public static void set(Level level, ChunkPos pos, ClaimInfo info) {
+        var data = read(level);
+        data.claims.put(pos, info);
         data.setDirty();
     }
 
-    public static Set<ClaimedChunk> get(ServerPlayer player) {
-        var data = read((ServerLevel) player.level);
-        // TODO use team provider
-        return data.teams.getOrDefault(ClaimUtils.getTeamName(player), new HashSet<>());
+    @Nullable
+    public static ClaimInfo get(Player player) {
+        return get(player.level, player.chunkPosition());
     }
 
-    public static Set<ClaimedChunk> getAll(ServerLevel level) {
+    @Nullable
+    public static ClaimInfo get(Level level, ChunkPos pos) {
         var data = read(level);
-        var mergedSet = new HashSet<ClaimedChunk>();
-        for (var chunks : data.teams.values()) {
-            mergedSet.addAll(chunks);
-        }
-        return mergedSet;
+        return data.claims.getOrDefault(pos, null);
     }
 
-    public static Map<String, Set<ClaimedChunk>> getTeams(Level level) {
-        if (level.isClientSide()) {
-            return CadmusClient.TEAMS;
-        } else {
-            return read((ServerLevel) level).teams;
-        }
+    public static Map<ChunkPos, ClaimInfo> getAll(Level level) {
+        var data = read(level);
+        return data.claims;
     }
 }

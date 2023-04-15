@@ -4,7 +4,7 @@ import com.teamresourceful.resourcefullib.common.networking.NetworkChannel;
 import com.teamresourceful.resourcefullib.common.networking.base.NetworkDirection;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.network.message.client.SendClaimedChunksPacket;
-import earth.terrarium.cadmus.common.network.message.client.SyncClaimedChunksPacket;
+import earth.terrarium.cadmus.common.network.message.server.ClearChunksPacket;
 import earth.terrarium.cadmus.common.network.message.server.RequestClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.message.server.UpdateClaimedChunksPacket;
 
@@ -14,8 +14,9 @@ public class NetworkHandler {
     public static void init() {
         CHANNEL.registerPacket(NetworkDirection.CLIENT_TO_SERVER, RequestClaimedChunksPacket.ID, RequestClaimedChunksPacket.HANDLER, RequestClaimedChunksPacket.class);
         CHANNEL.registerPacket(NetworkDirection.CLIENT_TO_SERVER, UpdateClaimedChunksPacket.ID, UpdateClaimedChunksPacket.HANDLER, UpdateClaimedChunksPacket.class);
+        CHANNEL.registerPacket(NetworkDirection.CLIENT_TO_SERVER, ClearChunksPacket.ID, ClearChunksPacket.HANDLER, ClearChunksPacket.class);
 
         CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SendClaimedChunksPacket.ID, SendClaimedChunksPacket.HANDLER, SendClaimedChunksPacket.class);
-        CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SyncClaimedChunksPacket.ID, SyncClaimedChunksPacket.HANDLER, SyncClaimedChunksPacket.class);
+//        CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SyncClaimedChunksPacket.ID, SyncClaimedChunksPacket.HANDLER, SyncClaimedChunksPacket.class);
     }
 }

@@ -5,17 +5,19 @@ import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claiming.ClaimChunkSaveData;
-import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
+import earth.terrarium.cadmus.common.claiming.ClaimInfo;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.message.client.SendClaimedChunksPacket;
+import earth.terrarium.cadmus.common.team.Team;
+import earth.terrarium.cadmus.common.team.TeamSaveData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public record RequestClaimedChunksPacket(int renderDistance) implements Packet<RequestClaimedChunksPacket> {
 
@@ -47,19 +49,18 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
         public PacketContext handle(RequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
-                var friendlyChunks = ClaimChunkSaveData.get((ServerPlayer) player);
 
-                Set<ClaimedChunk> unfriendlyChunks = new HashSet<>();
-                for (var chunk : ClaimChunkSaveData.getAll((ServerLevel) player.level)) {
-                    var chunkPos = new ChunkPos(start.x - chunk.pos().x, start.z - chunk.pos().z);
+                Map<ChunkPos, ClaimInfo> claims = new HashMap<>();
+                for (var claimedChunk : ClaimChunkSaveData.getAll(player.level).entrySet()) {
+                    var chunkPos = new ChunkPos(start.x - claimedChunk.getKey().x, start.z - claimedChunk.getKey().z);
                     if (chunkPos.x < message.renderDistance && chunkPos.x > -message.renderDistance && chunkPos.z < message.renderDistance && chunkPos.z > -message.renderDistance) {
-                        if (!friendlyChunks.contains(chunk)) {
-                            unfriendlyChunks.add(chunk);
-                        }
+                        claims.put(claimedChunk.getKey(), claimedChunk.getValue());
                     }
                 }
 
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(friendlyChunks, unfriendlyChunks), player);
+                Optional<UUID> team = TeamSaveData.getTeams(level).stream().filter(team1 -> team1.hasMember(player.getUUID())).findFirst().map(Team::teamId);
+
+                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, team), player);
             };
         }
     }

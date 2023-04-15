@@ -7,11 +7,13 @@ import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.claiming.ClaimTool;
+import earth.terrarium.cadmus.common.claiming.ClaimInfo;
 import earth.terrarium.cadmus.common.claiming.ClaimType;
-import earth.terrarium.cadmus.common.claiming.ClaimedChunk;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.network.message.server.ClearChunksPacket;
 import earth.terrarium.cadmus.common.network.message.server.RequestClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.message.server.UpdateClaimedChunksPacket;
+import earth.terrarium.cadmus.common.team.Team;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ImageButton;
@@ -23,9 +25,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ClaimMapScreen extends Screen {
     public static final int MAP_SIZE = 200;
@@ -257,11 +259,11 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void clearAll() {
-        // TODO: Clear all dimensions
+        NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(true));
     }
 
     public void clearDimension() {
-        // TODO: Clear current dimension
+        NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(false));
     }
 
     @Override
@@ -269,16 +271,19 @@ public class ClaimMapScreen extends Screen {
         return false;
     }
 
-    public static void update(Set<ClaimedChunk> friendlyChunks, Set<ClaimedChunk> unfriendlyChunks) {
+    public static void update(Map<ChunkPos, ClaimInfo> claims, UUID playerTeam) {
         waitingForServerData = false;
         FRIENDLY_CHUNKS.clear();
         UNFRIENDLY_CHUNKS.clear();
-        for (ClaimedChunk chunk : friendlyChunks) {
-            FRIENDLY_CHUNKS.put(chunk.pos(), chunk.type());
-        }
-        for (ClaimedChunk chunk : unfriendlyChunks) {
-            UNFRIENDLY_CHUNKS.put(chunk.pos(), chunk.type());
-        }
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
+        claims.forEach((pos, info) -> {
+            if (info.team().teamId().equals(playerTeam)) {
+                FRIENDLY_CHUNKS.put(pos, info.type());
+            } else {
+                UNFRIENDLY_CHUNKS.put(pos, info.type());
+            }
+        });
     }
 
     public void update() {
@@ -292,11 +297,7 @@ public class ClaimMapScreen extends Screen {
         super.removed();
         if (!isDirty) return;
         isDirty = false;
-        Set<ClaimedChunk> claimedChunks = new HashSet<>();
-        for (var entry : FRIENDLY_CHUNKS.entrySet()) {
-            claimedChunks.add(new ClaimedChunk(entry.getKey(), entry.getValue()));
-        }
-        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(claimedChunks));
+        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(FRIENDLY_CHUNKS));
         FRIENDLY_CHUNKS.clear();
         UNFRIENDLY_CHUNKS.clear();
     }
