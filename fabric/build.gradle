@@ -33,6 +33,8 @@ dependencies {
 
     modApi "com.teamresourceful.resourcefullib:resourcefullib-fabric-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
     modImplementation "eu.pb4:common-protection-api:$rootProject.common_protection_api_version"
+
+    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixinextras_version}")))
 }
 
 processResources {

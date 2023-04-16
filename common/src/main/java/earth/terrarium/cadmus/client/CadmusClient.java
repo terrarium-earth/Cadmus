@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.client;
 
-import earth.terrarium.cadmus.client.map.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimMapUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +19,6 @@ public class CadmusClient {
             screen = null;
         }
 
-        if (Minecraft.getInstance().screen instanceof ClaimMapScreen claimsScreen) {
-            claimsScreen.update();
-        }
+        ClaimMapUpdater.update(ClaimMapScreen.MAP_RENDERER::update);
     }
 }

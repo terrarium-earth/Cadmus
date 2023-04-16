@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.compat.fabric.cpa;
 
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.InteractionType;
 import eu.pb4.common.protection.api.ProtectionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -25,7 +26,7 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         ChunkPos max = new ChunkPos(((int) area.maxX) >> 4, ((int) area.maxZ) >> 4);
         for (int x = min.x; x <= max.x; x++) {
             for (int z = min.z; z <= max.z; z++) {
-                if (ClaimApi.API.isClaimed(level, new ChunkPos(x, z))) {
+                if (!ClaimApi.API.isClaimed(level, new ChunkPos(x, z))) {
                     return true;
                 }
             }
@@ -60,9 +61,9 @@ public class CadmusProtectionProvider implements ProtectionProvider {
     @Override
     public boolean canInteractBlock(Level level, BlockPos pos, GameProfile profile, @Nullable Player player) {
         if (player != null) {
-            return ClaimApi.API.canInteractWithBlock(level, pos, player);
+            return ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.USE, player);
         }
-        return ClaimApi.API.canInteractWithBlock(level, pos, profile.getId());
+        return ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.USE, profile.getId());
     }
 
     @Override

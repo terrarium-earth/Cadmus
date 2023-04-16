@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.client.fabric;
 
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.client.map.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;

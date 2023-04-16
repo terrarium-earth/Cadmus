@@ -10,7 +10,6 @@ architectury {
 loom {
     forge {
         mixinConfig "$project.mod_id-common.mixins.json"
-        mixinConfig "${project.mod_id}.mixins.json"
     }
 }
 
@@ -29,6 +28,9 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     modApi "com.teamresourceful.resourcefullib:resourcefullib-forge-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
+
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:${rootProject.mixinextras_version}"))
+    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:${rootProject.mixinextras_version}"))
 }
 
 processResources {

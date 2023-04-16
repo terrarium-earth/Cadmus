@@ -73,13 +73,14 @@ allprojects {
     group = rootProject.maven_group
 
     repositories {
+        maven { url = "https://maven.resourcefulbees.com/repository/maven-public/" }
         maven {
-            url "https://cursemaven.com"
+            url = 'https://jitpack.io'
             content {
-                includeGroup "curse.maven"
+                includeGroup 'com.github.LlamaLad7'
+                includeGroup 'com.github.llamalad7.mixinextras'
             }
         }
-        maven { url = "https://maven.resourcefulbees.com/repository/maven-public/" }
     }
 
     tasks.withType(JavaCompile).tap {

@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.client.forge;
 
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.client.map.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
 import net.minecraft.commands.Commands;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;

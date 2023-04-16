@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.mixin.client;
 
-import earth.terrarium.cadmus.client.map.ChunkHolder;
+import earth.terrarium.cadmus.client.claims.ChunkHolder;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;

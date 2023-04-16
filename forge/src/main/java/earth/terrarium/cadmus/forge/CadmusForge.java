@@ -1,14 +1,14 @@
 package earth.terrarium.cadmus.forge;
 
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
-import earth.terrarium.cadmus.common.claiming.ClaimUtils;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,11 +23,13 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Mod(Cadmus.MOD_ID)
 public class CadmusForge {
@@ -42,66 +44,70 @@ public class CadmusForge {
     }
 
     private static void registerChunkProtectionEvents(IEventBus bus) {
-        bus.addListener(CadmusForge::onBlockBreak);
-        bus.addListener(CadmusForge::onBlockPlace);
-        bus.addListener(CadmusForge::onBlockInteract);
-        bus.addListener(CadmusForge::onEntityInteract);
-        bus.addListener(CadmusForge::onAttackBlock);
-        bus.addListener(CadmusForge::onAttackEntity);
-        bus.addListener(CadmusForge::onFillBucket);
-        bus.addListener(CadmusForge::onExplode);
-        bus.addListener(CadmusForge::onFarmLandTrample);
-        bus.addListener(CadmusForge::onEntityMobGriefing);
-        bus.addListener(CadmusForge::onLivingDestroyBlock);
-        bus.addListener(CadmusForge::onItemPickup);
-        bus.addListener(CadmusForge::onEntityStruckByLightning);
-        bus.addListener(CadmusForge::onProjectileImpact);
-        bus.addListener(CadmusForge::onLivingAttack);
-        bus.addListener(CadmusForge::onPistonPush);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockBreak);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockPlace);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockInteract);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityInteract);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onAttackBlock);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onAttackEntity);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onFillBucket);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onExplode);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onFarmLandTrample);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityMobGriefing);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onLivingDestroyBlock);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onItemPickup);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityStruckByLightning);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onProjectileImpact);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onLivingAttack);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onPistonPush);
     }
 
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        ClaimUtils.sendSyncPacket((ServerPlayer) event.getEntity());
+        ModUtils.sendSyncPacket((ServerPlayer) event.getEntity());
     }
 
     private static void onEnterSection(EntityEvent.EnteringSection event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            ClaimUtils.displayTeamName(player);
+            ModUtils.displayTeamName(player);
         }
     }
 
     private static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getPlayer(), event.getPos())) {
+        if (!ClaimApi.API.canBreakBlock(event.getPlayer().getLevel(), event.getPos(), event.getPlayer())) {
             event.setCanceled(true);
         }
     }
 
     private static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (event.getEntity() instanceof Player player) {
+            if (!ClaimApi.API.canPlaceBlock(player.getLevel(), event.getPos(), player)) {
+                event.setCanceled(true);
+            }
+        } else if (event.getEntity() != null && !ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().getLevel(), event.getPos(), InteractionType.USE, event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (!ClaimApi.API.canInteractWithEntity(event.getEntity().getLevel(), event.getTarget(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onAttackBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().getLevel(), event.getPos(), InteractionType.ATTACK, event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onAttackEntity(AttackEntityEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getTarget().blockPosition())) {
+        if (!ClaimApi.API.canDamageEntity(event.getEntity().getLevel(), event.getTarget(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
@@ -109,32 +115,32 @@ public class CadmusForge {
     // Prevent players from using buckets in protected chunks
     private static void onFillBucket(FillBucketEvent event) {
         var target = event.getTarget();
-        if (target != null && ClaimUtils.inProtectedChunk(event.getEntity(), BlockPos.containing(target.getLocation()))) {
+        if (target != null && ClaimApi.API.canBreakBlock(event.getLevel(), BlockPos.containing(target.getLocation()), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
     }
 
     // Prevent explosions from destroying blocks in protected chunks
-    private static void onExplode(ExplosionEvent.Detonate event) { // TODO
-        for (var blockPos : event.getAffectedBlocks()) {
-            if (ClaimUtils.inProtectedChunk(event.getLevel(), blockPos)) {
-                event.getAffectedBlocks().clear();
-                event.getAffectedEntities().removeIf(entity -> entity instanceof HangingEntity || entity instanceof ArmorStand);
-                break;
-            }
-        }
+    private static void onExplode(ExplosionEvent.Detonate event) {
+        Player player = event.getExplosion().getIndirectSourceEntity() instanceof Player p ? p : null;
+        event.getAffectedBlocks().removeIf(next -> (ClaimApi.API.isClaimed(event.getLevel(), next) && (player == null || !ClaimApi.API.canPlaceBlock(event.getLevel(), next, player))));
+        event.getAffectedEntities().removeIf(next -> (ClaimApi.API.isClaimed(event.getLevel(), next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(event.getLevel(), next, player))));
     }
 
     // Prevent players from trampling crops in protected chunks
     private static void onFarmLandTrample(BlockEvent.FarmlandTrampleEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (event.getEntity() instanceof Player player) {
+            if (!ClaimApi.API.canBreakBlock(player.level, event.getPos(), player)) {
+                event.setCanceled(true);
+            }
+        } else if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onEntityMobGriefing(EntityMobGriefingEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity())) {
+        if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
@@ -142,15 +148,14 @@ public class CadmusForge {
 
     // Prevent mobs destroying blocks in protected chunks
     private static void onLivingDestroyBlock(LivingDestroyBlockEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getEntity(), event.getPos())) {
+        if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     // Prevent players from picking up items in protected chunks unless they dropped them
     private static void onItemPickup(EntityItemPickupEvent event) {
-        Entity owner = event.getItem().getOwner();
-        if (ClaimUtils.inProtectedChunk(event.getEntity()) && !Objects.equals(owner, event.getEntity())) {
+        if (!ClaimApi.API.canPickupItem(event.getItem().level, event.getItem().blockPosition(), event.getItem(), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
@@ -158,34 +163,38 @@ public class CadmusForge {
 
     // Prevent entities from being affected by lightning in protected chunks
     private static void onEntityStruckByLightning(EntityStruckByLightningEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getLightning().getCause(), event.getEntity().blockPosition())) {
+        if (event.getLightning().getCause() != null) {
+            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), event.getLightning().getCause())) {
+                event.setCanceled(true);
+            }
+        } else if (!ClaimApi.API.canEntityGrief(event.getLightning().level, event.getLightning())) {
             event.setCanceled(true);
         }
     }
 
     private static void onProjectileImpact(ProjectileImpactEvent event) {
-        if (ClaimUtils.inProtectedChunk(event.getProjectile().getOwner(), event.getEntity().blockPosition())) {
-            event.setCanceled(true);
+        if (event.getProjectile().getOwner() instanceof Player player) {
+            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), player)) {
+                event.setCanceled(true);
+            }
         }
     }
 
     // Prevent mobs from taking damage from players in protected chunks
     private static void onLivingAttack(LivingAttackEvent event) {
-        if (event.getEntity() instanceof Player && ClaimUtils.inProtectedChunk((event.getSource().getEntity()))) {
-            event.setCanceled(true);
+        if (event.getSource().getEntity() instanceof Player player) {
+            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), player)) {
+                event.setCanceled(true);
+            }
         }
     }
 
     // Prevent pistons from pushing blocks into protected chunks
     private static void onPistonPush(PistonEvent.Pre event) {
-        var pos = event.getPos();
-        var direction = event.getDirection();
         if (event.getLevel() instanceof Level level) {
-            if (ClaimUtils.inProtectedChunk(level, new BlockPos(
-                    pos.getX() + direction.getStepX() * 16,
-                    pos.getY() + direction.getStepY() * 16,
-                    pos.getZ() + direction.getStepZ() * 16))
-            ) {
+            ChunkPos pos = new ChunkPos(event.getPos().relative(event.getDirection()));
+            Set<UUID> currentChunkMembers = ClaimApi.API.getClaimMembers(level, new ChunkPos(event.getPos()));
+            if (!ClaimApi.API.isClaimed(level, pos) && !currentChunkMembers.equals(ClaimApi.API.getClaimMembers(level, pos))) {
                 event.setCanceled(true);
             }
         }

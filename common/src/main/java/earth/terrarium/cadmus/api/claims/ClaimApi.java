@@ -36,9 +36,9 @@ public interface ClaimApi {
 
     boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, Player player);
 
-    boolean canInteractWithBlock(Level level, BlockPos pos, UUID id);
+    boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID id);
 
-    boolean canInteractWithBlock(Level level, BlockPos pos, Player player);
+    boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, Player player);
 
     boolean canInteractWithEntity(Level level, Entity entity, UUID id);
 
@@ -49,6 +49,8 @@ public interface ClaimApi {
     boolean canDamageEntity(Level level, Entity entity, Player player);
 
     boolean canEntityGrief(Level level, Entity entity);
+
+    boolean canEntityGrief(Level level, BlockPos pos, Entity entity);
 
     boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, Entity picker);
 }
