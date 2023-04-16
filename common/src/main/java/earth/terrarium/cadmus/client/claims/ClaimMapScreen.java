@@ -6,7 +6,6 @@ import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
@@ -24,9 +23,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimMapScreen extends Screen {
     public static final int MAP_SIZE = 200;
@@ -38,12 +35,13 @@ public class ClaimMapScreen extends Screen {
     public static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
 
     public static final ClaimMapRenderer MAP_RENDERER = new ClaimMapRenderer();
+    private static final Map<ChunkPos, ClaimType> START_CHUNKS = new HashMap<>();
+    private static final Map<ChunkPos, ClaimType> FRIENDLY_CHUNKS = new HashMap<>();
+    private static final Map<ChunkPos, ClaimType> UNFRIENDLY_CHUNKS = new HashMap<>();
+
     public static boolean calculatingMap;
     public static boolean waitingForServerData;
     private static boolean isDirty;
-
-    private static final Map<ChunkPos, ClaimType> FRIENDLY_CHUNKS = new HashMap<>();
-    private static final Map<ChunkPos, ClaimType> UNFRIENDLY_CHUNKS = new HashMap<>();
 
     private ClaimTool tool = ClaimTool.NONE;
 
@@ -51,6 +49,9 @@ public class ClaimMapScreen extends Screen {
         super(Component.empty());
         ClaimMapScreen.waitingForServerData = true;
         NetworkHandler.CHANNEL.sendToServer(new RequestClaimedChunksPacket(Minecraft.getInstance().options.renderDistance().get()));
+        START_CHUNKS.clear();
+        FRIENDLY_CHUNKS.clear();
+        UNFRIENDLY_CHUNKS.clear();
     }
 
     @Override
@@ -80,13 +81,13 @@ public class ClaimMapScreen extends Screen {
         super.init();
 
         this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
-                CONTAINER_BACKGROUND,
-                button -> clearDimension()
+            CONTAINER_BACKGROUND,
+            button -> clearDimension()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_DIMENSION));
 
         this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
-                CONTAINER_BACKGROUND,
-                button -> clearAll()
+            CONTAINER_BACKGROUND,
+            button -> clearAll()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_ALL));
     }
 
@@ -272,13 +273,10 @@ public class ClaimMapScreen extends Screen {
 
     public static void update(Map<ChunkPos, ClaimInfo> claims, UUID playerTeam) {
         waitingForServerData = false;
-        FRIENDLY_CHUNKS.clear();
-        UNFRIENDLY_CHUNKS.clear();
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) return;
         claims.forEach((pos, info) -> {
             if (info.team().teamId().equals(playerTeam)) {
                 FRIENDLY_CHUNKS.put(pos, info.type());
+                START_CHUNKS.put(pos, info.type());
             } else {
                 UNFRIENDLY_CHUNKS.put(pos, info.type());
             }
@@ -290,8 +288,9 @@ public class ClaimMapScreen extends Screen {
         super.removed();
         if (!isDirty) return;
         isDirty = false;
-        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(FRIENDLY_CHUNKS));
-        FRIENDLY_CHUNKS.clear();
-        UNFRIENDLY_CHUNKS.clear();
+
+        Set<ChunkPos> removedChunks = new HashSet<>(START_CHUNKS.keySet());
+        removedChunks.removeAll(FRIENDLY_CHUNKS.keySet());
+        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(FRIENDLY_CHUNKS, removedChunks));
     }
 }

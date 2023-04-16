@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.mixin.fabric.common.chunkprotection;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Local;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

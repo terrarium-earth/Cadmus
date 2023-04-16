@@ -35,8 +35,8 @@ public class ClaimMapColorers {
                     MaterialColor color = MaterialColor.NONE;
                     double yDiff = 0.0;
                     int y = level.dimensionType().hasCeiling() ?
-                            findBlockWithAirAbove(level, new BlockPos(x, player.getBlockY(), z)) :
-                            chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 1;
+                        findBlockWithAirAbove(level, new BlockPos(x, player.getBlockY(), z)) :
+                        chunk.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) + 1;
                     BlockState state = null;
                     if (y > level.getMinBuildHeight() + 1) {
                         do {

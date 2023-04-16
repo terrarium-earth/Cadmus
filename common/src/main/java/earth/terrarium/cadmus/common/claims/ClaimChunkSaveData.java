@@ -71,6 +71,12 @@ public class ClaimChunkSaveData extends SavedData {
         data.setDirty();
     }
 
+    public static void remove(Level level, ChunkPos pos) {
+        var data = read(level);
+        data.claims.remove(pos);
+        data.setDirty();
+    }
+
     @Nullable
     public static ClaimInfo get(Player player) {
         return get(player.level, player.chunkPosition());

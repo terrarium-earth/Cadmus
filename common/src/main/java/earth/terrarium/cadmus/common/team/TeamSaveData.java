@@ -105,10 +105,10 @@ public class TeamSaveData extends SavedData {
             team.members().clear();
             server.getProfileCache().get(team.creator()).ifPresent(profile -> {
                 List<UUID> uuids = TeamProviderApi.API.getSelected()
-                        .getTeamMembers(server, profile)
-                        .stream()
-                        .map(GameProfile::getId)
-                        .toList();
+                    .getTeamMembers(server, profile)
+                    .stream()
+                    .map(GameProfile::getId)
+                    .toList();
                 team.members().addAll(uuids);
             });
         });

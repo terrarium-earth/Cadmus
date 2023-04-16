@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefullib.common.networking.NetworkChannel;
 import com.teamresourceful.resourcefullib.common.networking.base.NetworkDirection;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPacket;
+import earth.terrarium.cadmus.common.network.messages.client.SyncClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.server.ClearChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.server.RequestClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.server.UpdateClaimedChunksPacket;
@@ -17,6 +18,6 @@ public class NetworkHandler {
         CHANNEL.registerPacket(NetworkDirection.CLIENT_TO_SERVER, ClearChunksPacket.ID, ClearChunksPacket.HANDLER, ClearChunksPacket.class);
 
         CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SendClaimedChunksPacket.ID, SendClaimedChunksPacket.HANDLER, SendClaimedChunksPacket.class);
-//        CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SyncClaimedChunksPacket.ID, SyncClaimedChunksPacket.HANDLER, SyncClaimedChunksPacket.class);
+        CHANNEL.registerPacket(NetworkDirection.SERVER_TO_CLIENT, SyncClaimedChunksPacket.ID, SyncClaimedChunksPacket.HANDLER, SyncClaimedChunksPacket.class);
     }
 }

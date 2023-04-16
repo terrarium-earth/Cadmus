@@ -6,7 +6,6 @@ import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -44,8 +43,8 @@ public class CadmusForge {
     }
 
     private static void registerChunkProtectionEvents(IEventBus bus) {
-        bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockBreak);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockPlace);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockBreak);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockInteract);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityInteract);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onAttackBlock);
@@ -63,12 +62,12 @@ public class CadmusForge {
     }
 
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        ModUtils.sendSyncPacket((ServerPlayer) event.getEntity());
+        ModUtils.displayTeamName(event.getEntity());
     }
 
     private static void onEnterSection(EntityEvent.EnteringSection event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            ModUtils.displayTeamName(player);
+        if (event.getEntity() instanceof Player player) {
+            ModUtils.enterChunkSection(player);
         }
     }
 

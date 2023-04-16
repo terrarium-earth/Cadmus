@@ -52,8 +52,8 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
         @Override
         public SendClaimedChunksPacket decode(FriendlyByteBuf buf) {
             Map<ChunkPos, Pair<UUID, ClaimType>> claims = buf.readMap(
-                    FriendlyByteBuf::readChunkPos,
-                    (buf1) -> Pair.of(buf1.readUUID(), buf1.readEnum(ClaimType.class))
+                FriendlyByteBuf::readChunkPos,
+                (buf1) -> Pair.of(buf1.readUUID(), buf1.readEnum(ClaimType.class))
             );
             int size = buf.readVarInt();
             Map<UUID, Team> teams = Maps.newHashMapWithExpectedSize(size);
@@ -67,7 +67,7 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             Optional<UUID> team = buf.readOptional(FriendlyByteBuf::readUUID);
             Map<ChunkPos, ClaimInfo> newClaims = Maps.newHashMapWithExpectedSize(claims.size());
             claims.forEach((key, value) ->
-                    newClaims.put(key, new ClaimInfo(teams.get(value.getFirst()), value.getSecond())));
+                newClaims.put(key, new ClaimInfo(teams.get(value.getFirst()), value.getSecond())));
             return new SendClaimedChunksPacket(newClaims, team);
         }
 

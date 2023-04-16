@@ -20,8 +20,7 @@ public class CadmusFabric implements ModInitializer {
             CommonProtectionApiCompat.init();
         }
 
-        // Send chunk data to client
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ModUtils.sendSyncPacket(handler.player));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ModUtils.displayTeamName(handler.player));
         registerChunkProtectionEvents();
     }
 

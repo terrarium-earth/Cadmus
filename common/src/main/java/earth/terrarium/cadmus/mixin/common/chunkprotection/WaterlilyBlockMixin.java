@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.mixin.common.chunkprotection;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.claims.InteractionType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

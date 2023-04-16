@@ -18,9 +18,9 @@ public class CadmusClientFabric implements ClientModInitializer {
 
     private static void registerClientCommands() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-                dispatcher.register(ClientCommandManager.literal("claim").executes(context -> {
-                    CadmusClient.screen = new ClaimMapScreen();
-                    return 0;
-                })));
+            dispatcher.register(ClientCommandManager.literal("claim").executes(context -> {
+                CadmusClient.screen = new ClaimMapScreen();
+                return 0;
+            })));
     }
 }

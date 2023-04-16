@@ -7,9 +7,7 @@ import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import earth.terrarium.cadmus.Cadmus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
@@ -17,22 +15,12 @@ import org.joml.Matrix4f;
 public class ClaimMapRenderer {
     private static final ResourceLocation TEXTURE = new ResourceLocation(Cadmus.MOD_ID, "claimmaptextures");
 
-    private int lastScale;
-
     public void update(ClaimMapData data) {
         ClaimMapScreen.calculatingMap = false;
-        if (lastScale != data.scale()) {
-            lastScale = data.scale();
-            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-            AbstractTexture texture = textureManager.getTexture(TEXTURE, MissingTextureAtlasSprite.getTexture());
-            if (texture != MissingTextureAtlasSprite.getTexture()) {
-                textureManager.release(TEXTURE);
-            }
-
-            var dynamicTexture = new DynamicTexture(data.scale(), data.scale(), true);
-            textureManager.register(TEXTURE, dynamicTexture);
-            updateTexture(dynamicTexture, data.colors(), data.scale());
-        }
+        TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+        var dynamicTexture = new DynamicTexture(data.scale(), data.scale(), true);
+        textureManager.register(TEXTURE, dynamicTexture);
+        updateTexture(dynamicTexture, data.colors(), data.scale());
     }
 
     public void render(PoseStack poseStack) {
