@@ -44,7 +44,7 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             buf.writeMap(teams, FriendlyByteBuf::writeUUID, (buf1, team) -> {
                 buf1.writeUUID(team.creator());
                 buf1.writeCollection(team.members(), FriendlyByteBuf::writeUUID);
-                buf1.writeUtf(team.name() == null ? "TODO" : team.name());
+                buf1.writeUtf(team.name());
             });
             buf.writeOptional(packet.team, FriendlyByteBuf::writeUUID);
         }

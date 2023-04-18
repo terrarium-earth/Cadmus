@@ -3,7 +3,6 @@ package earth.terrarium.cadmus.api.team;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -23,8 +22,8 @@ public interface TeamProvider {
      *
      * @param server  the server
      * @param creator the creator
-     * @return the name of the team, returns null if no team for creator is found
+     * @return the name of the team, or the creator's name if no team is found
      */
-    @Nullable
+    @NotNull
     String getTeamName(MinecraftServer server, GameProfile creator);
 }

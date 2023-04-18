@@ -10,6 +10,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public class TeamSaveData extends SavedData {
             ListTag members = new ListTag();
             team.members().forEach((member) -> members.add(StringTag.valueOf(member.toString())));
             teamIdTag.put("members", members);
-            teamIdTag.putString("name", team.name() == null ? "TODO" : team.name());
+            teamIdTag.putString("name", team.name());
             tag.put(uuid.toString(), teamIdTag);
         });
         return tag;
@@ -85,11 +86,16 @@ public class TeamSaveData extends SavedData {
     }
 
     public static Team getOrCreate(ServerPlayer player) {
-        var data = read(player.level);
-        UUID uuid = data.players.get(player.getUUID());
-        Team team = data.teams.get(uuid);
+        Team team = getPlayerTeam(player);
         if (team == null) return set(player.getLevel(), player);
         return team;
+    }
+
+    @Nullable
+    public static Team getPlayerTeam(Player player) {
+        var data = read(player.level);
+        UUID uuid = data.players.get(player.getUUID());
+        return data.teams.get(uuid);
     }
 
     public static Collection<Team> getTeams(Level level) {

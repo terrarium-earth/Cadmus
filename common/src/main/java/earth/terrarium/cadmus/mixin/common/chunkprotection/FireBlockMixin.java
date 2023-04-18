@@ -22,7 +22,7 @@ public abstract class FireBlockMixin extends Block {
     // Prevent fire from spreading in protected chunks
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void cadmus$tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random, CallbackInfo ci) {
-        if (!ClaimApi.API.isClaimed(level, pos)) {
+        if (ClaimApi.API.isClaimed(level, pos)) {
             level.scheduleTick(pos, this, invokeGetFireTickDelay(level.random));
             ci.cancel();
         }

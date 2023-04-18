@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
@@ -22,6 +23,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -44,7 +46,6 @@ public class ClaimMapScreen extends Screen {
     private static boolean isDirty;
 
     private ClaimTool tool = ClaimTool.NONE;
-
     public ClaimMapScreen() {
         super(Component.empty());
         ClaimMapScreen.waitingForServerData = true;
@@ -153,7 +154,7 @@ public class ClaimMapScreen extends Screen {
                 }
 
                 boolean shouldRender = claim != null;
-                int color = owned ? claim == ClaimType.CLAIMED ? 0xff00ff00 : 0xfff59a22 : 0xffbd2025;
+                int color = owned ? claim == ClaimType.CLAIMED ? 0xff55ffff : 0xfff59a22 : 0xffbd2025;
                 boolean isHovering = false;
 
                 if (mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height) {
@@ -177,7 +178,7 @@ public class ClaimMapScreen extends Screen {
                         }
                     } else if (owned) {
                         isHovering = true;
-                        color = Screen.hasShiftDown() ? 0xfff59a22 : tool == ClaimTool.ERASER ? 0xffff0000 : 0xff00ff00;
+                        color = Screen.hasShiftDown() ? 0xfff59a22 : tool == ClaimTool.ERASER ? 0xffff0000 : 0xff55ffff;
                     }
                 }
 
@@ -211,6 +212,7 @@ public class ClaimMapScreen extends Screen {
         }
     }
 
+    @Nullable
     private ClaimType getClaimType(ChunkPos chunkPos) {
         return FRIENDLY_CHUNKS.getOrDefault(chunkPos, UNFRIENDLY_CHUNKS.getOrDefault(chunkPos, null));
     }
@@ -260,10 +262,12 @@ public class ClaimMapScreen extends Screen {
 
     public void clearAll() {
         NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(true));
+        FRIENDLY_CHUNKS.clear();
     }
 
     public void clearDimension() {
         NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(false));
+        FRIENDLY_CHUNKS.clear();
     }
 
     @Override

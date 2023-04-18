@@ -6,6 +6,7 @@ import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -62,11 +63,13 @@ public class CadmusForge {
     }
 
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        ModUtils.displayTeamName(event.getEntity());
+        if (event.getEntity() instanceof ServerPlayer player) {
+            ModUtils.displayTeamName(player);
+        }
     }
 
     private static void onEnterSection(EntityEvent.EnteringSection event) {
-        if (event.getEntity() instanceof Player player) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             ModUtils.enterChunkSection(player);
         }
     }

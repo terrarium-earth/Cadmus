@@ -25,7 +25,7 @@ public class CadmusFabric implements ModInitializer {
     }
 
     private static void registerChunkProtectionEvents() {
-        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, blockState, blockEntity) -> !ClaimApi.API.canBreakBlock(level, pos, player));
+        PlayerBlockBreakEvents.BEFORE.register((level, player, pos, blockState, blockEntity) -> ClaimApi.API.canBreakBlock(level, pos, player));
 
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
             if (!ClaimApi.API.canInteractWithBlock(level, hitResult.getBlockPos(), InteractionType.USE, player)) {

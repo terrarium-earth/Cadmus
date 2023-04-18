@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
+import earth.terrarium.cadmus.common.team.Team;
 import earth.terrarium.cadmus.common.team.TeamSaveData;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
@@ -89,5 +90,11 @@ public class ClaimChunkSaveData extends SavedData {
 
     public static Map<ChunkPos, ClaimInfo> getAll(Level level) {
         return read(level).claims;
+    }
+
+    public static void clear(Level level, Team team) {
+        var data = read(level);
+        data.claims.entrySet().removeIf(entry -> entry.getValue().team().equals(team));
+        data.setDirty();
     }
 }

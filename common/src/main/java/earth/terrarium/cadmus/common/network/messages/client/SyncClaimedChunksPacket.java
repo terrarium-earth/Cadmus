@@ -40,7 +40,7 @@ public record SyncClaimedChunksPacket(ChunkPos pos, ClaimInfo info) implements P
             buf.writeUUID(team.teamId());
             buf.writeUUID(team.creator());
             buf.writeCollection(team.members(), FriendlyByteBuf::writeUUID);
-            buf.writeUtf(team.name() == null ? "TODO" : team.name());
+            buf.writeUtf(team.name());
         }
 
         @Override

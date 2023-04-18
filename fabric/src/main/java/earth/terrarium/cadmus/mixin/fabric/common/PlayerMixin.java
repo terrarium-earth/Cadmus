@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.mixin.fabric.common;
 
 import earth.terrarium.cadmus.common.util.ModUtils;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -31,7 +32,7 @@ public abstract class PlayerMixin extends LivingEntity {
             // check if player has entered new chunk
             if (!Objects.equals(pos, cadmus$lastChunkPos)) {
                 cadmus$lastChunkPos = pos;
-                ModUtils.enterChunkSection((Player) (Object) this);
+                ModUtils.enterChunkSection((ServerPlayer) (Object) this);
             }
         }
     }

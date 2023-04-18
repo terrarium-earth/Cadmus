@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BasePressurePlateBlock.class)
 public abstract class BasePressurePlateBlockMixin {
     // Prevent players from activating pressure plates in protected chunks
-    @Inject(method = "checkPressed", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "checkPressed", at = @At("HEAD"), cancellable = true) // TODO pressure plates dont go back up?
     private void cadmus$checkPressed(@Nullable Entity entity, Level level, BlockPos pos, BlockState state, int currentSignal, CallbackInfo ci) {
         if (entity instanceof Player player) {
             if (!ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.WORLD, player)) {
