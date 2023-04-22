@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.team;
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.team.TeamProvider;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,5 +32,32 @@ public class VanillaTeamProvider implements TeamProvider {
         PlayerTeam team = server.getScoreboard().getPlayersTeam(creator.getName());
         if (team == null) return creator.getName();
         return team.getName();
+    }
+
+    // TODO: transfer chunks when player joins a new team
+    public void addPlayerToTeam(MinecraftServer server, String playerName, PlayerTeam scoreboardTeam) {
+        ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
+        if (player == null) return;
+
+        for (Team team : TeamSaveData.getTeams(server)) {
+            if (team.name().equals(scoreboardTeam.getName())) {
+                TeamSaveData.addTeamMember(player, team);
+                return;
+            }
+            TeamSaveData.removeTeamMember(player, team);
+        }
+        TeamSaveData.getOrCreate(player, scoreboardTeam.getName());
+    }
+
+    public void removePlayerFromTeam(MinecraftServer server, String playerName, PlayerTeam scoreboardTeam) {
+        ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
+        if (player == null) return;
+
+        for (Team team : TeamSaveData.getTeams(server)) {
+            if (team.name().equals(scoreboardTeam.getName())) {
+                TeamSaveData.removeTeamMember(player, team);
+                return;
+            }
+        }
     }
 }

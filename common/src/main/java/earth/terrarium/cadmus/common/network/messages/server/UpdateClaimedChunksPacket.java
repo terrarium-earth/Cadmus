@@ -53,9 +53,7 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
         public PacketContext handle(UpdateClaimedChunksPacket message) {
             return (player, level) -> {
                 Team team = TeamSaveData.getOrCreate((ServerPlayer) player);
-                message.addedChunks.forEach((pos, type) -> {
-                    ClaimChunkSaveData.set(player.level, pos, new ClaimInfo(team, type));
-                });
+                message.addedChunks.forEach((pos, type) -> ClaimChunkSaveData.set(player.level, pos, new ClaimInfo(team, type)));
                 message.removedChunks.forEach(chunkPos -> ClaimChunkSaveData.remove(player.level, chunkPos));
             };
         }

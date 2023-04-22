@@ -97,4 +97,15 @@ public class ClaimChunkSaveData extends SavedData {
         data.claims.entrySet().removeIf(entry -> entry.getValue().team().equals(team));
         data.setDirty();
     }
+
+    public static Map<ChunkPos, ClaimInfo> getTeamChunks(Level level, Team team) {
+        var data = read(level);
+        Map<ChunkPos, ClaimInfo> teamChunks = new HashMap<>();
+        data.claims.forEach((pos, info) -> {
+            if (info.team().teamId().equals(team.teamId())) {
+                teamChunks.put(pos, info);
+            }
+        });
+        return teamChunks;
+    }
 }

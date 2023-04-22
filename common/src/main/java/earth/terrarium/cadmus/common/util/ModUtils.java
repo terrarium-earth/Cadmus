@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.util;
 
+import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.LastMessageHolder;
@@ -45,8 +46,8 @@ public class ModUtils {
         if (team.creator() == null) {
             player.displayClientMessage(ConstantComponents.WILDERNESS, true);
         } else {
-            Team playerTeam = TeamSaveData.getPlayerTeam(player);
-            ChatFormatting color = playerTeam == null ? ChatFormatting.DARK_RED : playerTeam.teamId().equals(team.teamId()) ? ChatFormatting.AQUA : ChatFormatting.DARK_RED;
+            var members = ClaimApi.API.getClaimMembers(player.level, player.chunkPosition());
+            ChatFormatting color = members.contains(player.getUUID()) ? ChatFormatting.AQUA : ChatFormatting.DARK_RED;
             player.displayClientMessage(Component.nullToEmpty(name).copy().withStyle(color), true);
         }
     }

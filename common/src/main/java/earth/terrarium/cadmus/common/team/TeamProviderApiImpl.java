@@ -20,7 +20,8 @@ public class TeamProviderApiImpl implements TeamProviderApi {
     }
 
     @Override
-    public @Nullable TeamProvider get(ResourceLocation id) {
+    @Nullable
+    public TeamProvider get(ResourceLocation id) {
         return providers.get(id);
     }
 
@@ -45,6 +46,6 @@ public class TeamProviderApiImpl implements TeamProviderApi {
 
     @Override
     public void update(UUID uuid) {
-        // TODO
+
     }
 }

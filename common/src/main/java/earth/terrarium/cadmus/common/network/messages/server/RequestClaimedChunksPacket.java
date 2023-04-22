@@ -58,8 +58,7 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
                     }
                 }
 
-                Optional<UUID> team = TeamSaveData.getTeams(level).stream().filter(team1 -> team1.hasMember(player.getUUID())).findFirst().map(Team::teamId);
-
+                Optional<UUID> team = Optional.ofNullable(TeamSaveData.getPlayerTeam(player)).map(Team::teamId);
                 NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, team), player);
             };
         }

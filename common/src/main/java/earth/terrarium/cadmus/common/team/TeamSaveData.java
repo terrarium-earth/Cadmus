@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.team;
 
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.team.TeamProviderApi;
+import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -28,7 +29,7 @@ public class TeamSaveData extends SavedData {
     public TeamSaveData() {
     }
 
-    public TeamSaveData(CompoundTag tag, MinecraftServer server) {
+    public TeamSaveData(CompoundTag tag) {
         tag.getAllKeys().forEach(key -> {
             var teamTag = tag.getCompound(key);
             var creator = UUID.fromString(teamTag.getString("creator"));
@@ -37,7 +38,7 @@ public class TeamSaveData extends SavedData {
             var name = teamTag.getString("name");
             teams.put(UUID.fromString(key), new Team(UUID.fromString(key), creator, members, name));
         });
-        updateInternal(server);
+        updateInternal();
     }
 
     @Override
@@ -62,14 +63,29 @@ public class TeamSaveData extends SavedData {
     }
 
     public static TeamSaveData read(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(tag -> new TeamSaveData(tag, server), TeamSaveData::new, "cadmus_teams");
+        return server.overworld().getDataStorage().computeIfAbsent(tag -> new TeamSaveData(tag), TeamSaveData::new, "cadmus_teams");
     }
 
-    public static Team set(ServerLevel level, ServerPlayer player) {
-        var data = read(level);
+    public static Team getOrCreate(ServerPlayer player) {
+        Team team = getPlayerTeam(player);
+        if (team == null) return set(player);
+        return team;
+    }
+
+    public static Team getOrCreate(ServerPlayer player, String name) {
+        Team team = getPlayerTeam(player);
+        if (team == null) return set(player, name);
+        return team;
+    }
+
+    public static Team set(ServerPlayer player) {
+        return set(player, TeamProviderApi.API.getSelected().getTeamName(player.server, player.getGameProfile()));
+    }
+
+    public static Team set(ServerPlayer player, String name) {
+        var data = read(player.level);
         UUID teamId = ModUtils.generate(Predicate.not(data.teams::containsKey), UUID::randomUUID);
-        Set<GameProfile> members = TeamProviderApi.API.getSelected().getTeamMembers(level.getServer(), player.getGameProfile());
-        String name = TeamProviderApi.API.getSelected().getTeamName(level.getServer(), player.getGameProfile());
+        Set<GameProfile> members = TeamProviderApi.API.getSelected().getTeamMembers(player.getServer(), player.getGameProfile());
         Team team = new Team(teamId, player.getUUID(), members.stream().map(GameProfile::getId).collect(Collectors.toSet()), name);
         data.teams.put(teamId, team);
         data.setDirty();
@@ -85,40 +101,52 @@ public class TeamSaveData extends SavedData {
         return data.teams.get(teamId);
     }
 
-    public static Team getOrCreate(ServerPlayer player) {
-        Team team = getPlayerTeam(player);
-        if (team == null) return set(player.getLevel(), player);
-        return team;
-    }
-
-    @Nullable
     public static Team getPlayerTeam(Player player) {
         var data = read(player.level);
         UUID uuid = data.players.get(player.getUUID());
         return data.teams.get(uuid);
     }
 
-    public static Collection<Team> getTeams(Level level) {
-        return read(level).teams.values();
+    public static void addTeamMember(ServerPlayer player, Team team) {
+        var data = read(player.server);
+        data.teams.get(team.teamId()).members().add(player.getUUID());
+        data.setDirty();
+        data.updateInternal();
+    }
+
+    public static void removeTeamMember(ServerPlayer player, Team team) {
+        var data = read(player.server);
+        data.teams.get(team.teamId()).members().remove(player.getUUID());
+        removeTeamsWithNoMembers(player.server);
+        data.setDirty();
+        data.updateInternal();
+    }
+
+    public static void removeTeamsWithNoMembers(MinecraftServer server) {
+        var data = read(server);
+        for (Team team : data.teams.values()) {
+            if (team.members().isEmpty()) {
+                data.teams.remove(team.teamId());
+                for (ServerLevel level : server.getAllLevels()) {
+                    for (var entry : ClaimChunkSaveData.getTeamChunks(level, team).entrySet()) {
+                        if (entry.getValue().team().teamId().equals(team.teamId())) {
+                            ClaimChunkSaveData.remove(level, entry.getKey());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public static Collection<Team> getTeams(MinecraftServer server) {
+        return read(server).teams.values();
     }
 
     public static void update(MinecraftServer server) {
-        read(server).updateInternal(server);
+        read(server).updateInternal();
     }
 
-    private void updateInternal(MinecraftServer server) {
-        teams.forEach((uuid, team) -> {
-            team.members().clear();
-            server.getProfileCache().get(team.creator()).ifPresent(profile -> {
-                List<UUID> uuids = TeamProviderApi.API.getSelected()
-                    .getTeamMembers(server, profile)
-                    .stream()
-                    .map(GameProfile::getId)
-                    .toList();
-                team.members().addAll(uuids);
-            });
-        });
-
+    private void updateInternal() {
         players.clear();
 
         for (Team team : teams.values()) {
