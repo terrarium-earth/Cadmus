@@ -4,8 +4,9 @@
   "package": "earth.terrarium.cadmus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "common.ServerScoreboardMixin",
+    "common.GameRulesAccessor",
     "common.ServerPlayerMixin",
+    "common.ServerScoreboardMixin",
     "common.chunkprotection.BasePressurePlateBlockMixin",
     "common.chunkprotection.ButtonBlockMixin",
     "common.chunkprotection.EntityMixin",

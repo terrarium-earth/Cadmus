@@ -13,11 +13,13 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @MethodsReturnNonnullByDefault
 public class ClaimChunkSaveData extends SavedData {
     private static final ClaimChunkSaveData CLIENT_SIDE = new ClaimChunkSaveData();
     private final Map<ChunkPos, ClaimInfo> claims = new HashMap<>();
+    private final Map<UUID, Map<ChunkPos, ClaimInfo>> teamClaims = new HashMap<>();
 
     public ClaimChunkSaveData() {
     }
@@ -100,12 +102,8 @@ public class ClaimChunkSaveData extends SavedData {
 
     public static Map<ChunkPos, ClaimInfo> getTeamChunks(Level level, Team team) {
         var data = read(level);
-        Map<ChunkPos, ClaimInfo> teamChunks = new HashMap<>();
-        data.claims.forEach((pos, info) -> {
-            if (info.team().teamId().equals(team.teamId())) {
-                teamChunks.put(pos, info);
-            }
-        });
-        return teamChunks;
+        return data.teamClaims.computeIfAbsent(team.teamId(), k -> data.claims.entrySet().stream()
+            .filter(e -> e.getValue().team().teamId().equals(team.teamId()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 }

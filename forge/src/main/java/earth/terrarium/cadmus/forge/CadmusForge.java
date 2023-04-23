@@ -64,7 +64,7 @@ public class CadmusForge {
 
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            ModUtils.displayTeamName(player);
+            ModUtils.onPlayerJoin(player);
         }
     }
 

@@ -17,7 +17,8 @@ import net.minecraft.world.level.ChunkPos;
 import java.util.*;
 
 public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
-                                      Optional<UUID> team) implements Packet<SendClaimedChunksPacket> {
+                                      Optional<UUID> team, int maxClaims,
+                                      int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -47,6 +48,8 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 buf1.writeUtf(team.name());
             });
             buf.writeOptional(packet.team, FriendlyByteBuf::writeUUID);
+            buf.writeVarInt(packet.maxClaims);
+            buf.writeVarInt(packet.maxChunkLoaded);
         }
 
         @Override
@@ -68,12 +71,14 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             Map<ChunkPos, ClaimInfo> newClaims = Maps.newHashMapWithExpectedSize(claims.size());
             claims.forEach((key, value) ->
                 newClaims.put(key, new ClaimInfo(teams.get(value.getFirst()), value.getSecond())));
-            return new SendClaimedChunksPacket(newClaims, team);
+            int maxClaims = buf.readVarInt();
+            int maxChunkLoaded = buf.readVarInt();
+            return new SendClaimedChunksPacket(newClaims, team, maxClaims, maxChunkLoaded);
         }
 
         @Override
         public PacketContext handle(SendClaimedChunksPacket message) {
-            return (player, level) -> ClaimMapScreen.update(message.claims(), message.team().orElse(null));
+            return (player, level) -> ClaimMapScreen.update(message.claims(), message.team().orElse(null), message.maxClaims, message.maxChunkLoaded);
         }
     }
 }

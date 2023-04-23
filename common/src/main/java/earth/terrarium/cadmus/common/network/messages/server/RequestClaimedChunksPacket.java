@@ -8,8 +8,10 @@ import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPacket;
+import earth.terrarium.cadmus.common.registry.ModGameRules;
 import earth.terrarium.cadmus.common.team.Team;
 import earth.terrarium.cadmus.common.team.TeamSaveData;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -59,7 +61,9 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
                 }
 
                 Optional<UUID> team = Optional.ofNullable(TeamSaveData.getPlayerTeam(player)).map(Team::teamId);
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, team), player);
+                int maxClaims = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
+                int maxChunkLoaded = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, team, maxClaims, maxChunkLoaded), player);
             };
         }
     }

@@ -2,7 +2,9 @@ package earth.terrarium.cadmus.common.claims;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.common.registry.ModGameRules;
 import earth.terrarium.cadmus.common.team.Team;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -33,8 +35,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canBreakBlock(Level level, BlockPos pos, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-        return !isClaimed(level, pos) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
+            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
+            return !isClaimed(level, pos) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -44,8 +49,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-        return !isClaimed(level, pos) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
+            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
+            return !isClaimed(level, pos) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -55,8 +63,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-        return !isClaimed(level, pos) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
+            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
+            return !isClaimed(level, pos) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -66,8 +77,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-        return !isClaimed(level, pos) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
+            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
+            return !isClaimed(level, pos) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -77,8 +91,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
-        return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
+            Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
+            return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -88,8 +105,11 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID id) {
-        Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
-        return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)) {
+            Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
+            return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
+        }
+        return true;
     }
 
     @Override
@@ -99,7 +119,10 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canEntityGrief(Level level, Entity entity) {
-        return !isClaimed(level, entity.chunkPosition());
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING)) {
+            return !isClaimed(level, entity.chunkPosition());
+        }
+        return true;
     }
 
     @Override
@@ -109,12 +132,15 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, Entity picker) {
-        if (Objects.equals(item.getOwner(), picker)) {
-            return true;
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS)) {
+            if (Objects.equals(item.getOwner(), picker)) {
+                return true;
+            }
+            if (picker instanceof Player) {
+                return canInteractWithEntity(level, item, (Player) picker);
+            }
+            return canEntityGrief(level, picker);
         }
-        if (picker instanceof Player) {
-            return canInteractWithEntity(level, item, (Player) picker);
-        }
-        return canEntityGrief(level, picker);
+        return true;
     }
 }

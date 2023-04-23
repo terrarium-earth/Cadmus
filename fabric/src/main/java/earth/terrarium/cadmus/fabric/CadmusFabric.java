@@ -20,7 +20,7 @@ public class CadmusFabric implements ModInitializer {
             CommonProtectionApiCompat.init();
         }
 
-        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ModUtils.displayTeamName(handler.player));
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> ModUtils.onPlayerJoin(handler.player));
         registerChunkProtectionEvents();
     }
 

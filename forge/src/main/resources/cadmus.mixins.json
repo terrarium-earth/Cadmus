@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "earth.terrarium.cadmus.mixin.forge",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "common.GameRulesBooleanValueInvoker",
+    "common.GameRulesIntegerValueInvoker"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

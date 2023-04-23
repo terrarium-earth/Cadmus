@@ -5,7 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.UUID;
 
 public interface TeamProviderApi {
     TeamProviderApi API = ApiHelper.load(TeamProviderApi.class);
@@ -49,11 +48,4 @@ public interface TeamProviderApi {
      * @return the ids
      */
     Collection<ResourceLocation> getIds();
-
-    /**
-     * Called when the player changes teams, joins a new team or leaves a team
-     *
-     * @param uuid the creator
-     */
-    void update(UUID uuid);
 }

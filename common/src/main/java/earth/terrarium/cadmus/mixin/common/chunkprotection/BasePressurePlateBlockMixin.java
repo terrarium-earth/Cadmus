@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.mixin.common.chunkprotection;
 
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import net.minecraft.core.BlockPos;
@@ -8,23 +9,26 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BasePressurePlateBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+@Debug(export = true)
 @Mixin(BasePressurePlateBlock.class)
 public abstract class BasePressurePlateBlockMixin {
+    @Shadow
+    protected abstract int getSignalStrength(Level level, BlockPos blockPos);
+
+    @Shadow
+    protected abstract int getPressedTime();
+
     // Prevent players from activating pressure plates in protected chunks
-    @Inject(method = "checkPressed", at = @At("HEAD"), cancellable = true) // TODO pressure plates dont go back up?
-    private void cadmus$checkPressed(@Nullable Entity entity, Level level, BlockPos pos, BlockState state, int currentSignal, CallbackInfo ci) {
+    @WrapWithCondition(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/BasePressurePlateBlock;checkPressed(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)V"))
+    private boolean cadmus$entityInside(BasePressurePlateBlock block, Entity entity, Level level, BlockPos pos, BlockState state, int signalStrength) {
         if (entity instanceof Player player) {
-            if (!ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.WORLD, player)) {
-                ci.cancel();
-            }
-        } else if (!ClaimApi.API.canEntityGrief(level, pos, entity)) {
-            ci.cancel();
+            return ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.WORLD, player);
         }
+        return ClaimApi.API.canEntityGrief(level, pos, entity);
     }
 }

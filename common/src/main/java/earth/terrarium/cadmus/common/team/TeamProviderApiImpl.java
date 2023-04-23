@@ -5,7 +5,10 @@ import earth.terrarium.cadmus.api.team.TeamProviderApi;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class TeamProviderApiImpl implements TeamProviderApi {
     public final Map<ResourceLocation, TeamProvider> providers = new HashMap<>();
@@ -42,10 +45,5 @@ public class TeamProviderApiImpl implements TeamProviderApi {
     @Override
     public Collection<ResourceLocation> getIds() {
         return providers.keySet();
-    }
-
-    @Override
-    public void update(UUID uuid) {
-
     }
 }
