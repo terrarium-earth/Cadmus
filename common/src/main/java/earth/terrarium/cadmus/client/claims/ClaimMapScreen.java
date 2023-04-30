@@ -41,10 +41,10 @@ public class ClaimMapScreen extends Screen {
     public static boolean calculatingMap;
     public static boolean waitingForServerData;
     private static boolean isDirty;
-
-    private ClaimTool tool = ClaimTool.NONE;
     private static int maxClaimedChunks = 1089;
     private static int maxChunkLoadedChunks = 64;
+
+    private ClaimTool tool = ClaimTool.NONE;
 
     public ClaimMapScreen() {
         super(Component.empty());

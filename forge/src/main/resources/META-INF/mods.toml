@@ -9,7 +9,7 @@ version = "${version}"
 displayName = "ModName"
 displayURL = "https://modrinth.com/mod/cadmus"
 logoFile = "icon.png"
-authors = "Alex Nijjar"
+authors = "Alex Nijjar, ThatGravyBoat"
 credits = ""
 description = "idk"
 

@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.claims;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.api.team.TeamProviderApi;
 import earth.terrarium.cadmus.common.registry.ModGameRules;
 import earth.terrarium.cadmus.common.team.Team;
 import earth.terrarium.cadmus.common.util.ModUtils;
@@ -18,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-//TODO make each check a game rule
 public class ClaimApiImpl implements ClaimApi {
 
     @Override
@@ -36,6 +36,9 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canBreakBlock(Level level, BlockPos pos, UUID id) {
         if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
+            if (!TeamProviderApi.API.getSelected().canBreakBlock(level, pos, id)) {
+                return false;
+            }
             Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
             return !isClaimed(level, pos) || claimMembers.contains(id);
         }
@@ -50,6 +53,9 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID id) {
         if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
+            if (!TeamProviderApi.API.getSelected().canPlaceBlock(level, pos, id)) {
+                return false;
+            }
             Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
             return !isClaimed(level, pos) || claimMembers.contains(id);
         }
@@ -64,6 +70,9 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID id) {
         if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
+            if (!TeamProviderApi.API.getSelected().canExplodeBlock(level, pos, explosion, id)) {
+                return false;
+            }
             Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
             return !isClaimed(level, pos) || claimMembers.contains(id);
         }
@@ -78,6 +87,9 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID id) {
         if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
+            if (!TeamProviderApi.API.getSelected().canInteractWithBlock(level, pos, type, id)) {
+                return false;
+            }
             Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
             return !isClaimed(level, pos) || claimMembers.contains(id);
         }
@@ -92,6 +104,9 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID id) {
         if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
+            if (!TeamProviderApi.API.getSelected().canInteractWithEntity(level, entity, id)) {
+                return false;
+            }
             Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
             return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
         }
@@ -105,7 +120,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)) {
+        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES) && TeamProviderApi.API.getSelected().canDamageEntity(level, entity, id)) {
             Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
             return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
         }
@@ -136,8 +151,8 @@ public class ClaimApiImpl implements ClaimApi {
             if (Objects.equals(item.getOwner(), picker)) {
                 return true;
             }
-            if (picker instanceof Player) {
-                return canInteractWithEntity(level, item, (Player) picker);
+            if (picker instanceof Player player) {
+                return canInteractWithEntity(level, item, player);
             }
             return canEntityGrief(level, picker);
         }

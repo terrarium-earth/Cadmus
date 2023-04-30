@@ -10,7 +10,6 @@ import earth.terrarium.cadmus.common.network.messages.client.SyncClaimedChunksPa
 import earth.terrarium.cadmus.common.network.messages.client.SyncGameRulePacket;
 import earth.terrarium.cadmus.common.registry.ModGameRules;
 import earth.terrarium.cadmus.common.team.Team;
-import earth.terrarium.cadmus.common.team.TeamSaveData;
 import earth.terrarium.cadmus.mixin.common.GameRulesAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
@@ -19,7 +18,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 

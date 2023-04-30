@@ -48,14 +48,22 @@ public record SyncGameRulePacket(byte id, boolean val) implements Packet<SyncGam
         public PacketContext handle(SyncGameRulePacket message) {
             return (player, level) -> {
                 switch (message.id()) {
-                    case DO_CLAIMED_BLOCK_BREAKING -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, message.val());
-                    case DO_CLAIMED_BLOCK_PLACING -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, message.val());
-                    case DO_CLAIMED_BLOCK_EXPLOSIONS -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, message.val());
-                    case DO_CLAIMED_BLOCK_INTERACTIONS -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, message.val());
-                    case DO_CLAIMED_ENTITY_INTERACTIONS -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, message.val());
-                    case CLAIMED_DAMAGE_ENTITIES -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, message.val());
-                    case CLAIMED_MOB_GRIEFING -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CLAIMED_MOB_GRIEFING, message.val());
-                    case CAN_PICKUP_CLAIMED_ITEMS -> ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS, message.val());
+                    case DO_CLAIMED_BLOCK_BREAKING ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, message.val());
+                    case DO_CLAIMED_BLOCK_PLACING ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, message.val());
+                    case DO_CLAIMED_BLOCK_EXPLOSIONS ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, message.val());
+                    case DO_CLAIMED_BLOCK_INTERACTIONS ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, message.val());
+                    case DO_CLAIMED_ENTITY_INTERACTIONS ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, message.val());
+                    case CLAIMED_DAMAGE_ENTITIES ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, message.val());
+                    case CLAIMED_MOB_GRIEFING ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CLAIMED_MOB_GRIEFING, message.val());
+                    case CAN_PICKUP_CLAIMED_ITEMS ->
+                        ModUtils.CLIENT_GAME_RULES.put(ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS, message.val());
                 }
             };
         }
