@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
                                         Set<ChunkPos> removedChunks) implements Packet<UpdateClaimedChunksPacket> {
@@ -45,7 +44,6 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
             buf.writeMap(packet.addedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
             buf.writeCollection(packet.removedChunks, FriendlyByteBuf::writeChunkPos);
         }
-
 
 
         @Override

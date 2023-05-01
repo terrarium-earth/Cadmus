@@ -17,7 +17,7 @@ import net.minecraft.world.level.ChunkPos;
 import java.util.*;
 
 public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
-                                      Optional<UUID> team, int maxClaims,
+                                      Optional<UUID> team, Optional<String> teamName, int maxClaims,
                                       int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
@@ -48,6 +48,7 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 buf1.writeUtf(team.name());
             });
             buf.writeOptional(packet.team, FriendlyByteBuf::writeUUID);
+            buf.writeOptional(packet.teamName, FriendlyByteBuf::writeUtf);
             buf.writeVarInt(packet.maxClaims);
             buf.writeVarInt(packet.maxChunkLoaded);
         }
@@ -68,17 +69,18 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 teams.put(id, new Team(id, creator, members, name));
             }
             Optional<UUID> team = buf.readOptional(FriendlyByteBuf::readUUID);
+            Optional<String> teamName = buf.readOptional(FriendlyByteBuf::readUtf);
             Map<ChunkPos, ClaimInfo> newClaims = Maps.newHashMapWithExpectedSize(claims.size());
             claims.forEach((key, value) ->
                 newClaims.put(key, new ClaimInfo(teams.get(value.getFirst()), value.getSecond())));
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
-            return new SendClaimedChunksPacket(newClaims, team, maxClaims, maxChunkLoaded);
+            return new SendClaimedChunksPacket(newClaims, team, teamName, maxClaims, maxChunkLoaded);
         }
 
         @Override
         public PacketContext handle(SendClaimedChunksPacket message) {
-            return (player, level) -> ClaimMapScreen.update(message.claims(), message.team().orElse(null), message.maxClaims, message.maxChunkLoaded);
+            return (player, level) -> ClaimMapScreen.update(message.claims(), message.team().orElse(null), message.teamName.orElse(null), message.maxClaims, message.maxChunkLoaded);
         }
     }
 }

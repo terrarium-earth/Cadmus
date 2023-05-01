@@ -13,6 +13,7 @@ import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.server.ClearChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.server.RequestClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.server.UpdateClaimedChunksPacket;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.ImageButton;
@@ -27,16 +28,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class ClaimMapScreen extends Screen {
-    public static final int MAP_SIZE = 200;
-    public static final int MAX_MAP_SIZE = 32;
-
     public static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/map.png");
     public static final ResourceLocation MAP_ICONS_LOCATION = new ResourceLocation("textures/map/map_icons.png");
 
+    public static final int MAP_SIZE = 200;
+    public static final int MAX_MAP_SIZE = 32;
+
     public static final ClaimMapRenderer MAP_RENDERER = new ClaimMapRenderer();
+
+    @Nullable
+    private static String teamName;
     private static final Map<ChunkPos, ClaimType> START_CHUNKS = new HashMap<>();
     private static final Map<ChunkPos, ClaimType> FRIENDLY_CHUNKS = new HashMap<>();
-    private static final Map<ChunkPos, ClaimType> UNFRIENDLY_CHUNKS = new HashMap<>();
+    private static final Map<ChunkPos, ClaimInfo> UNFRIENDLY_CHUNKS = new HashMap<>();
 
     public static boolean calculatingMap;
     public static boolean waitingForServerData;
@@ -125,6 +129,9 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void renderChunkButtons(LocalPlayer player, PoseStack poseStack, int mouseX, int mouseY) {
+        Screen screen = Minecraft.getInstance().screen;
+        if (screen == null) return;
+
         float left = (this.width - MAP_SIZE) / 2f;
         float top = (this.height - MAP_SIZE) / 2f;
         float scale = ClaimMapUpdater.getChunkScale((ClaimMapUpdater.getScaledRenderDistance()));
@@ -146,8 +153,9 @@ public class ClaimMapScreen extends Screen {
                 ChunkPos chunkPos = new ChunkPos(playerChunkX + i, playerChunkZ + j);
                 var claim = FRIENDLY_CHUNKS.getOrDefault(new ChunkPos(chunkPos.x, chunkPos.z), null);
                 boolean owned = true;
+                var info = UNFRIENDLY_CHUNKS.get(new ChunkPos(chunkPos.x, chunkPos.z));
                 if (claim == null) {
-                    claim = UNFRIENDLY_CHUNKS.getOrDefault(new ChunkPos(chunkPos.x, chunkPos.z), null);
+                    claim = info != null ? info.type() : null;
                     if (claim != null) {
                         owned = false;
                     }
@@ -165,6 +173,10 @@ public class ClaimMapScreen extends Screen {
                             default -> null;
                         };
 
+                        if (tool == ClaimTool.CHUNK_LOAD_ERASER && claim == null) {
+                            claimType = null;
+                        }
+
                         if (claimType != null) {
                             if (this.tool == ClaimTool.CHUNK_LOAD_ERASER || (this.tool == ClaimTool.BRUSH && FRIENDLY_CHUNKS.size() < maxClaimedChunks) || (this.tool == ClaimTool.CHUNK_LOAD_BRUSH && getChunkLoaded() < maxChunkLoadedChunks)) {
                                 if (this.tool != ClaimTool.BRUSH || claim != ClaimType.CHUNK_LOADED) {
@@ -180,10 +192,16 @@ public class ClaimMapScreen extends Screen {
                         isHovering = true;
                         color = Screen.hasShiftDown() ? 0xfff59a22 : tool == ClaimTool.ERASER ? 0xffff0000 : 0xff55ffff;
                     }
-                    Minecraft.getInstance().screen.setTooltipForNextRenderPass(List.of(
-                        Component.literal("X: " + chunkPos.x).getVisualOrderText(),
-                        Component.literal("Z: " + chunkPos.z).getVisualOrderText()
-                    ));
+
+                    if (info != null) {
+                        screen.setTooltipForNextRenderPass(List.of(
+                            Component.literal(info.team().name()).withStyle(ChatFormatting.DARK_RED).getVisualOrderText()
+                        ));
+                    } else if (claim != null && teamName != null && tool == ClaimTool.NONE) {
+                        screen.setTooltipForNextRenderPass(List.of(
+                            Component.literal(teamName).withStyle(ChatFormatting.AQUA).getVisualOrderText()
+                        ));
+                    }
                 }
 
                 if (shouldRender || isHovering) {
@@ -218,12 +236,12 @@ public class ClaimMapScreen extends Screen {
 
     @Nullable
     private ClaimType getClaimType(ChunkPos chunkPos) {
-        return FRIENDLY_CHUNKS.getOrDefault(chunkPos, UNFRIENDLY_CHUNKS.getOrDefault(chunkPos, null));
+        return FRIENDLY_CHUNKS.getOrDefault(chunkPos, UNFRIENDLY_CHUNKS.get(chunkPos) != null ? UNFRIENDLY_CHUNKS.get(chunkPos).type() : null);
     }
 
     private void renderText(PoseStack poseStack) {
         this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.claimed_chunks", FRIENDLY_CHUNKS.size(), maxClaimedChunks), 5, height - 24, 0xffffff);
-        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.force_loaded_chunks", getChunkLoaded(), maxChunkLoadedChunks), 5, height - 12, 0xffffff);
+        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", getChunkLoaded(), maxChunkLoadedChunks), 5, height - 12, 0xffffff);
     }
 
     private int getChunkLoaded() {
@@ -279,8 +297,9 @@ public class ClaimMapScreen extends Screen {
         return false;
     }
 
-    public static void update(Map<ChunkPos, ClaimInfo> claims, UUID playerTeam, int maxClaimedChunks, int maxChunkLoadedChunks) {
+    public static void update(Map<ChunkPos, ClaimInfo> claims, UUID playerTeam, String teamName, int maxClaimedChunks, int maxChunkLoadedChunks) {
         waitingForServerData = false;
+        ClaimMapScreen.teamName = teamName;
         ClaimMapScreen.maxClaimedChunks = maxClaimedChunks;
         ClaimMapScreen.maxChunkLoadedChunks = maxChunkLoadedChunks;
         claims.forEach((pos, info) -> {
@@ -288,7 +307,7 @@ public class ClaimMapScreen extends Screen {
                 FRIENDLY_CHUNKS.put(pos, info.type());
                 START_CHUNKS.put(pos, info.type());
             } else {
-                UNFRIENDLY_CHUNKS.put(pos, info.type());
+                UNFRIENDLY_CHUNKS.put(pos, info);
             }
         });
     }
@@ -296,6 +315,7 @@ public class ClaimMapScreen extends Screen {
     @Override
     public void removed() {
         super.removed();
+        // don't send the packet if the player didn't change anything
         if (!isDirty) return;
         isDirty = false;
 

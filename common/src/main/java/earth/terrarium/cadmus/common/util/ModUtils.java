@@ -38,15 +38,18 @@ public class ModUtils {
     public static void onPlayerJoin(ServerPlayer player) {
         displayTeamName(player);
         enterChunkSection(player);
-        Level level = player.level;
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.DO_CLAIMED_BLOCK_BREAKING, getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.DO_CLAIMED_BLOCK_PLACING, getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.DO_CLAIMED_BLOCK_EXPLOSIONS, getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.DO_CLAIMED_BLOCK_INTERACTIONS, getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.DO_CLAIMED_ENTITY_INTERACTIONS, getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.CLAIMED_DAMAGE_ENTITIES, getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.CLAIMED_MOB_GRIEFING, getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING)), player);
-        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(SyncGameRulePacket.CAN_PICKUP_CLAIMED_ITEMS, getOrCreateBooleanGameRule(level, ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS)), player);
+        sendGameRulePacket(player, SyncGameRulePacket.DO_CLAIMED_BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING);
+        sendGameRulePacket(player, SyncGameRulePacket.DO_CLAIMED_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING);
+        sendGameRulePacket(player, SyncGameRulePacket.DO_CLAIMED_BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS);
+        sendGameRulePacket(player, SyncGameRulePacket.DO_CLAIMED_BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS);
+        sendGameRulePacket(player, SyncGameRulePacket.DO_CLAIMED_ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS);
+        sendGameRulePacket(player, SyncGameRulePacket.CLAIMED_DAMAGE_ENTITIES, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES);
+        sendGameRulePacket(player, SyncGameRulePacket.CLAIMED_MOB_GRIEFING, ModGameRules.RULE_CLAIMED_MOB_GRIEFING);
+        sendGameRulePacket(player, SyncGameRulePacket.CAN_PICKUP_CLAIMED_ITEMS, ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS);
+    }
+
+    private static void sendGameRulePacket(ServerPlayer player, byte id, GameRules.Key<GameRules.BooleanValue> key) {
+        NetworkHandler.CHANNEL.sendToPlayer(new SyncGameRulePacket(id, getOrCreateBooleanGameRule(player.level, key)), player);
     }
 
     public static void enterChunkSection(ServerPlayer player) {

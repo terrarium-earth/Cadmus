@@ -1,8 +1,10 @@
 {
   "gui.cadmus.claim_map.claimed_chunks": "%s / %s Claimed Chunks",
-  "gui.cadmus.claim_map.force_loaded_chunks": "%s / %s Chunk Loaded",
+  "gui.cadmus.claim_map.chunk_loaded_chunks": "%s / %s Chunk Loaded",
   "gui.cadmus.claim_map.loading": "Loading...",
   "tooltip.cadmus.claim_map.clear_dimension": "Clear All Claimed Chunks In Dimension",
   "tooltip.cadmus.claim_map.clear_all": "Clear All Claimed Chunks",
-  "message.cadmus.wilderness": "§2Wilderness"
+  "message.cadmus.wilderness": "§2Wilderness",
+  "key.cadmus.open_claim_map": "Open Claim Map",
+  "key.categories.cadmus": "Cadmus"
 }

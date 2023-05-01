@@ -60,10 +60,12 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
                     }
                 }
 
-                Optional<UUID> team = Optional.ofNullable(TeamSaveData.getPlayerTeam(player)).map(Team::teamId);
+                Team team = TeamSaveData.getPlayerTeam(player);
+                Optional<UUID> teamId = Optional.ofNullable(team).map(Team::teamId);
+                Optional<String> teamName = Optional.ofNullable(team).map(Team::name);
                 int maxClaims = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, team, maxClaims, maxChunkLoaded), player);
+                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, teamName, maxClaims, maxChunkLoaded), player);
             };
         }
     }
