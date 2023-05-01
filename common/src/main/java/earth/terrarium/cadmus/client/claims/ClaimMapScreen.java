@@ -73,7 +73,7 @@ public class ClaimMapScreen extends Screen {
                 poseStack.translate(0, 0, 5);
                 renderChunkButtons(player, poseStack, mouseX, mouseY);
                 renderPlayerAvatar(player, poseStack);
-                renderText(poseStack);
+                renderText(poseStack, mouseX, mouseY);
             }
         } else {
             GuiComponent.drawCenteredString(poseStack, font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
@@ -85,12 +85,12 @@ public class ClaimMapScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 11, 12, 12, 218, 0, 12,
             CONTAINER_BACKGROUND,
             button -> clearDimension()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_DIMENSION));
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 11, 12, 12, 230, 0, 12,
             CONTAINER_BACKGROUND,
             button -> clearAll()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_ALL));
@@ -101,7 +101,7 @@ public class ClaimMapScreen extends Screen {
         int top = (this.height - 227) / 2 - 4;
         RenderSystem.enableBlend();
         RenderUtils.bindTexture(CONTAINER_BACKGROUND);
-        blit(poseStack, left, top, 0, 0, 218, 248);
+        blit(poseStack, left, top, 0, 0, 218, 249);
     }
 
     private void renderPlayerAvatar(LocalPlayer player, PoseStack poseStack) {
@@ -129,9 +129,6 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void renderChunkButtons(LocalPlayer player, PoseStack poseStack, int mouseX, int mouseY) {
-        Screen screen = Minecraft.getInstance().screen;
-        if (screen == null) return;
-
         float left = (this.width - MAP_SIZE) / 2f;
         float top = (this.height - MAP_SIZE) / 2f;
         float scale = ClaimMapUpdater.getChunkScale((ClaimMapUpdater.getScaledRenderDistance()));
@@ -194,13 +191,9 @@ public class ClaimMapScreen extends Screen {
                     }
 
                     if (info != null) {
-                        screen.setTooltipForNextRenderPass(List.of(
-                            Component.literal(info.team().name()).withStyle(ChatFormatting.DARK_RED).getVisualOrderText()
-                        ));
+                        this.setTooltipForNextRenderPass(Component.literal(info.team().name()).withStyle(ChatFormatting.DARK_RED));
                     } else if (claim != null && teamName != null && tool == ClaimTool.NONE) {
-                        screen.setTooltipForNextRenderPass(List.of(
-                            Component.literal(teamName).withStyle(ChatFormatting.AQUA).getVisualOrderText()
-                        ));
+                        this.setTooltipForNextRenderPass(Component.literal(teamName).withStyle(ChatFormatting.AQUA));
                     }
                 }
 
@@ -239,9 +232,20 @@ public class ClaimMapScreen extends Screen {
         return FRIENDLY_CHUNKS.getOrDefault(chunkPos, UNFRIENDLY_CHUNKS.get(chunkPos) != null ? UNFRIENDLY_CHUNKS.get(chunkPos).type() : null);
     }
 
-    private void renderText(PoseStack poseStack) {
-        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.claimed_chunks", FRIENDLY_CHUNKS.size(), maxClaimedChunks), 5, height - 24, 0xffffff);
-        this.font.draw(poseStack, Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", getChunkLoaded(), maxChunkLoadedChunks), 5, height - 12, 0xffffff);
+    private void renderText(PoseStack poseStack, int mouseX, int mouseY) {
+        this.font.draw(poseStack, Component.literal(FRIENDLY_CHUNKS.size() + " / " + maxClaimedChunks), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
+        this.font.draw(poseStack, Component.literal(getChunkLoaded() + " / " + maxChunkLoadedChunks), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 241, 0x404040);
+
+        // text tooltips
+        float left = (this.width - MAP_SIZE) / 2f;
+        float top = (this.height - MAP_SIZE) / 2f;
+
+        if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
+            this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.claimed_chunks", FRIENDLY_CHUNKS.size(), maxClaimedChunks));
+        }
+        else if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE + 13 && mouseY < top + MAP_SIZE + 26) {
+            this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", getChunkLoaded(), maxChunkLoadedChunks));
+        }
     }
 
     private int getChunkLoaded() {
