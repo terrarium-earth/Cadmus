@@ -25,7 +25,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ClaimMapScreen extends Screen {
@@ -79,6 +82,7 @@ public class ClaimMapScreen extends Screen {
         } else {
             GuiComponent.drawCenteredString(poseStack, font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
         }
+        this.font.draw(poseStack, ConstantComponents.TITLE, (this.width / 2f) - 101, ((this.height - 248) / 2f) + 12, 0x404040);
         super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
@@ -204,6 +208,11 @@ public class ClaimMapScreen extends Screen {
                     boolean south = j == chunkScale - 1 || getClaimType(new ChunkPos(playerChunkX + i, playerChunkZ + j + 1)) != claim;
                     boolean west = i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j)) != claim;
 
+                    boolean northEast = j == 0 || i == chunkScale - 1 || getClaimType(new ChunkPos(playerChunkX + i + 1, playerChunkZ + j - 1)) != claim;
+                    boolean southEast = j == chunkScale - 1 || i == chunkScale - 1 || getClaimType(new ChunkPos(playerChunkX + i + 1, playerChunkZ + j + 1)) != claim;
+                    boolean southWest = j == chunkScale - 1 || i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j + 1)) != claim;
+                    boolean northWest = j == 0 || i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j - 1)) != claim;
+
                     // Do CTM on the claimed chunks
                     int roundedX = Math.round(x);
                     int roundedY = Math.round(y);
@@ -211,15 +220,23 @@ public class ClaimMapScreen extends Screen {
                     int roundedHeight = Math.round(y + height);
                     if (north || isHovering) {
                         fill(poseStack, roundedX, roundedY, roundedWidth, roundedY + 1, color);
+                    } else if (northEast) {
+                        fill(poseStack, roundedWidth - 1, roundedY, roundedWidth, roundedY + 1, color);
                     }
                     if (east || isHovering) {
                         fill(poseStack, roundedWidth - 1, roundedY, roundedWidth, roundedHeight, color);
+                    } else if (southEast) {
+                        fill(poseStack, roundedWidth - 1, roundedHeight - 1, roundedWidth, roundedHeight, color);
                     }
                     if (south || isHovering) {
                         fill(poseStack, roundedX, roundedHeight - 1, roundedWidth, roundedHeight, color);
+                    } else if (southWest) {
+                        fill(poseStack, roundedX, roundedHeight - 1, roundedX + 1, roundedHeight, color);
                     }
                     if (west || isHovering) {
                         fill(poseStack, roundedX, roundedY, roundedX + 1, roundedHeight, color);
+                    } else if (northWest) {
+                        fill(poseStack, roundedX, roundedY, roundedX + 1, roundedY + 1, color);
                     }
 
                     fill(poseStack, roundedX, roundedY, roundedWidth, roundedHeight, color & 0x33ffffff);

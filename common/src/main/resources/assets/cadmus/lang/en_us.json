@@ -1,4 +1,5 @@
 {
+  "gui.cadmus.claim_map.title": "Claim Map",
   "gui.cadmus.claim_map.claimed_chunks": "%s / %s Claimed Chunks",
   "gui.cadmus.claim_map.chunk_loaded_chunks": "%s / %s Chunk Loaded",
   "gui.cadmus.claim_map.loading": "Loading...",

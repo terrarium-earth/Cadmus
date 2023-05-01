@@ -24,7 +24,9 @@ public class CadmusClient {
             shouldOpenClaimMap = false;
         }
 
-        ClaimMapUpdater.update(ClaimMapScreen.MAP_RENDERER::update);
+        if (Minecraft.getInstance().screen instanceof ClaimMapScreen) {
+            ClaimMapUpdater.update(ClaimMapScreen.MAP_RENDERER::update);
+        }
 
         if (KEY_OPEN_CLAIM_MAP.consumeClick()) {
             shouldOpenClaimMap = true;
