@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.claims;
 import com.mojang.datafixers.util.Pair;
 import earth.terrarium.cadmus.common.team.Team;
 import earth.terrarium.cadmus.common.team.TeamSaveData;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -24,9 +25,9 @@ public class ClaimChunkSaveData extends SavedData {
     public ClaimChunkSaveData() {
     }
 
-    public ClaimChunkSaveData(CompoundTag tag, ServerLevel server) {
+    public ClaimChunkSaveData(CompoundTag tag, ServerLevel level) {
         tag.getAllKeys().forEach(key -> {
-            var team = TeamSaveData.get(server, UUID.fromString(key));
+            var team = TeamSaveData.get(level, UUID.fromString(key));
             var teamTag = tag.getCompound(key);
             for (String key1 : teamTag.getAllKeys()) {
                 var pos = new ChunkPos(Long.parseLong(key1));
@@ -35,6 +36,14 @@ public class ClaimChunkSaveData extends SavedData {
                 claims.put(pos, claimInfo);
             }
         });
+
+        ModUtils.updateChunkLoaded(level,
+            claims.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().type() == ClaimType.CHUNK_LOADED)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet()),
+            true);
     }
 
     @Override
@@ -96,6 +105,7 @@ public class ClaimChunkSaveData extends SavedData {
 
     public static void clear(Level level, Team team) {
         var data = read(level);
+        ModUtils.updateChunkLoaded((ServerLevel) level, data.claims.keySet(), false);
         data.claims.entrySet().removeIf(entry -> entry.getValue().team().equals(team));
         data.setDirty();
     }

@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.util;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
+import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.LastMessageHolder;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -14,13 +15,16 @@ import earth.terrarium.cadmus.mixin.common.GameRulesAccessor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -75,6 +79,10 @@ public class ModUtils {
             ChatFormatting color = members.contains(player.getUUID()) ? ChatFormatting.AQUA : ChatFormatting.DARK_RED;
             player.displayClientMessage(Component.nullToEmpty(name).copy().withStyle(color), true);
         }
+    }
+
+    public static void updateChunkLoaded(ServerLevel level, Set<ChunkPos> chunks, boolean add) {
+        chunks.forEach(pos -> level.setChunkForced(pos.x, pos.z, add));
     }
 
     public static int getOrCreateIntGameRule(Level level, GameRules.Key<GameRules.IntegerValue> key) {

@@ -6,9 +6,13 @@ import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.team.TeamSaveData;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+
+import java.util.Map;
+import java.util.Set;
 
 public record ClearChunksPacket(boolean allDimensions) implements Packet<ClearChunksPacket> {
 
@@ -43,8 +47,8 @@ public record ClearChunksPacket(boolean allDimensions) implements Packet<ClearCh
                 if (team == null) return;
                 if (!message.allDimensions) {
                     ClaimChunkSaveData.clear(level, team);
-                } else if (level instanceof ServerLevel serverLevel) {
-                    serverLevel.getServer().getAllLevels().forEach(l -> ClaimChunkSaveData.clear(l, team));
+                } else {
+                    ((ServerLevel)level).getServer().getAllLevels().forEach(l -> ClaimChunkSaveData.clear(l, team));
                 }
             };
         }

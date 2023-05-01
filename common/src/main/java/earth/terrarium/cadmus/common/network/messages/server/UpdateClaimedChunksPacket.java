@@ -14,6 +14,7 @@ import earth.terrarium.cadmus.common.team.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -23,7 +24,9 @@ import java.util.Map;
 import java.util.Set;
 
 public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
-                                        Set<ChunkPos> removedChunks) implements Packet<UpdateClaimedChunksPacket> {
+                                        Set<ChunkPos> removedChunks, Set<ChunkPos> addedChunkLoadedChunks,
+                                        Set<ChunkPos> removedChunkLoadedChunks
+) implements Packet<UpdateClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "update_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -43,6 +46,8 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
         public void encode(UpdateClaimedChunksPacket packet, FriendlyByteBuf buf) {
             buf.writeMap(packet.addedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
             buf.writeCollection(packet.removedChunks, FriendlyByteBuf::writeChunkPos);
+            buf.writeCollection(packet.addedChunkLoadedChunks, FriendlyByteBuf::writeChunkPos);
+            buf.writeCollection(packet.removedChunkLoadedChunks, FriendlyByteBuf::writeChunkPos);
         }
 
 
@@ -50,7 +55,9 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
         public UpdateClaimedChunksPacket decode(FriendlyByteBuf buf) {
             Map<ChunkPos, ClaimType> addedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
             Set<ChunkPos> removedChunks = buf.readCollection(HashSet::new, FriendlyByteBuf::readChunkPos);
-            return new UpdateClaimedChunksPacket(addedChunks, removedChunks);
+            Set<ChunkPos> addedChunkLoadedChunks = buf.readCollection(HashSet::new, FriendlyByteBuf::readChunkPos);
+            Set<ChunkPos> removedChunkLoadedChunks = buf.readCollection(HashSet::new, FriendlyByteBuf::readChunkPos);
+            return new UpdateClaimedChunksPacket(addedChunks, removedChunks, addedChunkLoadedChunks, removedChunkLoadedChunks);
         }
 
         @Override
@@ -73,6 +80,9 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
 
                 message.addedChunks.forEach((pos, type) -> ClaimChunkSaveData.set(player.level, pos, new ClaimInfo(team, type)));
                 message.removedChunks.forEach(chunkPos -> ClaimChunkSaveData.remove(player.level, chunkPos));
+
+                ModUtils.updateChunkLoaded((ServerLevel) level, message.addedChunkLoadedChunks, true);
+                ModUtils.updateChunkLoaded((ServerLevel) level, message.removedChunkLoadedChunks, false);
             };
         }
     }

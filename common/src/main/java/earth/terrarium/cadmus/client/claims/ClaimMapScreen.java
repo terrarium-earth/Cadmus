@@ -26,6 +26,7 @@ import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ClaimMapScreen extends Screen {
     public static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/map.png");
@@ -85,12 +86,12 @@ public class ClaimMapScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 11, 12, 12, 218, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
             CONTAINER_BACKGROUND,
             button -> clearDimension()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_DIMENSION));
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 11, 12, 12, 230, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
             CONTAINER_BACKGROUND,
             button -> clearAll()
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_ALL));
@@ -242,8 +243,7 @@ public class ClaimMapScreen extends Screen {
 
         if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
             this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.claimed_chunks", FRIENDLY_CHUNKS.size(), maxClaimedChunks));
-        }
-        else if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE + 13 && mouseY < top + MAP_SIZE + 26) {
+        } else if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE + 13 && mouseY < top + MAP_SIZE + 26) {
             this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", getChunkLoaded(), maxChunkLoadedChunks));
         }
     }
@@ -323,9 +323,21 @@ public class ClaimMapScreen extends Screen {
         if (!isDirty) return;
         isDirty = false;
 
-        Set<ChunkPos> removedChunks = new HashSet<>(START_CHUNKS.keySet());
-        removedChunks.removeAll(FRIENDLY_CHUNKS.keySet());
+        Set<ChunkPos> removedChunks = START_CHUNKS.keySet()
+            .stream()
+            .filter(chunkPos -> !FRIENDLY_CHUNKS.containsKey(chunkPos))
+            .collect(Collectors.toSet());
 
-        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(FRIENDLY_CHUNKS, removedChunks));
+        Set<ChunkPos> addedChunkLoadedChunks = FRIENDLY_CHUNKS.keySet()
+            .stream()
+            .filter(chunkPos -> !START_CHUNKS.containsKey(chunkPos) && FRIENDLY_CHUNKS.get(chunkPos) == ClaimType.CHUNK_LOADED)
+            .collect(Collectors.toSet());
+
+        Set<ChunkPos> removedChunkLoadedChunks = START_CHUNKS.keySet()
+            .stream()
+            .filter(chunkPos -> FRIENDLY_CHUNKS.containsKey(chunkPos) && FRIENDLY_CHUNKS.get(chunkPos) != ClaimType.CHUNK_LOADED)
+            .collect(Collectors.toSet());
+
+        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(FRIENDLY_CHUNKS, removedChunks, addedChunkLoadedChunks, removedChunkLoadedChunks));
     }
 }
