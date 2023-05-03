@@ -16,18 +16,18 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.MaterialColor;
 
-public class ClaimMapColorers {
+public class ClaimMapTopologyAlgorithm {
     public static final int BRIGHTER_COLOR = 0xff030303;
 
-    public static int[][] setColors(int minBlockX, int minBlockZ, int maxBlockX, int maxBlockZ, ClientLevel level, Player player) {
-        int[][] colors = new int[maxBlockX - minBlockX][maxBlockZ - minBlockZ];
+    public static int[][] setColors(int minX, int minZ, int maxX, int maxZ, ClientLevel level, Player player) {
+        int[][] colors = new int[maxX - minX][maxZ - minZ];
         BlockPos.MutableBlockPos pos1 = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos pos2 = new BlockPos.MutableBlockPos();
 
-        for (int x = minBlockX; x < maxBlockX; x++) {
+        for (int x = minX; x < maxX; x++) {
             pos1.setX(x);
             double depth = 0.0;
-            for (int z = minBlockZ - 1; z < maxBlockZ; z++) {
+            for (int z = minZ - 1; z < maxZ; z++) {
                 double fluidDepth = 0;
                 pos1.setZ(z);
                 LevelChunk chunk = level.getChunk(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
@@ -87,8 +87,8 @@ public class ClaimMapColorers {
                     }
 
                     depth = yDiff;
-                    if (z != minBlockZ - 1) {
-                        colors[x - minBlockX][z - minBlockZ] = getTintShade(color, state, level, pos1, brightness);
+                    if (z != minZ - 1) {
+                        colors[x - minX][z - minZ] = getTintShade(color, state, level, pos1, brightness);
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class ClaimMapColorers {
         } else if (state != null) {
             int tintColor = Minecraft.getInstance().getBlockColors().getColor(state, level, pos, 0);
             if (tintColor == -1) {
-                return ClaimMapColorPalette.getColor(color.id, brightness);
+                return ClaimMapPalette.getColor(color.id, brightness);
             }
             int intColor = rgb2abgr(Minecraft.getInstance().getBlockColors().getColor(state, level, pos));
             return switch (brightness) {

@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.common.claims;
 
-import earth.terrarium.cadmus.common.team.Team;
+import java.util.UUID;
 
-public record ClaimInfo(Team team, ClaimType type) {
+public record ClaimInfo(UUID teamId, ClaimType type) {
 }

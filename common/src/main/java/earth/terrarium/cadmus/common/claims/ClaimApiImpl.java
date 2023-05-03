@@ -2,160 +2,150 @@ package earth.terrarium.cadmus.common.claims;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
-import earth.terrarium.cadmus.api.team.TeamProviderApi;
-import earth.terrarium.cadmus.common.registry.ModGameRules;
-import earth.terrarium.cadmus.common.team.Team;
-import earth.terrarium.cadmus.common.util.ModUtils;
-import net.minecraft.Optionull;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
+import earth.terrarium.cadmus.common.teams.Team;
+import earth.terrarium.cadmus.common.teams.TeamSaveData;
+import earth.terrarium.cadmus.common.util.ModGameRules;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 public class ClaimApiImpl implements ClaimApi {
-
     @Override
     public boolean isClaimed(Level level, ChunkPos pos) {
-        return ClaimChunkSaveData.get(level, pos) != null;
-    }
-
-    @Override
-    public Set<UUID> getClaimMembers(Level level, ChunkPos pos) {
-        ClaimInfo info = ClaimChunkSaveData.get(level, pos);
-        if (info == null) return Set.of();
-        return Optionull.mapOrDefault(info.team(), Team::members, Set.of());
-    }
-
-    @Override
-    public boolean canBreakBlock(Level level, BlockPos pos, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
-            if (!TeamProviderApi.API.getSelected().canBreakBlock(level, pos, id)) {
-                return false;
-            }
-            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-            return !isClaimed(level, pos) || claimMembers.contains(id);
+        if (level instanceof ServerLevel serverLevel) {
+            return ClaimSaveData.get(serverLevel, pos) != null;
         }
-        return true;
+        return false;
     }
 
     @Override
-    public boolean canBreakBlock(Level level, BlockPos pos, Player id) {
-        return canBreakBlock(level, pos, id.getUUID());
-    }
-
-    @Override
-    public boolean canPlaceBlock(Level level, BlockPos pos, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
-            if (!TeamProviderApi.API.getSelected().canPlaceBlock(level, pos, id)) {
-                return false;
-            }
-            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-            return !isClaimed(level, pos) || claimMembers.contains(id);
+    @Nullable
+    public Team getChunkTeam(Level level, ChunkPos pos) {
+        if (level instanceof ServerLevel serverLevel) {
+            ClaimInfo info = ClaimSaveData.get(serverLevel, pos);
+            if (info == null) return null;
+            return TeamSaveData.get(serverLevel.getServer(), info.teamId());
         }
-        return true;
+        return null;
+    }
+
+    public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
+        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (team, server) ->
+            TeamProviderApi.API.getSelected().canBreakBlock(team.name(), server, pos, player));
     }
 
     @Override
-    public boolean canPlaceBlock(Level level, BlockPos pos, Player id) {
-        return canPlaceBlock(level, pos, id.getUUID());
+    public boolean canBreakBlock(Level level, BlockPos pos, Player player) {
+        return canBreakBlock(level, pos, player.getUUID());
     }
 
     @Override
-    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
-            if (!TeamProviderApi.API.getSelected().canExplodeBlock(level, pos, explosion, id)) {
-                return false;
-            }
-            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-            return !isClaimed(level, pos) || claimMembers.contains(id);
-        }
-        return true;
+    public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
+        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (team, server) ->
+            TeamProviderApi.API.getSelected().canPlaceBlock(team.name(), server, pos, player));
     }
 
     @Override
-    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, Player id) {
-        return canExplodeBlock(level, pos, explosion, id.getUUID());
+    public boolean canPlaceBlock(Level level, BlockPos pos, Player player) {
+        return canPlaceBlock(level, pos, player.getUUID());
     }
 
     @Override
-    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
-            if (!TeamProviderApi.API.getSelected().canInteractWithBlock(level, pos, type, id)) {
-                return false;
-            }
-            Set<UUID> claimMembers = getClaimMembers(level, new ChunkPos(pos));
-            return !isClaimed(level, pos) || claimMembers.contains(id);
-        }
-        return true;
+    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
+        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (team, server) ->
+            TeamProviderApi.API.getSelected().canExplodeBlock(team.name(), server, pos, explosion, player));
     }
 
     @Override
-    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, Player id) {
-        return canInteractWithBlock(level, pos, type, id.getUUID());
+    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, Player player) {
+        return canExplodeBlock(level, pos, explosion, player.getUUID());
     }
 
     @Override
-    public boolean canInteractWithEntity(Level level, Entity entity, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
-            if (!TeamProviderApi.API.getSelected().canInteractWithEntity(level, entity, id)) {
-                return false;
-            }
-            Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
-            return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
-        }
-        return true;
+    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
+        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (team, server) ->
+            TeamProviderApi.API.getSelected().canInteractWithBlock(team.name(), server, pos, type, player));
     }
 
     @Override
-    public boolean canInteractWithEntity(Level level, Entity entity, Player id) {
-        return canInteractWithEntity(level, entity, id.getUUID());
+    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, Player player) {
+        return canInteractWithBlock(level, pos, type, player.getUUID());
     }
 
     @Override
-    public boolean canDamageEntity(Level level, Entity entity, UUID id) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES) && TeamProviderApi.API.getSelected().canDamageEntity(level, entity, id)) {
-            Set<UUID> claimMembers = getClaimMembers(level, entity.chunkPosition());
-            return !isClaimed(level, entity.chunkPosition()) || claimMembers.contains(id);
-        }
-        return true;
+    public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
+        return canAccess(level, entity.blockPosition(), player, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (team, server) ->
+            TeamProviderApi.API.getSelected().canInteractWithEntity(team.name(), server, entity, player));
     }
 
     @Override
-    public boolean canDamageEntity(Level level, Entity entity, Player id) {
-        return canDamageEntity(level, entity, id.getUUID());
+    public boolean canInteractWithEntity(Level level, Entity entity, Player player) {
+        return canInteractWithEntity(level, entity, player.getUUID());
+    }
+
+    @Override
+    public boolean canDamageEntity(Level level, Entity entity, UUID player) {
+        return canAccess(level, entity.blockPosition(), player, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (team, server) ->
+            TeamProviderApi.API.getSelected().canDamageEntity(team.name(), server, entity, player));
+    }
+
+    @Override
+    public boolean canDamageEntity(Level level, Entity entity, Player player) {
+        return canDamageEntity(level, entity, player.getUUID());
     }
 
     @Override
     public boolean canEntityGrief(Level level, Entity entity) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING)) {
-            return !isClaimed(level, entity.chunkPosition());
-        }
-        return true;
+        return ModGameRules.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING)
+            || !isClaimed(level, entity.chunkPosition());
     }
 
     @Override
     public boolean canEntityGrief(Level level, BlockPos pos, Entity entity) {
-        return !isClaimed(level, pos);
+        return ModGameRules.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING)
+            || !isClaimed(level, pos);
     }
 
     @Override
     public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, Entity picker) {
-        if (!ModUtils.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS)) {
-            if (Objects.equals(item.getOwner(), picker)) {
-                return true;
-            }
-            if (picker instanceof Player player) {
-                return canInteractWithEntity(level, item, player);
-            }
-            return canEntityGrief(level, picker);
+        if (ModGameRules.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CAN_PICKUP_CLAIMED_ITEMS)) {
+            return true;
         }
-        return true;
+        if (Objects.equals(item.getOwner(), picker)) return true;
+        if (picker instanceof Player player) {
+            return canInteractWithEntity(level, item, player);
+        }
+        return canEntityGrief(level, picker);
+    }
+
+    private boolean canAccess(Level level, BlockPos pos, UUID player, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<Team, MinecraftServer, Boolean> checkTeamPermission) {
+        if (!(level instanceof ServerLevel serverLevel)) return true;
+        MinecraftServer server = serverLevel.getServer();
+        if (ModGameRules.getOrCreateBooleanGameRule(level, rule)) return true;
+        if (!isClaimed(level, pos)) return true;
+
+        Team team = TeamSaveData.getPlayerTeam(server, player);
+        if (team == null) return false;
+
+        if (!checkTeamPermission.apply(team, server)) return false;
+
+        ClaimInfo info = ClaimSaveData.get(serverLevel, new ChunkPos(pos));
+        if (info == null) return true;
+        Team chunkTeam = TeamSaveData.get(server, info.teamId());
+        if (chunkTeam == null) return true;
+        return TeamProviderApi.API.getSelected().isMember(chunkTeam.name(), serverLevel.getServer(), player);
     }
 }

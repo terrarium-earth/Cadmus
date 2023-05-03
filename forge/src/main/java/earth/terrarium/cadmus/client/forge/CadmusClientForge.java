@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.client.forge;
 
 import earth.terrarium.cadmus.client.CadmusClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -20,13 +21,13 @@ public class CadmusClientForge {
 
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase.equals(TickEvent.Phase.START)) {
-            CadmusClient.onStartClientTick();
+            CadmusClient.clientTick();
         }
     }
 
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
         event.getDispatcher().register((Commands.literal("claim").executes(context -> {
-            CadmusClient.shouldOpenClaimMap = true;
+            Minecraft.getInstance().tell(CadmusClient::openClaimMap);
             return 0;
         })));
     }

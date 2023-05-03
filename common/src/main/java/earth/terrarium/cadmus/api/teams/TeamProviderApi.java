@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.api.team;
+package earth.terrarium.cadmus.api.teams;
 
 import earth.terrarium.cadmus.api.ApiHelper;
 import net.minecraft.resources.ResourceLocation;

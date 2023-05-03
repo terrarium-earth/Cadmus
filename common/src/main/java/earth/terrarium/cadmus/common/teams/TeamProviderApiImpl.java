@@ -1,7 +1,7 @@
-package earth.terrarium.cadmus.common.team;
+package earth.terrarium.cadmus.common.teams;
 
-import earth.terrarium.cadmus.api.team.TeamProvider;
-import earth.terrarium.cadmus.api.team.TeamProviderApi;
+import earth.terrarium.cadmus.api.teams.TeamProvider;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 

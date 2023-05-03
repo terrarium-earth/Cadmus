@@ -1,7 +1,5 @@
 package earth.terrarium.cadmus.common.network.messages.client;
 
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
@@ -9,15 +7,19 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimType;
-import earth.terrarium.cadmus.common.team.Team;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
-                                      Optional<UUID> team, Optional<String> teamName, int maxClaims,
+                                      Optional<UUID> teamId, Optional<String> displayName,
+                                      Map<UUID, String> teamDisplayNames, int maxClaims,
                                       int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
@@ -36,51 +38,42 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
     private static class Handler implements PacketHandler<SendClaimedChunksPacket> {
         @Override
         public void encode(SendClaimedChunksPacket packet, FriendlyByteBuf buf) {
-            Map<UUID, Team> teams = new HashMap<>();
             buf.writeMap(packet.claims, FriendlyByteBuf::writeChunkPos, (buf1, info) -> {
-                buf1.writeUUID(info.team().teamId());
+                buf1.writeUUID(info.teamId());
                 buf1.writeEnum(info.type());
-                teams.put(info.team().teamId(), info.team());
             });
-            buf.writeMap(teams, FriendlyByteBuf::writeUUID, (buf1, team) -> {
-                buf1.writeUUID(team.creator());
-                buf1.writeCollection(team.members(), FriendlyByteBuf::writeUUID);
-                buf1.writeUtf(team.name());
-            });
-            buf.writeOptional(packet.team, FriendlyByteBuf::writeUUID);
-            buf.writeOptional(packet.teamName, FriendlyByteBuf::writeUtf);
+
+            buf.writeOptional(packet.teamId, FriendlyByteBuf::writeUUID);
+            buf.writeOptional(packet.displayName, FriendlyByteBuf::writeUtf);
+            buf.writeMap(packet.teamDisplayNames, FriendlyByteBuf::writeUUID, FriendlyByteBuf::writeUtf);
             buf.writeVarInt(packet.maxClaims);
             buf.writeVarInt(packet.maxChunkLoaded);
         }
 
         @Override
         public SendClaimedChunksPacket decode(FriendlyByteBuf buf) {
-            Map<ChunkPos, Pair<UUID, ClaimType>> claims = buf.readMap(
+            Map<ChunkPos, ClaimInfo> claims = buf.readMap(
                 FriendlyByteBuf::readChunkPos,
-                (buf1) -> Pair.of(buf1.readUUID(), buf1.readEnum(ClaimType.class))
+                buf1 -> new ClaimInfo(buf1.readUUID(), buf1.readEnum(ClaimType.class))
             );
-            int size = buf.readVarInt();
-            Map<UUID, Team> teams = Maps.newHashMapWithExpectedSize(size);
-            for (int i = 0; i < size; i++) {
-                UUID id = buf.readUUID();
-                UUID creator = buf.readUUID();
-                Set<UUID> members = buf.readCollection(HashSet::new, FriendlyByteBuf::readUUID);
-                String name = buf.readUtf();
-                teams.put(id, new Team(id, creator, members, name));
-            }
-            Optional<UUID> team = buf.readOptional(FriendlyByteBuf::readUUID);
-            Optional<String> teamName = buf.readOptional(FriendlyByteBuf::readUtf);
-            Map<ChunkPos, ClaimInfo> newClaims = Maps.newHashMapWithExpectedSize(claims.size());
-            claims.forEach((key, value) ->
-                newClaims.put(key, new ClaimInfo(teams.get(value.getFirst()), value.getSecond())));
+            Optional<UUID> teamId = buf.readOptional(FriendlyByteBuf::readUUID);
+            Optional<String> displayName = buf.readOptional(FriendlyByteBuf::readUtf);
+            Map<UUID, String> teamDisplayNames = buf.readMap(FriendlyByteBuf::readUUID, FriendlyByteBuf::readUtf);
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
-            return new SendClaimedChunksPacket(newClaims, team, teamName, maxClaims, maxChunkLoaded);
+
+            return new SendClaimedChunksPacket(claims, teamId, displayName, teamDisplayNames, maxClaims, maxChunkLoaded);
         }
 
         @Override
         public PacketContext handle(SendClaimedChunksPacket message) {
-            return (player, level) -> ClaimMapScreen.update(message.claims(), message.team().orElse(null), message.teamName.orElse(null), message.maxClaims, message.maxChunkLoaded);
+            return (player, level) -> Minecraft.getInstance().setScreen(new ClaimMapScreen(
+                message.claims,
+                message.teamId.orElse(null),
+                message.displayName.map(Component::nullToEmpty).orElse(player.getDisplayName()),
+                message.teamDisplayNames,
+                message.maxClaims,
+                message.maxChunkLoaded));
         }
     }
 }

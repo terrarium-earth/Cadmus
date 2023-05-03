@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.mixin.common;
 
-import earth.terrarium.cadmus.api.team.TeamProviderApi;
-import earth.terrarium.cadmus.common.team.VanillaTeamProvider;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
+import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.PlayerTeam;

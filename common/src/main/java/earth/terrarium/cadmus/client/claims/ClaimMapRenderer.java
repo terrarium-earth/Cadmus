@@ -15,35 +15,14 @@ import org.joml.Matrix4f;
 public class ClaimMapRenderer {
     private static final ResourceLocation TEXTURE = new ResourceLocation(Cadmus.MOD_ID, "claimmaptextures");
 
-    public void update(ClaimMapData data) {
-        ClaimMapScreen.calculatingMap = false;
+    public ClaimMapRenderer(int[][] colors, int scale) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-        var dynamicTexture = new DynamicTexture(data.scale(), data.scale(), true);
+        var dynamicTexture = new DynamicTexture(scale, scale, true);
         textureManager.register(TEXTURE, dynamicTexture);
-        updateTexture(dynamicTexture, data.colors(), data.scale());
+        updateTexture(dynamicTexture, colors, scale);
     }
 
-    public void render(PoseStack poseStack) {
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
-        int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
-        int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
-        try (var ignored = new CloseablePoseStack(poseStack)) {
-            // render map at the center of the screen
-            poseStack.translate(screenWidth / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, screenHeight / 2.0f - ClaimMapScreen.MAP_SIZE / 2.0f, 1.0);
-
-            Matrix4f matrix4f = poseStack.last().pose();
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            builder.vertex(matrix4f, 0.0F, ClaimMapScreen.MAP_SIZE, -0.01F).uv(0.0F, 1.0F).endVertex();
-            builder.vertex(matrix4f, ClaimMapScreen.MAP_SIZE, ClaimMapScreen.MAP_SIZE, -0.01F).uv(1.0F, 1.0F).endVertex();
-            builder.vertex(matrix4f, ClaimMapScreen.MAP_SIZE, 0.0F, -0.01F).uv(1.0F, 0.0F).endVertex();
-            builder.vertex(matrix4f, 0.0F, 0.0F, -0.01F).uv(0.0F, 0.0F).endVertex();
-            BufferUploader.drawWithShader(builder.end());
-        }
-    }
-
-    private static void updateTexture(DynamicTexture texture, int[][] colors, int scale) {
+    private void updateTexture(DynamicTexture texture, int[][] colors, int scale) {
         NativeImage nativeImage = texture.getPixels();
         if (nativeImage == null) return;
         for (int i = 0; i < scale; ++i) {
@@ -53,5 +32,22 @@ public class ClaimMapRenderer {
         }
 
         texture.upload();
+    }
+
+    public void render(PoseStack poseStack, int width, int height, int size) {
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        try (var ignored = new CloseablePoseStack(poseStack)) {
+            poseStack.translate(width / 2.0f - size / 2.0f, height / 2.0f - size / 2.0f, 1.0);
+
+            Matrix4f matrix4f = poseStack.last().pose();
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            builder.vertex(matrix4f, 0.0F, size, -0.01F).uv(0.0F, 1.0F).endVertex();
+            builder.vertex(matrix4f, size, size, -0.01F).uv(1.0F, 1.0F).endVertex();
+            builder.vertex(matrix4f, size, 0.0F, -0.01F).uv(1.0F, 0.0F).endVertex();
+            builder.vertex(matrix4f, 0.0F, 0.0F, -0.01F).uv(0.0F, 0.0F).endVertex();
+            BufferUploader.drawWithShader(builder.end());
+        }
     }
 }

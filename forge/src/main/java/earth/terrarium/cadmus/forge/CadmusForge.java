@@ -4,12 +4,8 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -18,7 +14,10 @@ import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
-import net.minecraftforge.event.entity.player.*;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.FillBucketEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.PistonEvent;
@@ -28,17 +27,13 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.Set;
-import java.util.UUID;
-
 @Mod(Cadmus.MOD_ID)
 public class CadmusForge {
     public CadmusForge() {
         Cadmus.init();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> CadmusClientForge::init);
 
-        var bus = MinecraftForge.EVENT_BUS;
-        bus.addListener(CadmusForge::onPlayerLoggedIn);
+        IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(CadmusForge::onEnterSection);
         registerChunkProtectionEvents(bus);
     }
@@ -62,15 +57,9 @@ public class CadmusForge {
         bus.addListener(EventPriority.LOWEST, CadmusForge::onPistonPush);
     }
 
-    private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            ModUtils.onPlayerJoin(player);
-        }
-    }
-
     private static void onEnterSection(EntityEvent.EnteringSection event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            ModUtils.enterChunkSection(player);
+        if (event.getEntity() instanceof Player player) {
+            Cadmus.enterChunkSection(player);
         }
     }
 
@@ -191,14 +180,7 @@ public class CadmusForge {
         }
     }
 
-    // Prevent pistons from pushing blocks into protected chunks
     private static void onPistonPush(PistonEvent.Pre event) {
-        if (event.getLevel() instanceof Level level) {
-            ChunkPos pos = new ChunkPos(event.getPos().relative(event.getDirection()));
-            Set<UUID> currentChunkMembers = ClaimApi.API.getClaimMembers(level, new ChunkPos(event.getPos()));
-            if (!ClaimApi.API.isClaimed(level, pos) && !currentChunkMembers.equals(ClaimApi.API.getClaimMembers(level, pos))) {
-                event.setCanceled(true);
-            }
-        }
+        // TODO
     }
 }

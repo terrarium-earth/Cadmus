@@ -4,16 +4,18 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.common.claims.ClaimChunkSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
+import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPacket;
-import earth.terrarium.cadmus.common.registry.ModGameRules;
-import earth.terrarium.cadmus.common.team.Team;
-import earth.terrarium.cadmus.common.team.TeamSaveData;
-import earth.terrarium.cadmus.common.util.ModUtils;
+import earth.terrarium.cadmus.common.teams.Team;
+import earth.terrarium.cadmus.common.teams.TeamSaveData;
+import earth.terrarium.cadmus.common.util.ModGameRules;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
@@ -51,21 +53,27 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
         public PacketContext handle(RequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
+                int renderDistance = Math.min(message.renderDistance, 32);
 
                 Map<ChunkPos, ClaimInfo> claims = new HashMap<>();
-                for (var claimedChunk : ClaimChunkSaveData.getAll(player.level).entrySet()) {
+                for (var claimedChunk : ClaimSaveData.getAll((ServerLevel) level).entrySet()) {
                     var chunkPos = new ChunkPos(start.x - claimedChunk.getKey().x, start.z - claimedChunk.getKey().z);
-                    if (chunkPos.x < message.renderDistance && chunkPos.x > -message.renderDistance && chunkPos.z < message.renderDistance && chunkPos.z > -message.renderDistance) {
+                    if (chunkPos.x < renderDistance && chunkPos.x > -renderDistance && chunkPos.z < renderDistance && chunkPos.z > -renderDistance) {
                         claims.put(claimedChunk.getKey(), claimedChunk.getValue());
                     }
                 }
 
-                Team team = TeamSaveData.getPlayerTeam(player);
+                Team team = TeamSaveData.getPlayerTeam((ServerPlayer) player);
                 Optional<UUID> teamId = Optional.ofNullable(team).map(Team::teamId);
-                Optional<String> teamName = Optional.ofNullable(team).map(Team::name);
-                int maxClaims = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
-                int maxChunkLoaded = ModUtils.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, teamName, maxClaims, maxChunkLoaded), player);
+                Optional<String> displayName = Optional.ofNullable(team).map(Team::displayName).map(Component::getString);
+
+                Map<UUID, String> teamDisplayNames = TeamSaveData.getTeams(((ServerLevel) level).getServer()).stream()
+                    .filter(t -> !t.teamId().equals(teamId.orElse(null)))
+                    .collect(HashMap::new, (map, team1) -> map.put(team1.teamId(), team1.displayName().getString()), HashMap::putAll);
+
+                int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
+                int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, displayName, teamDisplayNames, maxClaims, maxChunkLoaded), player);
             };
         }
     }

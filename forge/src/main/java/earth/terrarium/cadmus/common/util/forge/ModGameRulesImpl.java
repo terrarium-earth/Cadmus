@@ -1,7 +1,5 @@
-package earth.terrarium.cadmus.common.registry.forge;
+package earth.terrarium.cadmus.common.util.forge;
 
-import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.messages.client.SyncGameRulePacket;
 import earth.terrarium.cadmus.mixin.forge.common.GameRulesBooleanValueInvoker;
 import earth.terrarium.cadmus.mixin.forge.common.GameRulesIntegerValueInvoker;
 import net.minecraft.world.level.GameRules;
@@ -15,8 +13,7 @@ public class ModGameRulesImpl {
         return GameRulesIntegerValueInvoker.invokeCreate(defaultValue);
     }
 
-    public static GameRules.Type<GameRules.BooleanValue> createBooleanRule(boolean defaultValue, byte packetId) {
-        return GameRulesBooleanValueInvoker.invokeCreate(defaultValue, (server, rule) ->
-            NetworkHandler.CHANNEL.sendToAllPlayers(new SyncGameRulePacket(packetId, rule.get()), server));
+    public static GameRules.Type<GameRules.BooleanValue> createBooleanRule(boolean defaultValue) {
+        return GameRulesBooleanValueInvoker.invokeCreate(defaultValue);
     }
 }

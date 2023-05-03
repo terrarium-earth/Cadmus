@@ -16,7 +16,6 @@
     "common.chunkprotection.WaterlilyBlockMixin"
   ],
   "client": [
-    "client.ClientLevelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
