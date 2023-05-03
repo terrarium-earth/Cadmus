@@ -303,7 +303,7 @@ public class ClaimMapScreen extends Screen {
         if (otherInfo != null) {
             String otherTeamDisplayName = teamDisplayNames.get(otherInfo.teamId());
             if (otherTeamDisplayName == null) return;
-            this.setTooltipForNextRenderPass(Component.literal(otherTeamDisplayName).withStyle(ChatFormatting.DARK_RED)); // TODO: use otherInfo.displayName
+            this.setTooltipForNextRenderPass(Component.literal(otherTeamDisplayName).withStyle(ChatFormatting.DARK_RED));
         } else if (teamType != null && tool == ClaimTool.NONE) {
             this.setTooltipForNextRenderPass(this.displayName.copy().withStyle(ChatFormatting.AQUA));
         }

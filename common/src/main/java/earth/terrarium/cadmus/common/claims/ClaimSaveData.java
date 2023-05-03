@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,5 +88,15 @@ public class ClaimSaveData extends SavedData {
 
     public static Map<ChunkPos, ClaimInfo> getAll(ServerLevel level) {
         return read(level).claims;
+    }
+
+    public static void updateChunkLoaded(ServerLevel level, UUID teamId, boolean setLoaded) {
+        ChunkSource chunkSource = level.getChunkSource();
+
+        getAll(level).forEach((pos, info) -> {
+            if (info.teamId().equals(teamId) && info.type() == ClaimType.CHUNK_LOADED) {
+                chunkSource.updateChunkForced(pos, setLoaded);
+            }
+        });
     }
 }

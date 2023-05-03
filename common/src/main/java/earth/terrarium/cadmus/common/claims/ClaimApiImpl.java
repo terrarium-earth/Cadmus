@@ -32,14 +32,13 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    @Nullable
-    public Team getChunkTeam(Level level, ChunkPos pos) {
+    public boolean isChunkLoaded(Level level, ChunkPos pos) {
         if (level instanceof ServerLevel serverLevel) {
             ClaimInfo info = ClaimSaveData.get(serverLevel, pos);
-            if (info == null) return null;
-            return TeamSaveData.get(serverLevel.getServer(), info.teamId());
+            if (info == null) return false;
+            return info.type() == ClaimType.CHUNK_LOADED;
         }
-        return null;
+        return false;
     }
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {

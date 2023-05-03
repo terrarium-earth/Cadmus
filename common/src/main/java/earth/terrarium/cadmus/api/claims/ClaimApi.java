@@ -18,11 +18,11 @@ public interface ClaimApi {
 
     boolean isClaimed(Level level, ChunkPos pos);
 
+    boolean isChunkLoaded(Level level, ChunkPos pos);
+
     default boolean isClaimed(Level level, BlockPos pos) {
         return this.isClaimed(level, new ChunkPos(pos));
     }
-
-    Team getChunkTeam(Level level, ChunkPos pos);
 
     boolean canBreakBlock(Level level, BlockPos pos, UUID player);
 
