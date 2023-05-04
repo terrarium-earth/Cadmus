@@ -3,7 +3,9 @@ package earth.terrarium.cadmus.api.teams;
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import org.jetbrains.annotations.Nullable;
@@ -14,14 +16,13 @@ import java.util.UUID;
 public interface TeamProvider {
 
     /**
-     * Gets the team members of the creator
+     * Gets the team members
      *
-     * @param id      the id of the team
-     * @param server  the server
-     * @param creator the creator
-     * @return the team members, returns a list with just the creator if no team is found
+     * @param id     the id of the team
+     * @param server the server
+     * @return the team members
      */
-    Set<GameProfile> getTeamMembers(String id, MinecraftServer server, GameProfile creator);
+    Set<GameProfile> getTeamMembers(String id, MinecraftServer server);
 
     /**
      * Gets the name of a team
@@ -31,7 +32,10 @@ public interface TeamProvider {
      * @return the name of the team, or null if no team is found
      */
     @Nullable
-    String getTeamName(String id, MinecraftServer server);
+    Component getTeamName(String id, MinecraftServer server);
+
+    @Nullable
+    String getTeamId(ServerPlayer player);
 
     /**
      * Checks if the player is a member of the team

@@ -119,7 +119,7 @@ public class ClaimMapScreen extends Screen {
     public void onClose() {
         super.onClose();
 
-        Map<ChunkPos, ClaimType> addedClaims = teamClaims.entrySet()
+        Map<ChunkPos, ClaimType> addedChunks = teamClaims.entrySet()
             .stream()
             .filter(entry -> !startClaims.containsKey(entry.getKey()) || startClaims.get(entry.getKey()).type() != entry.getValue())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -129,7 +129,9 @@ public class ClaimMapScreen extends Screen {
             .filter(chunkPos -> !teamClaims.containsKey(chunkPos))
             .collect(Collectors.toSet());
 
-        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(addedClaims, removedChunks));
+        // don't send if nothing has changed
+        if (addedChunks.isEmpty() && removedChunks.isEmpty()) return;
+        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(addedChunks, removedChunks));
     }
 
     @Override
@@ -160,12 +162,12 @@ public class ClaimMapScreen extends Screen {
         } else {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) return;
-            super.render(poseStack, mouseX, mouseY, partialTick);
             this.mapRenderer.render(poseStack, this.width, this.height, MAP_SIZE);
             this.renderText(poseStack, mouseX, mouseY);
             this.renderClaims(player, poseStack, mouseX, mouseY);
             this.renderPlayerAvatar(player, poseStack);
         }
+        super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
     private void renderBackgroundTexture(PoseStack poseStack) {

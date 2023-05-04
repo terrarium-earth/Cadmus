@@ -16,7 +16,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -42,7 +41,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (team, server) ->
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (team, server) ->
             TeamProviderApi.API.getSelected().canBreakBlock(team.name(), server, pos, player));
     }
 
@@ -53,7 +52,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (team, server) ->
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (team, server) ->
             TeamProviderApi.API.getSelected().canPlaceBlock(team.name(), server, pos, player));
     }
 
@@ -64,7 +63,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
-        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (team, server) ->
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (team, server) ->
             TeamProviderApi.API.getSelected().canExplodeBlock(team.name(), server, pos, explosion, player));
     }
 
@@ -75,7 +74,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
-        return canAccess(level, pos, player, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (team, server) ->
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (team, server) ->
             TeamProviderApi.API.getSelected().canInteractWithBlock(team.name(), server, pos, type, player));
     }
 
@@ -86,7 +85,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), player, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (team, server) ->
+        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (team, server) ->
             TeamProviderApi.API.getSelected().canInteractWithEntity(team.name(), server, entity, player));
     }
 
@@ -97,7 +96,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), player, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (team, server) ->
+        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (team, server) ->
             TeamProviderApi.API.getSelected().canDamageEntity(team.name(), server, entity, player));
     }
 
@@ -130,21 +129,17 @@ public class ClaimApiImpl implements ClaimApi {
         return canEntityGrief(level, picker);
     }
 
-    private boolean canAccess(Level level, BlockPos pos, UUID player, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<Team, MinecraftServer, Boolean> checkTeamPermission) {
+    private boolean canAccess(Level level, BlockPos pos, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<Team, MinecraftServer, Boolean> checkTeamPermission) {
         if (!(level instanceof ServerLevel serverLevel)) return true;
         MinecraftServer server = serverLevel.getServer();
         if (ModGameRules.getOrCreateBooleanGameRule(level, rule)) return true;
         if (!isClaimed(level, pos)) return true;
 
-        Team team = TeamSaveData.getPlayerTeam(server, player);
-        if (team == null) return false;
-
-        if (!checkTeamPermission.apply(team, server)) return false;
-
         ClaimInfo info = ClaimSaveData.get(serverLevel, new ChunkPos(pos));
         if (info == null) return true;
         Team chunkTeam = TeamSaveData.get(server, info.teamId());
         if (chunkTeam == null) return true;
-        return TeamProviderApi.API.getSelected().isMember(chunkTeam.name(), serverLevel.getServer(), player);
+
+        return checkTeamPermission.apply(chunkTeam, server);
     }
 }

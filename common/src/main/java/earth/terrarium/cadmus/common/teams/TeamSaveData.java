@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.util.ModUtils;
+import net.minecraft.Optionull;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -30,12 +31,11 @@ public class TeamSaveData extends SavedData {
     public TeamSaveData(CompoundTag tag) {
         tag.getAllKeys().forEach(key -> {
             CompoundTag teamTag = tag.getCompound(key);
-            UUID creator = UUID.fromString(teamTag.getString("creator"));
             Set<UUID> members = new HashSet<>();
             teamTag.getList("members", Tag.TAG_STRING).forEach((member) -> members.add(UUID.fromString(member.getAsString())));
             String name = teamTag.getString("name");
             Component displayName = Component.literal(teamTag.getString("displayName"));
-            teams.put(UUID.fromString(key), new Team(UUID.fromString(key), creator, members, name, displayName));
+            teams.put(UUID.fromString(key), new Team(UUID.fromString(key), members, name, displayName));
         });
         updateInternal();
     }
@@ -45,7 +45,6 @@ public class TeamSaveData extends SavedData {
     public CompoundTag save(CompoundTag tag) {
         teams.forEach((uuid, team) -> {
             CompoundTag teamIdTag = new CompoundTag();
-            teamIdTag.putString("creator", team.creator().toString());
             ListTag members = new ListTag();
             team.members().forEach((member) -> members.add(StringTag.valueOf(member.toString())));
             teamIdTag.put("members", members);
@@ -66,9 +65,13 @@ public class TeamSaveData extends SavedData {
     }
 
     public static Team getOrCreateTeam(ServerPlayer player) {
-        String name = TeamProviderApi.API.getSelected().getTeamName(player.getName().getString(), player.getServer());
-        if (name == null) name = player.getName().getString();
-        return getOrCreateTeam(player, name, Component.nullToEmpty(name));
+        String name = TeamProviderApi.API.getSelected().getTeamId(player);
+        return getOrCreateTeam(player,
+            name == null ? player.getUUID().toString() : name,
+            Optionull.mapOrDefault(
+                name,
+                id -> TeamProviderApi.API.getSelected().getTeamName(id, player.server),
+                player.getName()));
     }
 
     public static Team getOrCreateTeam(ServerPlayer player, String name, Component displayName) {
@@ -80,8 +83,9 @@ public class TeamSaveData extends SavedData {
     public static Team set(ServerPlayer player, String name, Component displayName) {
         var data = read(player.server);
         UUID teamId = ModUtils.generate(Predicate.not(data.teams::containsKey), UUID::randomUUID);
-        Set<GameProfile> members = TeamProviderApi.API.getSelected().getTeamMembers(name, player.getServer(), player.getGameProfile());
-        Team team = new Team(teamId, player.getUUID(), members
+        Set<GameProfile> members = TeamProviderApi.API.getSelected().getTeamMembers(name, player.getServer());
+        members.add(player.getGameProfile());
+        Team team = new Team(teamId, members
             .stream()
             .map(GameProfile::getId)
             .collect(Collectors.toSet()), name, displayName);

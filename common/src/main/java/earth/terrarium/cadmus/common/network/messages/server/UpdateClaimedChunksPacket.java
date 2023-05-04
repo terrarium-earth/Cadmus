@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkSource;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,6 +53,7 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
         @Override
         public PacketContext handle(UpdateClaimedChunksPacket message) {
             return (player, level) -> {
+                if (message.addedChunks().isEmpty() && message.removedChunks().isEmpty()) return;
                 Team team = TeamSaveData.getOrCreateTeam((ServerPlayer) player);
                 ServerLevel serverLevel = (ServerLevel) level;
 

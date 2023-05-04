@@ -10,5 +10,5 @@ public class ConstantComponents {
     public static final Component WILDERNESS = Component.translatable("message.cadmus.wilderness");
 
     public static final Component OPEN_CLAIM_MAP_KEY = Component.translatable("key.cadmus.open_claim_map");
-    public static final Component CADMUS_CATEGORY = Component.translatable("key.categories.cadmus");
+    public static final Component ODYSSEY_CATEGORY = Component.translatable("key.categories.odyssey");
 }

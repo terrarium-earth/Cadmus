@@ -12,7 +12,7 @@ public class CadmusClient {
     public static final KeyMapping KEY_OPEN_CLAIM_MAP = new KeyMapping(
         ConstantComponents.OPEN_CLAIM_MAP_KEY.getString(),
         InputConstants.UNKNOWN.getValue(),
-        ConstantComponents.CADMUS_CATEGORY.getString());
+        ConstantComponents.ODYSSEY_CATEGORY.getString());
 
     public static void clientTick() {
         if (KEY_OPEN_CLAIM_MAP.consumeClick()) {

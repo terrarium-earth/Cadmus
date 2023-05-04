@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.api.claims;
 
 import earth.terrarium.cadmus.api.ApiHelper;
-import earth.terrarium.cadmus.common.teams.Team;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
