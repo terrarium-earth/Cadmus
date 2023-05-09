@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
-                                      Optional<UUID> teamId, Optional<String> displayName,
-                                      Map<UUID, String> teamDisplayNames, int maxClaims,
+                                      UUID teamId, Optional<String> displayName,
+                                      Map<UUID, Component> teamDisplayNames, int maxClaims,
                                       int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
@@ -43,9 +43,9 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 buf1.writeEnum(info.type());
             });
 
-            buf.writeOptional(packet.teamId, FriendlyByteBuf::writeUUID);
+            buf.writeUUID(packet.teamId);
             buf.writeOptional(packet.displayName, FriendlyByteBuf::writeUtf);
-            buf.writeMap(packet.teamDisplayNames, FriendlyByteBuf::writeUUID, FriendlyByteBuf::writeUtf);
+            buf.writeMap(packet.teamDisplayNames, FriendlyByteBuf::writeUUID, FriendlyByteBuf::writeComponent);
             buf.writeVarInt(packet.maxClaims);
             buf.writeVarInt(packet.maxChunkLoaded);
         }
@@ -56,9 +56,9 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 FriendlyByteBuf::readChunkPos,
                 buf1 -> new ClaimInfo(buf1.readUUID(), buf1.readEnum(ClaimType.class))
             );
-            Optional<UUID> teamId = buf.readOptional(FriendlyByteBuf::readUUID);
+            UUID teamId = buf.readUUID();
             Optional<String> displayName = buf.readOptional(FriendlyByteBuf::readUtf);
-            Map<UUID, String> teamDisplayNames = buf.readMap(FriendlyByteBuf::readUUID, FriendlyByteBuf::readUtf);
+            Map<UUID, Component> teamDisplayNames = buf.readMap(FriendlyByteBuf::readUUID, FriendlyByteBuf::readComponent);
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
 
@@ -69,7 +69,7 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
         public PacketContext handle(SendClaimedChunksPacket message) {
             return (player, level) -> Minecraft.getInstance().setScreen(new ClaimMapScreen(
                 message.claims,
-                message.teamId.orElse(null),
+                message.teamId,
                 message.displayName.map(Component::nullToEmpty).orElse(player.getDisplayName()),
                 message.teamDisplayNames,
                 message.maxClaims,

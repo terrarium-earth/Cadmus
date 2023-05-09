@@ -7,5 +7,27 @@
   "tooltip.cadmus.claim_map.clear_all": "Clear All Claimed Chunks",
   "message.cadmus.wilderness": "§2Wilderness",
   "key.cadmus.open_claim_map": "Open Claim Map",
-  "key.categories.odyssey": "Odyssey"
+  "key.categories.odyssey": "Odyssey",
+
+  "gamerule.canPickupClaimedItems": "Pickup Claimed Items",
+  "gamerule.claimedMobGriefing": "Claimed Mob Griefing",
+  "gamerule.doClaimedBlockBreaking": "Claimed Block Breaking",
+  "gamerule.doClaimedBlockExplosions": "Claimed Block Explosions",
+  "gamerule.doClaimedBlockInteractions": "Claimed Block Interactions",
+  "gamerule.doClaimedBlockPlacing": "Claimed Block Placing",
+  "gamerule.doClaimedDamageEntities": "Claimed Damage Entities",
+  "gamerule.doClaimedEntityInteractions": "Claimed Entity Interactions",
+  "gamerule.maxChunkLoaded": "Max Chunk Loaded",
+  "gamerule.maxClaimedChunks": "Max Claimed Chunks",
+
+  "gamerule.canPickupClaimedItems.description": "Pickup Claimed Items",
+  "gamerule.claimedMobGriefing.description": "Claimed Mob Griefing",
+  "gamerule.doClaimedBlockBreaking.description": "Claimed Block Breaking",
+  "gamerule.doClaimedBlockExplosions.description": "Claimed Block Explosions",
+  "gamerule.doClaimedBlockInteractions.description": "Claimed Block Interactions",
+  "gamerule.doClaimedBlockPlacing.description": "Claimed Block Placing",
+  "gamerule.doClaimedDamageEntities.description": "Claimed Damage Entities",
+  "gamerule.doClaimedEntityInteractions.description": "Claimed Entity Interactions",
+  "gamerule.maxChunkLoaded.description": "Max Chunk Loaded",
+  "gamerule.maxClaimedChunks.description": "Max Claimed Chunks"
 }

@@ -43,7 +43,7 @@ public class ClaimMapScreen extends Screen {
     private final Map<ChunkPos, ClaimType> teamClaims = new HashMap<>();
     private final Map<ChunkPos, ClaimInfo> otherClaims = new HashMap<>();
 
-    private final Map<UUID, String> teamDisplayNames = new HashMap<>();
+    private final Map<UUID, Component> teamDisplayNames = new HashMap<>();
 
     private final Component displayName;
     private final int maxClaims;
@@ -54,7 +54,7 @@ public class ClaimMapScreen extends Screen {
     private ClaimTool tool = ClaimTool.NONE;
     private int chunkLoadedCount;
 
-    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, Component displayName, Map<UUID, String> teamDisplayNames, int maxClaims, int maxChunkLoaded) {
+    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, Component displayName, Map<UUID, Component> teamDisplayNames, int maxClaims, int maxChunkLoaded) {
         super(Component.empty());
         refreshMap();
 
@@ -303,9 +303,9 @@ public class ClaimMapScreen extends Screen {
 
     private void drawTooltips(ClaimType teamType, ClaimInfo otherInfo) {
         if (otherInfo != null) {
-            String otherTeamDisplayName = teamDisplayNames.get(otherInfo.teamId());
-            if (otherTeamDisplayName == null) return;
-            this.setTooltipForNextRenderPass(Component.literal(otherTeamDisplayName).withStyle(ChatFormatting.DARK_RED));
+            Component otherTeamDisplayName = teamDisplayNames.get(otherInfo.teamId());
+            if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
+            this.setTooltipForNextRenderPass(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED));
         } else if (teamType != null && tool == ClaimTool.NONE) {
             this.setTooltipForNextRenderPass(this.displayName.copy().withStyle(ChatFormatting.AQUA));
         }

@@ -8,7 +8,6 @@ import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.Team;
 import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -30,18 +29,19 @@ public class ModUtils {
 
         ClaimInfo info = ClaimSaveData.get(player);
         Team team = TeamSaveData.get(player.server, info == null ? null : info.teamId());
-        Component displayName = Optionull.mapOrDefault(team, Team::displayName, ConstantComponents.WILDERNESS);
+        String name = info == null ? player.getStringUUID() : info.teamId().toString();
+        Component displayName = TeamProviderApi.API.getSelected().getTeamName(name, player.server);
 
-        String lastMessage = holder.cadmus$getLastMessage();
-        if (Objects.equals(displayName.getString(), lastMessage)) return;
-        holder.cadmus$setLastMessage(displayName.getString());
+        Component lastMessage = holder.cadmus$getLastMessage();
+        if (Objects.equals(displayName, lastMessage)) return;
+        holder.cadmus$setLastMessage(displayName);
 
-        if (team == null) {
+        if (team == null || displayName == null) {
             player.displayClientMessage(ConstantComponents.WILDERNESS, true);
         } else {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(team.name(), player.server, player.getUUID());
             ChatFormatting color = isMember ? ChatFormatting.AQUA : ChatFormatting.DARK_RED;
-            player.displayClientMessage(team.displayName().copy().withStyle(color), true);
+            player.displayClientMessage(displayName.copy().withStyle(color), true);
         }
     }
 }

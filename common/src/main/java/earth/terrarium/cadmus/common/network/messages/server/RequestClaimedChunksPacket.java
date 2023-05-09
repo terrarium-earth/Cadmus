@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -11,6 +12,7 @@ import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPa
 import earth.terrarium.cadmus.common.teams.Team;
 import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModGameRules;
+import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,13 +65,16 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
                     }
                 }
 
-                Team team = TeamSaveData.getPlayerTeam((ServerPlayer) player);
-                Optional<UUID> teamId = Optional.ofNullable(team).map(Team::teamId);
-                Optional<String> displayName = Optional.ofNullable(team).map(Team::displayName).map(Component::getString);
+                Team team = TeamSaveData.getOrCreateTeam((ServerPlayer) player);
+                UUID teamId = team.teamId();
+                String id = team.name();
+                Optional<String> displayName = Optional.ofNullable(Optionull.map(TeamProviderApi.API.getSelected().getTeamName(id, player.getServer()), Component::getString));
 
-                Map<UUID, String> teamDisplayNames = TeamSaveData.getTeams(((ServerLevel) level).getServer()).stream()
-                    .filter(t -> !t.teamId().equals(teamId.orElse(null)))
-                    .collect(HashMap::new, (map, team1) -> map.put(team1.teamId(), team1.displayName().getString()), HashMap::putAll);
+                Map<UUID, Component> teamDisplayNames = TeamSaveData.getTeams(((ServerLevel) level).getServer()).stream()
+                    .filter(t -> !t.teamId().equals(teamId))
+                    .collect(HashMap::new, (map, team1) -> map.put(team1.teamId(),
+                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(team1.name(), player.getServer())).orElse(Component.literal(""))
+                    ), HashMap::putAll);
 
                 int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);

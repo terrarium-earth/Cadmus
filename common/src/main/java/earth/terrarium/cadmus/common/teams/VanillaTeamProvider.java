@@ -18,6 +18,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,8 +36,16 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public Component getTeamName(String id, MinecraftServer server) {
-        PlayerTeam team = server.getScoreboard().getPlayersTeam(id);
-        return Optionull.map(team, PlayerTeam::getDisplayName);
+        PlayerTeam playerTeam = server.getScoreboard().getPlayerTeam(id);
+        if (playerTeam != null) return playerTeam.getDisplayName();
+        Team team = TeamSaveData.get(server, UUID.fromString(id));
+        if (team == null) return null;
+        Optional<UUID> player = team.members().stream().findFirst();
+        if (player.isPresent()) {
+            var profile = server.getProfileCache().get(player.get());
+            return profile.map(gameProfile -> Component.literal(gameProfile.getName())).orElse(null);
+        }
+        return null;
     }
 
     @Override
@@ -97,7 +106,7 @@ public class VanillaTeamProvider implements TeamProvider {
             }
             removed.addAll(TeamSaveData.removeTeamMember(player, team));
         }
-        Team team = TeamSaveData.getOrCreateTeam(player, scoreboardTeam.getName(), Component.literal(scoreboardTeam.getName()));
+        Team team = TeamSaveData.getOrCreateTeam(player, scoreboardTeam.getName());
         // Transfer chunks to new team if the old team was removed
         removed.forEach(chunkPos -> ClaimSaveData.set(player.getLevel(), chunkPos, new ClaimInfo(team.teamId(), ClaimType.CLAIMED)));
     }
