@@ -52,9 +52,10 @@ public class ClaimMapScreen extends Screen {
     @Nullable
     private ClaimMapRenderer mapRenderer;
     private ClaimTool tool = ClaimTool.NONE;
+    private int claimedCount;
     private int chunkLoadedCount;
 
-    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, Component displayName, Map<UUID, Component> teamDisplayNames, int maxClaims, int maxChunkLoaded) {
+    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, Component displayName, Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
         super(Component.empty());
         refreshMap();
 
@@ -67,10 +68,8 @@ public class ClaimMapScreen extends Screen {
             }
         });
 
-        chunkLoadedCount = teamClaims.values()
-            .stream()
-            .mapToInt(info -> info == ClaimType.CHUNK_LOADED ? 1 : 0)
-            .sum();
+        this.claimedCount = claimedCount;
+        this.chunkLoadedCount = chunkLoadedCount;
 
         this.displayName = displayName;
         this.teamDisplayNames.putAll(teamDisplayNames);
@@ -203,7 +202,7 @@ public class ClaimMapScreen extends Screen {
     }
 
     private void renderText(PoseStack poseStack, int mouseX, int mouseY) {
-        this.font.draw(poseStack, Component.literal(teamClaims.size() + " / " + this.maxClaims), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
+        this.font.draw(poseStack, Component.literal(claimedCount + " / " + this.maxClaims), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
         this.font.draw(poseStack, Component.literal(chunkLoadedCount + " / " + this.maxChunkLoaded), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 241, 0x404040);
 
         // text tooltips
@@ -211,7 +210,7 @@ public class ClaimMapScreen extends Screen {
         float top = (this.height - MAP_SIZE) / 2f;
 
         if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
-            this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.claimed_chunks", teamClaims.size(), this.maxClaims));
+            this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.claimed_chunks", claimedCount, this.maxClaims));
         } else if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE + 13 && mouseY < top + MAP_SIZE + 26) {
             this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", chunkLoadedCount, this.maxChunkLoaded));
         }
@@ -276,11 +275,15 @@ public class ClaimMapScreen extends Screen {
         if (this.tool == ClaimTool.NONE) return null;
 
         if (type != null) {
-            if (this.teamClaims.size() < this.maxClaims && tool == ClaimTool.BRUSH && !teamClaims.containsKey(pos)) {
+            if (this.claimedCount < this.maxClaims && tool == ClaimTool.BRUSH && !teamClaims.containsKey(pos)) {
+                this.claimedCount++;
                 teamClaims.put(pos, type);
             }
 
             if (this.chunkLoadedCount < this.maxChunkLoaded && tool == ClaimTool.CHUNK_LOAD_BRUSH && !(teamClaims.containsKey(pos) && teamClaims.get(pos) == ClaimType.CHUNK_LOADED)) {
+                if (!teamClaims.containsKey(pos)) {
+                    this.claimedCount++;
+                }
                 this.chunkLoadedCount++;
                 teamClaims.put(pos, type);
             }
@@ -293,6 +296,7 @@ public class ClaimMapScreen extends Screen {
             }
 
         } else if (this.tool == ClaimTool.ERASER && teamClaims.containsKey(pos)) {
+            this.claimedCount--;
             if (teamType == ClaimType.CHUNK_LOADED) {
                 this.chunkLoadedCount--;
             }

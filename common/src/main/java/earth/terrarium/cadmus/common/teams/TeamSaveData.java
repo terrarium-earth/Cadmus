@@ -63,7 +63,11 @@ public class TeamSaveData extends SavedData {
 
     public static Team getOrCreateTeam(ServerPlayer player) {
         String name = TeamProviderApi.API.getSelected().getTeamId(player);
-        return getOrCreateTeam(player, name == null ? player.getUUID().toString() : name);
+        if (name == null) {
+            return getOrCreateTeam(player, player.getUUID().toString());
+        } else {
+            return getOrCreateTeam(player, name);
+        }
     }
 
     public static Team getOrCreateTeam(ServerPlayer player, String name) {

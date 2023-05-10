@@ -40,6 +40,8 @@ public class VanillaTeamProvider implements TeamProvider {
         if (playerTeam != null) return playerTeam.getDisplayName();
         Team team = TeamSaveData.get(server, UUID.fromString(id));
         if (team == null) return null;
+        PlayerTeam playerTeam1 = server.getScoreboard().getPlayerTeam(team.name());
+        if (playerTeam1 != null) return playerTeam1.getDisplayName();
         Optional<UUID> player = team.members().stream().findFirst();
         if (player.isPresent()) {
             var profile = server.getProfileCache().get(player.get());
@@ -99,7 +101,7 @@ public class VanillaTeamProvider implements TeamProvider {
         if (player == null) return;
 
         Set<ChunkPos> removed = new HashSet<>();
-        for (Team team : TeamSaveData.getTeams(server)) {
+        for (Team team : new HashSet<>(TeamSaveData.getTeams(server))) {
             if (team.name().equals(scoreboardTeam.getName())) {
                 TeamSaveData.addTeamMember(player, team);
                 return;
@@ -115,7 +117,7 @@ public class VanillaTeamProvider implements TeamProvider {
         ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
         if (player == null) return;
 
-        for (Team team : TeamSaveData.getTeams(server)) {
+        for (Team team : new HashSet<>(TeamSaveData.getTeams(server))) {
             if (team.name().equals(scoreboardTeam.getName())) {
                 TeamSaveData.removeTeamMember(player, team);
                 return;

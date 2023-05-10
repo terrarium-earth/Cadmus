@@ -19,7 +19,8 @@ import java.util.UUID;
 
 public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                                       UUID teamId, Optional<String> displayName,
-                                      Map<UUID, Component> teamDisplayNames, int maxClaims,
+                                      Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount,
+                                      int maxClaims,
                                       int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
@@ -46,6 +47,8 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             buf.writeUUID(packet.teamId);
             buf.writeOptional(packet.displayName, FriendlyByteBuf::writeUtf);
             buf.writeMap(packet.teamDisplayNames, FriendlyByteBuf::writeUUID, FriendlyByteBuf::writeComponent);
+            buf.writeVarInt(packet.claimedCount);
+            buf.writeVarInt(packet.chunkLoadedCount);
             buf.writeVarInt(packet.maxClaims);
             buf.writeVarInt(packet.maxChunkLoaded);
         }
@@ -59,10 +62,12 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             UUID teamId = buf.readUUID();
             Optional<String> displayName = buf.readOptional(FriendlyByteBuf::readUtf);
             Map<UUID, Component> teamDisplayNames = buf.readMap(FriendlyByteBuf::readUUID, FriendlyByteBuf::readComponent);
+            int claimedCount = buf.readVarInt();
+            int chunkLoadedCount = buf.readVarInt();
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
 
-            return new SendClaimedChunksPacket(claims, teamId, displayName, teamDisplayNames, maxClaims, maxChunkLoaded);
+            return new SendClaimedChunksPacket(claims, teamId, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded);
         }
 
         @Override
@@ -72,6 +77,8 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
                 message.teamId,
                 message.displayName.map(Component::nullToEmpty).orElse(player.getDisplayName()),
                 message.teamDisplayNames,
+                message.claimedCount,
+                message.chunkLoadedCount,
                 message.maxClaims,
                 message.maxChunkLoaded));
         }

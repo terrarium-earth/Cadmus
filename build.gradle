@@ -81,6 +81,7 @@ allprojects {
                 includeGroup 'com.github.llamalad7.mixinextras'
             }
         }
+        mavenLocal()
     }
 
     tasks.withType(JavaCompile).tap {
@@ -111,6 +112,11 @@ subprojects {
             officialMojangMappings()
 //            parchment("org.parchmentmc.data:parchment-$rootProject.minecraft_version:$rootProject.parchment_version@zip")
         }
+//        modImplementation("earth.terrarium.argonauts:argonauts-$name-$minecraft_version:$argonauts_version") {
+//            transitive = false
+//        }
+        modApi "com.teamresourceful.resourcefullib:resourcefullib-$name-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
+        implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-$name:$rootProject.mixinextras_version"))
     }
 
     var env = System.getenv()
