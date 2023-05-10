@@ -13,6 +13,7 @@ import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPa
 import earth.terrarium.cadmus.common.teams.Team;
 import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModGameRules;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -70,11 +71,12 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
                 UUID teamId = team.teamId();
                 String id = team.name();
                 Optional<String> displayName = Optional.ofNullable(Optionull.map(TeamProviderApi.API.getSelected().getTeamName(id, player.getServer()), Component::getString));
+                ChatFormatting color = TeamProviderApi.API.getSelected().getTeamColor(id, player.getServer());
 
                 Map<UUID, Component> teamDisplayNames = TeamSaveData.getTeams(player.getServer()).stream()
                     .filter(t -> !t.teamId().equals(teamId))
                     .collect(HashMap::new, (map, team1) -> map.put(team1.teamId(),
-                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(team1.name(), player.getServer())).orElse(Component.literal(""))
+                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(String.valueOf(team1.teamId()), player.getServer())).orElse(Component.literal(""))
                     ), HashMap::putAll);
 
                 int claimedChunks = 0;
@@ -92,7 +94,7 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
 
                 int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
+                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
             };
         }
     }

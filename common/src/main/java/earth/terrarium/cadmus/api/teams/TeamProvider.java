@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.api.teams;
 
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -46,6 +47,15 @@ public interface TeamProvider {
      * @return true if the player is a member of the team, false otherwise
      */
     boolean isMember(String id, MinecraftServer server, UUID player);
+
+    /**
+     * Gets the team color
+     *
+     * @param id     the id of the team
+     * @param server the server
+     * @return the team color
+     */
+    ChatFormatting getTeamColor(String id, MinecraftServer server);
 
     /**
      * Checks if the player can break a block

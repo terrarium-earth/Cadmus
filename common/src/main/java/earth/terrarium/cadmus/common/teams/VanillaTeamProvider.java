@@ -6,6 +6,7 @@ import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -64,6 +65,12 @@ public class VanillaTeamProvider implements TeamProvider {
             return id.equals(player.toString());
         }
         return serverPlayer.getTeam().getName().equals(id);
+    }
+
+    @Override
+    public ChatFormatting getTeamColor(String id, MinecraftServer server) {
+        PlayerTeam playerTeam = server.getScoreboard().getPlayerTeam(id);
+        return Optionull.mapOrDefault(playerTeam, PlayerTeam::getColor, ChatFormatting.AQUA);
     }
 
     @Override

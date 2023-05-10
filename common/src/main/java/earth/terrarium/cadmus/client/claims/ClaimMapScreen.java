@@ -20,6 +20,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
@@ -46,6 +47,7 @@ public class ClaimMapScreen extends Screen {
     private final Map<UUID, Component> teamDisplayNames = new HashMap<>();
 
     private final Component displayName;
+    private final int color;
     private final int maxClaims;
     private final int maxChunkLoaded;
 
@@ -55,10 +57,11 @@ public class ClaimMapScreen extends Screen {
     private int claimedCount;
     private int chunkLoadedCount;
 
-    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, Component displayName, Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
+    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, ChatFormatting color, Component displayName, Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
         super(Component.empty());
         refreshMap();
 
+        this.color = color.getColor() == null ? AQUA : color.getColor() | 0xff000000;
         claims.forEach((pos, info) -> {
             if (info.teamId().equals(teamId)) {
                 teamClaims.put(pos, info.type());
@@ -245,9 +248,9 @@ public class ClaimMapScreen extends Screen {
                         type = useTool(chunkPos, type);
                     }
                     drawTooltips(teamType, otherInfo);
-                    color = Screen.hasShiftDown() ? ORANGE : tool == ClaimTool.ERASER ? DARK_RED : AQUA;
+                    color = Screen.hasShiftDown() ? ORANGE : tool == ClaimTool.ERASER ? DARK_RED : this.color;
                 } else {
-                    color = otherInfo != null ? DARK_RED : teamType != null ? teamType == ClaimType.CHUNK_LOADED ? ORANGE : AQUA : 0x00FFFFFF;
+                    color = otherInfo != null ? DARK_RED : teamType != null ? teamType == ClaimType.CHUNK_LOADED ? ORANGE : this.color : 0x00FFFFFF;
                 }
 
                 if (type == null && !isHovering) continue;
@@ -311,7 +314,7 @@ public class ClaimMapScreen extends Screen {
             if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
             this.setTooltipForNextRenderPass(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED));
         } else if (teamType != null && tool == ClaimTool.NONE) {
-            this.setTooltipForNextRenderPass(this.displayName.copy().withStyle(ChatFormatting.AQUA));
+            this.setTooltipForNextRenderPass(this.displayName.copy().withStyle(this.displayName.getStyle().withColor(color)));
         }
     }
 

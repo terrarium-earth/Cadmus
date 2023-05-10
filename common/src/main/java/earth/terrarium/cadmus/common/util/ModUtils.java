@@ -40,7 +40,8 @@ public class ModUtils {
             player.displayClientMessage(ConstantComponents.WILDERNESS, true);
         } else {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(team.name(), player.server, player.getUUID());
-            ChatFormatting color = isMember ? ChatFormatting.AQUA : ChatFormatting.DARK_RED;
+            ChatFormatting teamColor = TeamProviderApi.API.getSelected().getTeamColor(team.name(), player.getServer());
+            ChatFormatting color = isMember ? teamColor : ChatFormatting.DARK_RED;
             player.displayClientMessage(displayName.copy().withStyle(color), true);
         }
     }
