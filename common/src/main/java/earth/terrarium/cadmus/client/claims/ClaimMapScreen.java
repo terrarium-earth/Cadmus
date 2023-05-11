@@ -5,6 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
+import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
+import com.teamresourceful.resourcefullib.client.screens.CursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
@@ -35,7 +37,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class ClaimMapScreen extends Screen {
+public class ClaimMapScreen extends BaseCursorScreen {
+
     public static final int MAP_SIZE = 200;
     public static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/map.png");
     public static final ResourceLocation MAP_ICONS = new ResourceLocation("textures/map/map_icons.png");
@@ -146,12 +149,10 @@ public class ClaimMapScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 19, ((this.height - 248) / 2) + 10, 11, 11, 230, 0, 11,
-            CONTAINER_BACKGROUND,
-            button -> this.onClose()
-        ));
+        int x = (this.width - 216) / 2;
+        int y = (this.height - 237) / 2;
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 227, 11, 11, 218, 0, 11,
+        this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11, 216, 0, 11,
             CONTAINER_BACKGROUND,
             button -> {
                 if (Screen.hasShiftDown()) {
@@ -162,6 +163,11 @@ public class ClaimMapScreen extends Screen {
                 CadmusClient.openClaimMap();
             }
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
+
+        this.addRenderableWidget(new ImageButton(x + 216 - 11 - 7, y + 6, 11, 11, 227, 0, 11,
+            CONTAINER_BACKGROUND,
+            button -> this.onClose()
+        ));
     }
 
     @Override
@@ -183,12 +189,12 @@ public class ClaimMapScreen extends Screen {
 
     private void renderBackgroundTexture(PoseStack poseStack) {
         fill(poseStack, (width - MAP_SIZE) / 2, (height - MAP_SIZE) / 2, (width + MAP_SIZE) / 2, (height + MAP_SIZE) / 2, 0xff000000);
-        int left = (this.width - 218) / 2;
-        int top = (this.height - 249) / 2 + 7;
+        int left = (this.width - 216) / 2;
+        int top = (this.height - 237) / 2 + 1;
         RenderSystem.enableBlend();
         RenderUtils.bindTexture(CONTAINER_BACKGROUND);
-        blit(poseStack, left, top, 0, 0, 218, 249);
-        this.font.draw(poseStack, ConstantComponents.TITLE, (this.width / 2f) - 101, ((this.height - 248) / 2f) + 12, 0x404040);
+        blit(poseStack, left, top, 0, 0, 216, 237);
+        this.font.draw(poseStack, ConstantComponents.TITLE, ((this.width - font.width(ConstantComponents.TITLE)) / 2f), top + 7, 0x404040);
     }
 
     private void renderPlayerAvatar(LocalPlayer player, PoseStack poseStack) {
@@ -214,8 +220,8 @@ public class ClaimMapScreen extends Screen {
     }
 
     private void renderText(PoseStack poseStack, int mouseX, int mouseY) {
-        this.font.draw(poseStack, Component.literal(claimedCount + "/" + this.maxClaims), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
-        this.font.draw(poseStack, Component.literal(chunkLoadedCount + "/" + this.maxChunkLoaded), ((this.width + 218) / 2f) - 119, ((this.height - 246) / 2f) + 228, 0x404040);
+        this.font.draw(poseStack, claimedCount + "/" + this.maxClaims, ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
+        this.font.draw(poseStack, chunkLoadedCount + "/" + this.maxChunkLoaded, ((this.width + 218) / 2f) - 119, ((this.height - 246) / 2f) + 228, 0x404040);
 
         // text tooltips
         float left = (this.width - MAP_SIZE) / 2f;
