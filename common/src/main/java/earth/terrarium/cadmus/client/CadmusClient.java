@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.messages.server.RequestClaimedChunksPacket;
+import earth.terrarium.cadmus.common.network.messages.ServerboundRequestClaimedChunksPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 
@@ -22,7 +22,7 @@ public class CadmusClient {
 
     // Send a request to the server to send the claim data and then open the claim map screen.
     public static void openClaimMap() {
-        NetworkHandler.CHANNEL.sendToServer(new RequestClaimedChunksPacket(Minecraft.getInstance().options.renderDistance().get()));
+        NetworkHandler.CHANNEL.sendToServer(new ServerboundRequestClaimedChunksPacket(Minecraft.getInstance().options.renderDistance().get()));
     }
 
     public static void enterChunkSection() {

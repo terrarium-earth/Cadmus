@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.network.messages.server;
+package earth.terrarium.cadmus.common.network.messages;
 
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
@@ -9,7 +9,6 @@ import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.messages.client.SendClaimedChunksPacket;
 import earth.terrarium.cadmus.common.teams.Team;
 import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModGameRules;
@@ -27,7 +26,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public record RequestClaimedChunksPacket(int renderDistance) implements Packet<RequestClaimedChunksPacket> {
+public record ServerboundRequestClaimedChunksPacket(
+    int renderDistance) implements Packet<ServerboundRequestClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "request_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -38,23 +38,23 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
     }
 
     @Override
-    public PacketHandler<RequestClaimedChunksPacket> getHandler() {
+    public PacketHandler<ServerboundRequestClaimedChunksPacket> getHandler() {
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<RequestClaimedChunksPacket> {
+    private static class Handler implements PacketHandler<ServerboundRequestClaimedChunksPacket> {
         @Override
-        public void encode(RequestClaimedChunksPacket packet, FriendlyByteBuf buf) {
+        public void encode(ServerboundRequestClaimedChunksPacket packet, FriendlyByteBuf buf) {
             buf.writeVarInt(packet.renderDistance);
         }
 
         @Override
-        public RequestClaimedChunksPacket decode(FriendlyByteBuf buf) {
-            return new RequestClaimedChunksPacket(Math.min(buf.readVarInt(), 32));
+        public ServerboundRequestClaimedChunksPacket decode(FriendlyByteBuf buf) {
+            return new ServerboundRequestClaimedChunksPacket(Math.min(buf.readVarInt(), 32));
         }
 
         @Override
-        public PacketContext handle(RequestClaimedChunksPacket message) {
+        public PacketContext handle(ServerboundRequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
                 int renderDistance = Math.min(message.renderDistance, 32);
@@ -94,7 +94,7 @@ public record RequestClaimedChunksPacket(int renderDistance) implements Packet<R
 
                 int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new SendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
+                NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
             };
         }
     }

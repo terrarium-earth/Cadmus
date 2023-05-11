@@ -5,6 +5,7 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
@@ -20,7 +21,6 @@ public class Cadmus {
     public static void init() {
         NetworkHandler.init();
         TeamProviderApi.API.register(DEFAULT_ID, new VanillaTeamProvider());
-        TeamProviderApi.API.setSelected(DEFAULT_ID);
         ModGameRules.init();
     }
 
@@ -32,13 +32,27 @@ public class Cadmus {
         }
     }
 
-    // Set chunk loaded chunks
     public static void serverStarted(MinecraftServer server) {
+        // Set chunk loaded chunks
         server.getAllLevels().forEach(level ->
             ClaimSaveData.getAll(level).forEach((pos, info) -> {
                 if (info.type() == ClaimType.CHUNK_LOADED) {
                     level.getLevel().getChunkSource().updateChunkForced(pos, true);
                 }
             }));
+
+        // Set the Team Provider
+        if (!ModUtils.isModLoaded("argonauts")) {
+            TeamSaveData.read(server);
+            // Should only ever get set once when the world is first created, and then it should grab the saved value.
+            if (TeamProviderApi.API.getSelectedId() == null) {
+                TeamProviderApi.API.setSelected(DEFAULT_ID);
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static void serverStopped(MinecraftServer server) {
+        TeamProviderApi.API.setSelected(null);
     }
 }

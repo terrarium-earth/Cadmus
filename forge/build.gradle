@@ -27,6 +27,8 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:${rootProject.mixinextras_version}"))
 }
 
 processResources {

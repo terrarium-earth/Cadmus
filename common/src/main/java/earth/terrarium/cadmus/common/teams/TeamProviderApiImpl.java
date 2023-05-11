@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public class TeamProviderApiImpl implements TeamProviderApi {
     public final Map<ResourceLocation, TeamProvider> providers = new HashMap<>();
+    @Nullable
     private ResourceLocation selected;
 
     @Override
@@ -34,11 +35,16 @@ public class TeamProviderApiImpl implements TeamProviderApi {
     }
 
     @Override
-    public void setSelected(ResourceLocation id) {
-        if (!providers.containsKey(id)) {
+    @Nullable
+    public ResourceLocation getSelectedId() {
+        return selected;
+    }
+
+    @Override
+    public void setSelected(@Nullable ResourceLocation id) {
+        if (id != null && !providers.containsKey(id)) {
             throw new IllegalArgumentException("No provider registered for: " + id);
         }
-        // TODO if updated, regenerate all team members
         this.selected = id;
     }
 

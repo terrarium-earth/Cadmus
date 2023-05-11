@@ -22,6 +22,7 @@ import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.level.PistonEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -36,6 +37,7 @@ public class CadmusForge {
 
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(CadmusForge::onServerStarted);
+        bus.addListener(CadmusForge::onServerStopped);
         bus.addListener(CadmusForge::onEnterSection);
         registerChunkProtectionEvents(bus);
     }
@@ -61,6 +63,10 @@ public class CadmusForge {
 
     private static void onServerStarted(ServerStartedEvent event) {
         Cadmus.serverStarted(event.getServer());
+    }
+
+    private static void onServerStopped(ServerStoppedEvent event) {
+        Cadmus.serverStopped(event.getServer());
     }
 
     private static void onEnterSection(EntityEvent.EnteringSection event) {

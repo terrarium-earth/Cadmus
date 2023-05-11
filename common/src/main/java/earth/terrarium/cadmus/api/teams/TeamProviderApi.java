@@ -35,6 +35,14 @@ public interface TeamProviderApi {
     TeamProvider getSelected();
 
     /**
+     * Gets the selected team provider id
+     *
+     * @return the selected team provider id
+     */
+    @Nullable
+    ResourceLocation getSelectedId();
+
+    /**
      * Sets the selected team provider
      *
      * @param id the id of the provider

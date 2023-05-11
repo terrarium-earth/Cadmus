@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,27 +29,32 @@ public class TeamSaveData extends SavedData {
     }
 
     public TeamSaveData(CompoundTag tag) {
-        tag.getAllKeys().forEach(key -> {
+        tag.getCompound("teams").getAllKeys().forEach(key -> {
             CompoundTag teamTag = tag.getCompound(key);
             Set<UUID> members = new HashSet<>();
             teamTag.getList("members", Tag.TAG_STRING).forEach((member) -> members.add(UUID.fromString(member.getAsString())));
             String name = teamTag.getString("name");
             teams.put(UUID.fromString(key), new Team(UUID.fromString(key), members, name));
         });
+        TeamProviderApi.API.setSelected(new ResourceLocation(tag.getString("team_provider")));
         updateInternal();
     }
 
     @Override
     @NotNull
     public CompoundTag save(CompoundTag tag) {
+        CompoundTag teamTag = new CompoundTag();
         teams.forEach((uuid, team) -> {
             CompoundTag teamIdTag = new CompoundTag();
             ListTag members = new ListTag();
             team.members().forEach((member) -> members.add(StringTag.valueOf(member.toString())));
             teamIdTag.put("members", members);
             teamIdTag.putString("name", team.name());
-            tag.put(uuid.toString(), teamIdTag);
+            teamTag.put(uuid.toString(), teamIdTag);
+
         });
+        tag.put("teams", teamTag);
+        tag.putString("team_provider", TeamProviderApi.API.getSelectedId().toString());
         return tag;
     }
 
@@ -87,7 +93,6 @@ public class TeamSaveData extends SavedData {
             .collect(Collectors.toSet()), name);
 
         data.teams.put(teamId, team);
-        data.setDirty();
         for (GameProfile member : members) {
             data.players.put(member.getId(), teamId);
         }
@@ -113,7 +118,6 @@ public class TeamSaveData extends SavedData {
     public static void addTeamMember(ServerPlayer player, Team team) {
         var data = read(player.server);
         data.teams.get(team.teamId()).members().add(player.getUUID());
-        data.setDirty();
         data.players.put(player.getUUID(), team.teamId());
     }
 
@@ -125,7 +129,6 @@ public class TeamSaveData extends SavedData {
         if (team.members().isEmpty()) {
             removedChunks = disband(team, player.server);
         }
-        data.setDirty();
         data.players.remove(player.getUUID());
         return removedChunks;
     }
@@ -146,13 +149,21 @@ public class TeamSaveData extends SavedData {
             toRemove.forEach(chunkPos -> ClaimSaveData.remove(level, chunkPos));
         }
 
-        data.setDirty();
         data.updateInternal();
         return removedChunks;
+    }
+
+    public static void update(MinecraftServer server) {
+        read(server).updateInternal();
     }
 
     private void updateInternal() {
         players.clear();
         teams.values().forEach(team -> team.members().forEach(member -> players.put(member, team.teamId())));
+    }
+
+    @Override
+    public boolean isDirty() {
+        return true;
     }
 }

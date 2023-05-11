@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.network.messages.client;
+package earth.terrarium.cadmus.common.network.messages;
 
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
@@ -18,11 +18,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
-                                      UUID teamId, ChatFormatting color, Optional<String> displayName,
-                                      Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount,
-                                      int maxClaims,
-                                      int maxChunkLoaded) implements Packet<SendClaimedChunksPacket> {
+public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
+                                                 UUID teamId, ChatFormatting color, Optional<String> displayName,
+                                                 Map<UUID, Component> teamDisplayNames, int claimedCount,
+                                                 int chunkLoadedCount,
+                                                 int maxClaims,
+                                                 int maxChunkLoaded) implements Packet<ClientboundSendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -33,13 +34,13 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
     }
 
     @Override
-    public PacketHandler<SendClaimedChunksPacket> getHandler() {
+    public PacketHandler<ClientboundSendClaimedChunksPacket> getHandler() {
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<SendClaimedChunksPacket> {
+    private static class Handler implements PacketHandler<ClientboundSendClaimedChunksPacket> {
         @Override
-        public void encode(SendClaimedChunksPacket packet, FriendlyByteBuf buf) {
+        public void encode(ClientboundSendClaimedChunksPacket packet, FriendlyByteBuf buf) {
             buf.writeMap(packet.claims, FriendlyByteBuf::writeChunkPos, (buf1, info) -> {
                 buf1.writeUUID(info.teamId());
                 buf1.writeEnum(info.type());
@@ -56,7 +57,7 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
         }
 
         @Override
-        public SendClaimedChunksPacket decode(FriendlyByteBuf buf) {
+        public ClientboundSendClaimedChunksPacket decode(FriendlyByteBuf buf) {
             Map<ChunkPos, ClaimInfo> claims = buf.readMap(
                 FriendlyByteBuf::readChunkPos,
                 buf1 -> new ClaimInfo(buf1.readUUID(), buf1.readEnum(ClaimType.class))
@@ -70,11 +71,11 @@ public record SendClaimedChunksPacket(Map<ChunkPos, ClaimInfo> claims,
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
 
-            return new SendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded);
+            return new ClientboundSendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded);
         }
 
         @Override
-        public PacketContext handle(SendClaimedChunksPacket message) {
+        public PacketContext handle(ClientboundSendClaimedChunksPacket message) {
             return (player, level) -> Minecraft.getInstance().setScreen(new ClaimMapScreen(
                 message.claims,
                 message.teamId,

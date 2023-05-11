@@ -75,32 +75,40 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public boolean canBreakBlock(String id, MinecraftServer server, BlockPos pos, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
     }
 
     @Override
     public boolean canPlaceBlock(String id, MinecraftServer server, BlockPos pos, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
     }
 
     @Override
     public boolean canExplodeBlock(String id, MinecraftServer server, BlockPos pos, Explosion explosion, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
     }
 
     @Override
     public boolean canInteractWithBlock(String id, MinecraftServer server, BlockPos pos, InteractionType type, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
     }
 
     @Override
     public boolean canInteractWithEntity(String id, MinecraftServer server, Entity entity, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
     }
 
     @Override
     public boolean canDamageEntity(String id, MinecraftServer server, Entity entity, UUID player) {
-        return isMember(id, server, player);
+        return hasPermission(id, server, player);
+    }
+
+    private boolean hasPermission(String id, MinecraftServer server, UUID player) {
+        if (isMember(id, server, player)) return true;
+        ServerPlayer serverPlayer = server.getPlayerList().getPlayer(player);
+        if (serverPlayer == null) return false;
+        PlayerTeam playerTeam = server.getScoreboard().getPlayerTeam(id);
+        return serverPlayer.isAlliedTo(playerTeam);
     }
 
     public void addPlayerToTeam(MinecraftServer server, String playerName, PlayerTeam scoreboardTeam) {

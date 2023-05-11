@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.util;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
@@ -10,6 +11,7 @@ import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -41,8 +43,14 @@ public class ModUtils {
         } else {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(team.name(), player.server, player.getUUID());
             ChatFormatting teamColor = TeamProviderApi.API.getSelected().getTeamColor(team.name(), player.getServer());
+            if (teamColor == ChatFormatting.RESET) teamColor = ChatFormatting.AQUA;
             ChatFormatting color = isMember ? teamColor : ChatFormatting.DARK_RED;
             player.displayClientMessage(displayName.copy().withStyle(color), true);
         }
+    }
+
+    @ExpectPlatform
+    public static boolean isModLoaded(String modId) {
+        throw new NotImplementedException();
     }
 }

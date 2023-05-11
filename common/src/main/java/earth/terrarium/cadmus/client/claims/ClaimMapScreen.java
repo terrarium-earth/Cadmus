@@ -1,17 +1,19 @@
 package earth.terrarium.cadmus.client.claims;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.messages.server.ClearChunksPacket;
-import earth.terrarium.cadmus.common.network.messages.server.UpdateClaimedChunksPacket;
+import earth.terrarium.cadmus.common.network.messages.ServerboundClearChunksPacket;
+import earth.terrarium.cadmus.common.network.messages.ServerboundUpdateClaimedChunksPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -22,6 +24,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,13 +84,11 @@ public class ClaimMapScreen extends Screen {
     }
 
     public void clearDimension() {
-        NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(false));
-        teamClaims.clear();
+        NetworkHandler.CHANNEL.sendToServer(new ServerboundClearChunksPacket(false));
     }
 
     public void clearAll() {
-        NetworkHandler.CHANNEL.sendToServer(new ClearChunksPacket(true));
-        teamClaims.clear();
+        NetworkHandler.CHANNEL.sendToServer(new ServerboundClearChunksPacket(true));
     }
 
     public void refreshMap() {
@@ -133,7 +134,7 @@ public class ClaimMapScreen extends Screen {
 
         // don't send if nothing has changed
         if (addedChunks.isEmpty() && removedChunks.isEmpty()) return;
-        NetworkHandler.CHANNEL.sendToServer(new UpdateClaimedChunksPacket(addedChunks, removedChunks));
+        NetworkHandler.CHANNEL.sendToServer(new ServerboundUpdateClaimedChunksPacket(addedChunks, removedChunks));
     }
 
     @Override
@@ -145,19 +146,27 @@ public class ClaimMapScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 36, ((this.height - 248) / 2) + 10, 12, 12, 218, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 19, ((this.height - 248) / 2) + 10, 11, 11, 230, 0, 11,
             CONTAINER_BACKGROUND,
-            button -> clearDimension()
-        )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_DIMENSION));
+            button -> this.onClose()
+        ));
 
-        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 10, 12, 12, 230, 0, 12,
+        this.addRenderableWidget(new ImageButton(((this.width + 218) / 2) - 20, ((this.height - 248) / 2) + 227, 11, 11, 218, 0, 11,
             CONTAINER_BACKGROUND,
-            button -> clearAll()
-        )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_ALL));
+            button -> {
+                if (Screen.hasShiftDown()) {
+                    clearAll();
+                } else {
+                    clearDimension();
+                }
+                CadmusClient.openClaimMap();
+            }
+        )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
     }
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(poseStack);
         renderBackgroundTexture(poseStack);
         if (this.mapRenderer == null) {
             GuiComponent.drawCenteredString(poseStack, font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
@@ -205,16 +214,16 @@ public class ClaimMapScreen extends Screen {
     }
 
     private void renderText(PoseStack poseStack, int mouseX, int mouseY) {
-        this.font.draw(poseStack, Component.literal(claimedCount + " / " + this.maxClaims), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
-        this.font.draw(poseStack, Component.literal(chunkLoadedCount + " / " + this.maxChunkLoaded), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 241, 0x404040);
+        this.font.draw(poseStack, Component.literal(claimedCount + "/" + this.maxClaims), ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
+        this.font.draw(poseStack, Component.literal(chunkLoadedCount + "/" + this.maxChunkLoaded), ((this.width + 218) / 2f) - 119, ((this.height - 246) / 2f) + 228, 0x404040);
 
         // text tooltips
         float left = (this.width - MAP_SIZE) / 2f;
         float top = (this.height - MAP_SIZE) / 2f;
 
-        if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
+        if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f + 15 && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
             this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.claimed_chunks", claimedCount, this.maxClaims));
-        } else if (mouseX + 2 > left && mouseX < left + MAP_SIZE / 3.5f && mouseY > top + MAP_SIZE + 13 && mouseY < top + MAP_SIZE + 26) {
+        } else if (mouseX + 2 > left + 75 && mouseX < left + MAP_SIZE / 3.5f + 70 && mouseY > top + MAP_SIZE && mouseY < top + MAP_SIZE + 13) {
             this.setTooltipForNextRenderPass(Component.translatable("gui.cadmus.claim_map.chunk_loaded_chunks", chunkLoadedCount, this.maxChunkLoaded));
         }
     }
@@ -314,7 +323,12 @@ public class ClaimMapScreen extends Screen {
             if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
             this.setTooltipForNextRenderPass(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED));
         } else if (teamType != null && tool == ClaimTool.NONE) {
-            this.setTooltipForNextRenderPass(this.displayName.copy().withStyle(this.displayName.getStyle().withColor(color)));
+            ImmutableList.Builder<FormattedCharSequence> tooltips = ImmutableList.builder();
+            tooltips.add(this.displayName.copy().withStyle(this.displayName.getStyle().withColor(color)).getVisualOrderText());
+            if (teamType == ClaimType.CHUNK_LOADED) {
+                tooltips.add(ConstantComponents.CHUNK_LOADED.copy().withStyle(Style.EMPTY.withColor(ORANGE).withItalic(true)).getVisualOrderText());
+            }
+            this.setTooltipForNextRenderPass(tooltips.build());
         }
     }
 

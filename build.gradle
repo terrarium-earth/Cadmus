@@ -116,7 +116,6 @@ subprojects {
 //            transitive = false
 //        }
         modApi "com.teamresourceful.resourcefullib:resourcefullib-$name-$rootProject.minecraft_version:$rootProject.resourcefullib_version"
-        implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-$name:$rootProject.mixinextras_version"))
     }
 
     var env = System.getenv()

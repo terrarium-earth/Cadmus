@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.network.messages.server;
+package earth.terrarium.cadmus.common.network.messages;
 
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
@@ -20,8 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
-                                        Set<ChunkPos> removedChunks) implements Packet<UpdateClaimedChunksPacket> {
+public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
+                                                   Set<ChunkPos> removedChunks) implements Packet<ServerboundUpdateClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "update_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -32,26 +32,26 @@ public record UpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
     }
 
     @Override
-    public PacketHandler<UpdateClaimedChunksPacket> getHandler() {
+    public PacketHandler<ServerboundUpdateClaimedChunksPacket> getHandler() {
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<UpdateClaimedChunksPacket> {
+    private static class Handler implements PacketHandler<ServerboundUpdateClaimedChunksPacket> {
         @Override
-        public void encode(UpdateClaimedChunksPacket packet, FriendlyByteBuf buf) {
+        public void encode(ServerboundUpdateClaimedChunksPacket packet, FriendlyByteBuf buf) {
             buf.writeMap(packet.addedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
             buf.writeCollection(packet.removedChunks, FriendlyByteBuf::writeChunkPos);
         }
 
         @Override
-        public UpdateClaimedChunksPacket decode(FriendlyByteBuf buf) {
+        public ServerboundUpdateClaimedChunksPacket decode(FriendlyByteBuf buf) {
             Map<ChunkPos, ClaimType> addedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
             Set<ChunkPos> removedChunks = buf.readCollection(HashSet::new, FriendlyByteBuf::readChunkPos);
-            return new UpdateClaimedChunksPacket(addedChunks, removedChunks);
+            return new ServerboundUpdateClaimedChunksPacket(addedChunks, removedChunks);
         }
 
         @Override
-        public PacketContext handle(UpdateClaimedChunksPacket message) {
+        public PacketContext handle(ServerboundUpdateClaimedChunksPacket message) {
             return (player, level) -> {
                 if (message.addedChunks().isEmpty() && message.removedChunks().isEmpty()) return;
                 Team team = TeamSaveData.getOrCreateTeam((ServerPlayer) player);
