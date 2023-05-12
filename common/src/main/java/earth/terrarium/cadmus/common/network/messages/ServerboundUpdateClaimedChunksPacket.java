@@ -4,15 +4,12 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.common.claims.ClaimInfo;
-import earth.terrarium.cadmus.common.claims.ClaimSaveData;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
-import earth.terrarium.cadmus.common.teams.Team;
-import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
@@ -54,15 +51,15 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
         public PacketContext handle(ServerboundUpdateClaimedChunksPacket message) {
             return (player, level) -> {
                 if (message.addedChunks().isEmpty() && message.removedChunks().isEmpty()) return;
-                Team team = TeamSaveData.getOrCreateTeam((ServerPlayer) player);
                 ServerLevel serverLevel = (ServerLevel) level;
+                String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
 
-                ClaimSaveData.updateChunkLoaded(serverLevel, team.teamId(), false);
+                ClaimHandler.updateChunkLoaded(serverLevel, id, false);
 
-                message.addedChunks.forEach((pos, type) -> ClaimSaveData.set(serverLevel, pos, new ClaimInfo(team.teamId(), type)));
-                message.removedChunks.forEach(chunkPos -> ClaimSaveData.remove(serverLevel, chunkPos));
+                ClaimHandler.addClaims(serverLevel, id, message.addedChunks);
+                ClaimHandler.removeClaims(serverLevel, id, message.removedChunks);
 
-                ClaimSaveData.updateChunkLoaded(serverLevel, team.teamId(), true);
+                ClaimHandler.updateChunkLoaded(serverLevel, id, true);
             };
         }
     }

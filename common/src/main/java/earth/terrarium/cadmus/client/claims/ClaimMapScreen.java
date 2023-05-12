@@ -3,14 +3,13 @@ package earth.terrarium.cadmus.client.claims;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
-import com.teamresourceful.resourcefullib.client.screens.CursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.common.claims.ClaimInfo;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -28,12 +27,12 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -46,11 +45,11 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public static final int AQUA = 0xff55ffff;
     public static final int DARK_RED = 0xffbd2025;
 
-    private final Map<ChunkPos, ClaimInfo> startClaims = new HashMap<>();
+    private final Map<ChunkPos, Pair<String, ClaimType>> startClaims = new HashMap<>();
     private final Map<ChunkPos, ClaimType> teamClaims = new HashMap<>();
-    private final Map<ChunkPos, ClaimInfo> otherClaims = new HashMap<>();
+    private final Map<ChunkPos, Pair<String, ClaimType>> otherClaims = new HashMap<>();
 
-    private final Map<UUID, Component> teamDisplayNames = new HashMap<>();
+    private final Map<String, Component> teamDisplayNames = new HashMap<>();
 
     private final Component displayName;
     private final int color;
@@ -63,17 +62,17 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private int claimedCount;
     private int chunkLoadedCount;
 
-    public ClaimMapScreen(Map<ChunkPos, ClaimInfo> claims, @Nullable UUID teamId, ChatFormatting color, Component displayName, Map<UUID, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
+    public ClaimMapScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
         super(Component.empty());
         refreshMap();
 
         this.color = color.getColor() == null ? AQUA : color.getColor() | 0xff000000;
-        claims.forEach((pos, info) -> {
-            if (info.teamId().equals(teamId)) {
-                teamClaims.put(pos, info.type());
-                startClaims.put(pos, info);
+        claims.forEach((pos, pair) -> {
+            if (pair.getFirst().equals(id)) {
+                teamClaims.put(pos, pair.getSecond());
+                startClaims.put(pos, pair);
             } else {
-                otherClaims.put(pos, info);
+                otherClaims.put(pos, pair);
             }
         });
 
@@ -127,7 +126,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
         Map<ChunkPos, ClaimType> addedChunks = teamClaims.entrySet()
             .stream()
-            .filter(entry -> !startClaims.containsKey(entry.getKey()) || startClaims.get(entry.getKey()).type() != entry.getValue())
+            .filter(entry -> !startClaims.containsKey(entry.getKey()) || startClaims.get(entry.getKey()).getSecond() != entry.getValue())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Set<ChunkPos> removedChunks = startClaims.keySet()
@@ -171,7 +170,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(poseStack);
         renderBackgroundTexture(poseStack);
         if (this.mapRenderer == null) {
@@ -253,8 +252,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
                 int playerChunkZ = Math.round(playerChunk.z - chunkScale / 2);
                 ChunkPos chunkPos = new ChunkPos(playerChunkX + i, playerChunkZ + j);
                 ClaimType teamType = teamClaims.get(chunkPos);
-                ClaimInfo otherInfo = otherClaims.get(chunkPos);
-                ClaimType type = otherInfo != null ? otherInfo.type() : teamType;
+                var otherInfo = otherClaims.get(chunkPos);
+                ClaimType type = otherInfo != null ? otherInfo.getSecond() : teamType;
 
                 int color;
                 boolean isHovering = mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
@@ -323,9 +322,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
         return type;
     }
 
-    private void drawTooltips(ClaimType teamType, ClaimInfo otherInfo) {
+    private void drawTooltips(ClaimType teamType, Pair<String, ClaimType> otherInfo) {
         if (otherInfo != null) {
-            Component otherTeamDisplayName = teamDisplayNames.get(otherInfo.teamId());
+            Component otherTeamDisplayName = teamDisplayNames.get(otherInfo.getFirst());
             if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
             this.setTooltipForNextRenderPass(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED));
         } else if (teamType != null && tool == ClaimTool.NONE) {
@@ -372,9 +371,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
         if (teamType != null) {
             return teamType;
         }
-        ClaimInfo otherInfo = otherClaims.get(chunkPos);
+        var otherInfo = otherClaims.get(chunkPos);
         if (otherInfo != null) {
-            return otherInfo.type();
+            return otherInfo.getSecond();
         }
         return null;
     }

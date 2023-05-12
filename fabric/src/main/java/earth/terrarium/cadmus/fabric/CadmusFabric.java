@@ -19,7 +19,6 @@ public class CadmusFabric implements ModInitializer {
             CommonProtectionApiCompat.init();
         }
         ServerLifecycleEvents.SERVER_STARTED.register(Cadmus::serverStarted);
-        ServerLifecycleEvents.SERVER_STOPPED.register(Cadmus::serverStopped);
         registerChunkProtectionEvents();
     }
 

@@ -1,42 +1,36 @@
 package earth.terrarium.cadmus.api.teams;
 
-import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
 import java.util.UUID;
 
 public interface TeamProvider {
 
     /**
-     * Gets the team members
+     * Gets the id of a team
      *
      * @param id     the id of the team
      * @param server the server
-     * @return the team members
-     */
-    Set<GameProfile> getTeamMembers(String id, MinecraftServer server);
-
-    /**
-     * Gets the name of a team
-     *
-     * @param id     the id of the team
-     * @param server the server
-     * @return the name of the team, or null if no team is found
+     * @return the id of the team, or null if no team is found
      */
     @Nullable
     Component getTeamName(String id, MinecraftServer server);
 
-    @Nullable
-    String getTeamId(ServerPlayer player);
+    /**
+     * Gets the id of the team a player is in
+     *
+     * @param server the server
+     * @param player the uuid of the player
+     * @return the id of the team, or null if the player is not in a team
+     */
+    String getTeamId(MinecraftServer server, UUID player);
 
     /**
      * Checks if the player is a member of the team

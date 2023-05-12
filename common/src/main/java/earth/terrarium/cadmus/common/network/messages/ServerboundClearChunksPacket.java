@@ -4,12 +4,11 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.common.claims.ClaimSaveData;
-import earth.terrarium.cadmus.common.teams.TeamSaveData;
+import earth.terrarium.cadmus.api.teams.TeamProviderApi;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 
 public record ServerboundClearChunksPacket(boolean allDimensions) implements Packet<ServerboundClearChunksPacket> {
 
@@ -40,12 +39,11 @@ public record ServerboundClearChunksPacket(boolean allDimensions) implements Pac
         @Override
         public PacketContext handle(ServerboundClearChunksPacket message) {
             return (player, level) -> {
-                var team = TeamSaveData.getPlayerTeam((ServerPlayer) player);
-                if (team == null) return;
+                String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
                 if (!message.allDimensions) {
-                    ClaimSaveData.clear((ServerLevel) level, team.teamId());
+                    ClaimHandler.clear((ServerLevel) level, id);
                 } else {
-                    ((ServerLevel) level).getServer().getAllLevels().forEach(l -> ClaimSaveData.clear(l, team.teamId()));
+                    ((ServerLevel) level).getServer().getAllLevels().forEach(l -> ClaimHandler.clear(l, id));
                 }
             };
         }

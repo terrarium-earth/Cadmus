@@ -2,10 +2,9 @@ package earth.terrarium.cadmus;
 
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.common.claims.ClaimSaveData;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
@@ -22,6 +21,9 @@ public class Cadmus {
         NetworkHandler.init();
         TeamProviderApi.API.register(DEFAULT_ID, new VanillaTeamProvider());
         ModGameRules.init();
+        if (!ModUtils.isModLoaded("argonauts")) {
+            TeamProviderApi.API.setSelected(DEFAULT_ID);
+        }
     }
 
     public static void enterChunkSection(Player player) {
@@ -35,24 +37,11 @@ public class Cadmus {
     public static void serverStarted(MinecraftServer server) {
         // Set chunk loaded chunks
         server.getAllLevels().forEach(level ->
-            ClaimSaveData.getAll(level).forEach((pos, info) -> {
-                if (info.type() == ClaimType.CHUNK_LOADED) {
-                    level.getLevel().getChunkSource().updateChunkForced(pos, true);
-                }
-            }));
-
-        // Set the Team Provider
-        if (!ModUtils.isModLoaded("argonauts")) {
-            TeamSaveData.read(server);
-            // Should only ever get set once when the world is first created, and then it should grab the saved value.
-            if (TeamProviderApi.API.getSelectedId() == null) {
-                TeamProviderApi.API.setSelected(DEFAULT_ID);
-            }
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static void serverStopped(MinecraftServer server) {
-        TeamProviderApi.API.setSelected(null);
+            ClaimHandler.getAllTeamClaims(level).forEach((id, data) ->
+                data.forEach((pos, type) -> {
+                    if (type == ClaimType.CHUNK_LOADED) {
+                        level.getLevel().getChunkSource().updateChunkForced(pos, true);
+                    }
+                })));
     }
 }

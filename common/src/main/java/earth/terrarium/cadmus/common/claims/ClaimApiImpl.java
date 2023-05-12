@@ -3,8 +3,6 @@ package earth.terrarium.cadmus.common.claims;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
-import earth.terrarium.cadmus.common.teams.Team;
-import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -25,7 +23,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean isClaimed(Level level, ChunkPos pos) {
         if (level instanceof ServerLevel serverLevel) {
-            return ClaimSaveData.get(serverLevel, pos) != null;
+            return ClaimHandler.getClaim(serverLevel, pos) != null;
         }
         return false;
     }
@@ -33,16 +31,16 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean isChunkLoaded(Level level, ChunkPos pos) {
         if (level instanceof ServerLevel serverLevel) {
-            ClaimInfo info = ClaimSaveData.get(serverLevel, pos);
-            if (info == null) return false;
-            return info.type() == ClaimType.CHUNK_LOADED;
+            var claim = ClaimHandler.getClaim(serverLevel, pos);
+            if (claim == null) return false;
+            return claim.getSecond() == ClaimType.CHUNK_LOADED;
         }
         return false;
     }
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (team, server) ->
-            TeamProviderApi.API.getSelected().canBreakBlock(team.name(), server, pos, player));
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (id, server) ->
+            TeamProviderApi.API.getSelected().canBreakBlock(id, server, pos, player));
     }
 
     @Override
@@ -52,8 +50,8 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (team, server) ->
-            TeamProviderApi.API.getSelected().canPlaceBlock(team.name(), server, pos, player));
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (id, server) ->
+            TeamProviderApi.API.getSelected().canPlaceBlock(id, server, pos, player));
     }
 
     @Override
@@ -63,8 +61,8 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
-        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (team, server) ->
-            TeamProviderApi.API.getSelected().canExplodeBlock(team.name(), server, pos, explosion, player));
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (id, server) ->
+            TeamProviderApi.API.getSelected().canExplodeBlock(id, server, pos, explosion, player));
     }
 
     @Override
@@ -74,8 +72,8 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
-        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (team, server) ->
-            TeamProviderApi.API.getSelected().canInteractWithBlock(team.name(), server, pos, type, player));
+        return canAccess(level, pos, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (id, server) ->
+            TeamProviderApi.API.getSelected().canInteractWithBlock(id, server, pos, type, player));
     }
 
     @Override
@@ -85,8 +83,8 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (team, server) ->
-            TeamProviderApi.API.getSelected().canInteractWithEntity(team.name(), server, entity, player));
+        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (id, server) ->
+            TeamProviderApi.API.getSelected().canInteractWithEntity(id, server, entity, player));
     }
 
     @Override
@@ -96,8 +94,8 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (team, server) ->
-            TeamProviderApi.API.getSelected().canDamageEntity(team.name(), server, entity, player));
+        return canAccess(level, entity.blockPosition(), ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (id, server) ->
+            TeamProviderApi.API.getSelected().canDamageEntity(id, server, entity, player));
     }
 
     @Override
@@ -129,17 +127,14 @@ public class ClaimApiImpl implements ClaimApi {
         return canEntityGrief(level, picker);
     }
 
-    private boolean canAccess(Level level, BlockPos pos, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<Team, MinecraftServer, Boolean> checkTeamPermission) {
+    private boolean canAccess(Level level, BlockPos pos, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<String, MinecraftServer, Boolean> checkTeamPermission) {
         if (!(level instanceof ServerLevel serverLevel)) return true;
         MinecraftServer server = serverLevel.getServer();
         if (ModGameRules.getOrCreateBooleanGameRule(level, rule)) return true;
         if (!isClaimed(level, pos)) return true;
 
-        ClaimInfo info = ClaimSaveData.get(serverLevel, new ChunkPos(pos));
-        if (info == null) return true;
-        Team chunkTeam = TeamSaveData.get(server, info.teamId());
-        if (chunkTeam == null) return true;
-
-        return checkTeamPermission.apply(chunkTeam, server);
+        var claim = ClaimHandler.getClaim(serverLevel, new ChunkPos(pos));
+        if (claim == null) return true;
+        return checkTeamPermission.apply(claim.getFirst(), server);
     }
 }

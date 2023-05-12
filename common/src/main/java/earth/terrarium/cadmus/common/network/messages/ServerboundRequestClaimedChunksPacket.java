@@ -1,16 +1,14 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
-import earth.terrarium.cadmus.common.claims.ClaimInfo;
-import earth.terrarium.cadmus.common.claims.ClaimSaveData;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.teams.Team;
-import earth.terrarium.cadmus.common.teams.TeamSaveData;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
@@ -18,13 +16,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public record ServerboundRequestClaimedChunksPacket(
     int renderDistance) implements Packet<ServerboundRequestClaimedChunksPacket> {
@@ -59,42 +55,46 @@ public record ServerboundRequestClaimedChunksPacket(
                 var start = player.chunkPosition();
                 int renderDistance = Math.min(message.renderDistance, 32);
 
-                Map<ChunkPos, ClaimInfo> claims = new HashMap<>();
-                for (var claimedChunk : ClaimSaveData.getAll((ServerLevel) level).entrySet()) {
-                    var chunkPos = new ChunkPos(start.x - claimedChunk.getKey().x, start.z - claimedChunk.getKey().z);
-                    if (chunkPos.x < renderDistance && chunkPos.x > -renderDistance && chunkPos.z < renderDistance && chunkPos.z > -renderDistance) {
-                        claims.put(claimedChunk.getKey(), claimedChunk.getValue());
-                    }
+                String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
+
+                // Get all claims within the render distance
+                var claimData = ClaimHandler.getAllTeamClaims((ServerLevel) level);
+                Map<ChunkPos, Pair<String, ClaimType>> claims = new HashMap<>();
+                if (claimData != null) {
+                    claimData.forEach((teamId, teamClaims) ->
+                        teamClaims.forEach((pos, type) -> {
+                            var chunkPos = new ChunkPos(start.x - pos.x, start.z - pos.z);
+                            if (chunkPos.x < renderDistance && chunkPos.x > -renderDistance && chunkPos.z < renderDistance && chunkPos.z > -renderDistance) {
+                                claims.put(pos, Pair.of(teamId, type));
+                            }
+                        }));
                 }
 
-                Team team = TeamSaveData.getOrCreateTeam((ServerPlayer) player);
-                UUID teamId = team.teamId();
-                String id = team.name();
                 Optional<String> displayName = Optional.ofNullable(Optionull.map(TeamProviderApi.API.getSelected().getTeamName(id, player.getServer()), Component::getString));
                 ChatFormatting color = TeamProviderApi.API.getSelected().getTeamColor(id, player.getServer());
 
-                Map<UUID, Component> teamDisplayNames = TeamSaveData.getTeams(player.getServer()).stream()
-                    .filter(t -> !t.teamId().equals(teamId))
-                    .collect(HashMap::new, (map, team1) -> map.put(team1.teamId(),
-                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(String.valueOf(team1.teamId()), player.getServer())).orElse(Component.literal(""))
+                Map<String, Component> teamDisplayNames = ClaimHandler.getAllTeamClaims((ServerLevel) level).keySet().stream()
+                    .filter(t -> !t.equals(id))
+                    .collect(HashMap::new, (map, teamId) -> map.put(teamId,
+                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(teamId, player.getServer())).orElse(Component.literal("ERROR"))
                     ), HashMap::putAll);
 
                 int claimedChunks = 0;
                 int chunkLoadedCount = 0;
-                for (var l : level.getServer().getAllLevels()) {
-                    for (var info : ClaimSaveData.getAll(l).values()) {
-                        if (teamId.equals(info.teamId())) {
-                            claimedChunks++;
-                            if (info.type() == ClaimType.CHUNK_LOADED) {
-                                chunkLoadedCount++;
-                            }
+                for (var serverLevel : level.getServer().getAllLevels()) {
+                    var teamClaims = ClaimHandler.getTeamClaims(serverLevel, id);
+                    if (teamClaims == null) continue;
+                    for (var data : teamClaims.entrySet()) {
+                        claimedChunks++;
+                        if (data.getValue() == ClaimType.CHUNK_LOADED) {
+                            chunkLoadedCount++;
                         }
                     }
                 }
 
                 int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, teamId, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
+                NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
             };
         }
     }
