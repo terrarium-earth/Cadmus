@@ -5,7 +5,7 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimScreen;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -75,7 +75,7 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
 
         @Override
         public PacketContext handle(ClientboundSendClaimedChunksPacket message) {
-            return (player, level) -> Minecraft.getInstance().setScreen(new ClaimMapScreen(
+            return (player, level) -> Minecraft.getInstance().setScreen(new ClaimScreen(
                 message.claims,
                 message.id,
                 message.color,

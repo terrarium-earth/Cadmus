@@ -23,14 +23,14 @@ public class ServerScoreboardMixin {
     @Inject(method = "addPlayerToTeam", at = @At("HEAD"))
     private void cadmus$addPlayerToTeam(String playerName, PlayerTeam team, CallbackInfoReturnable<Boolean> ci) {
         if (TeamProviderApi.API.getSelected() instanceof VanillaTeamProvider provider) {
-            provider.removeNonScoreboardTeam(server, playerName);
+            provider.onTeamChanged(server, playerName);
         }
     }
 
     @Inject(method = "removePlayerFromTeam(Ljava/lang/String;Lnet/minecraft/world/scores/PlayerTeam;)V", at = @At("HEAD"))
     private void cadmus$removePlayerFromTeam(String username, PlayerTeam playerTeam, CallbackInfo ci) {
         if (TeamProviderApi.API.getSelected() instanceof VanillaTeamProvider provider) {
-            provider.removeNonScoreboardTeam(server, username);
+            provider.onTeamChanged(server, username);
         }
     }
 

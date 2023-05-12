@@ -39,16 +39,16 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public boolean isMember(String id, MinecraftServer server, UUID player) {
-        var playerTeam = server.getScoreboard().getPlayerTeam(id);
         var profile = server.getProfileCache().get(player).orElse(null);
         if (profile == null) return false;
+        var playerTeam = server.getScoreboard().getPlayerTeam(id);
         if (playerTeam == null) return id.equals(player.toString());
         return playerTeam.getPlayers().contains(profile.getName());
     }
 
     @Override
     public ChatFormatting getTeamColor(String id, MinecraftServer server) {
-        PlayerTeam playerTeam = server.getScoreboard().getPlayerTeam(id);
+        var playerTeam = server.getScoreboard().getPlayerTeam(id);
         var result = Optionull.mapOrDefault(playerTeam, PlayerTeam::getColor, ChatFormatting.AQUA);
         return result == ChatFormatting.RESET ? ChatFormatting.AQUA : result;
     }
@@ -83,7 +83,7 @@ public class VanillaTeamProvider implements TeamProvider {
         return isMember(id, server, player);
     }
 
-    public void removeNonScoreboardTeam(MinecraftServer server, String playerName) {
+    public void onTeamChanged(MinecraftServer server, String playerName) {
         var profile = server.getProfileCache().get(playerName).orElse(null);
         if (profile == null) return;
         server.getAllLevels().forEach(l -> ClaimHandler.clear(l, profile.getId().toString()));

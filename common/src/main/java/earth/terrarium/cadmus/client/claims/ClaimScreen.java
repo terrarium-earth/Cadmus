@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class ClaimMapScreen extends BaseCursorScreen {
+public class ClaimScreen extends BaseCursorScreen {
 
     public static final int MAP_SIZE = 200;
     public static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/map.png");
@@ -62,7 +62,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private int claimedCount;
     private int chunkLoadedCount;
 
-    public ClaimMapScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
+    public ClaimScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
         super(Component.empty());
         refreshMap();
 
@@ -213,7 +213,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         try (var ignored = new CloseablePoseStack(poseStack)) {
             poseStack.translate(left + x, top + y, 0);
             poseStack.mulPose(Axis.ZP.rotationDegrees(player.getYRot()));
-            poseStack.translate(-8, -8, 0);
+            poseStack.translate(-4, -4, 0);
             blit(poseStack, 0, 0, 40, 0, 8, 8, 128, 128);
         }
     }
@@ -262,7 +262,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
                         type = useTool(chunkPos, type);
                     }
                     drawTooltips(teamType, otherInfo);
-                    color = Screen.hasShiftDown() ? ORANGE : tool == ClaimTool.ERASER ? DARK_RED : this.color;
+                    color = Screen.hasShiftDown() ? ORANGE : tool == ClaimTool.ERASER || otherInfo != null ? DARK_RED : this.color;
                 } else {
                     color = otherInfo != null ? DARK_RED : teamType != null ? teamType == ClaimType.CHUNK_LOADED ? ORANGE : this.color : 0x00FFFFFF;
                 }

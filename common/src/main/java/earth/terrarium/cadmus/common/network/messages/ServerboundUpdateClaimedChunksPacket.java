@@ -7,9 +7,11 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
@@ -60,6 +62,7 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
                 ClaimHandler.removeClaims(serverLevel, id, message.removedChunks);
 
                 ClaimHandler.updateChunkLoaded(serverLevel, id, true);
+                serverLevel.players().forEach(ModUtils::displayTeamName);
             };
         }
     }

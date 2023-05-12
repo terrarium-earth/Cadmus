@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import earth.terrarium.cadmus.client.claims.ClaimMapScreen;
+import earth.terrarium.cadmus.client.claims.ClaimScreen;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.ServerboundRequestClaimedChunksPacket;
@@ -26,7 +26,7 @@ public class CadmusClient {
     }
 
     public static void enterChunkSection() {
-        if (Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
+        if (Minecraft.getInstance().screen instanceof ClaimScreen screen) {
             screen.refreshMap();
         }
     }
