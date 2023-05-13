@@ -8,7 +8,6 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.claims.ClaimScreen;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +21,8 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
                                                  Map<String, Component> teamDisplayNames, int claimedCount,
                                                  int chunkLoadedCount,
                                                  int maxClaims,
-                                                 int maxChunkLoaded) implements Packet<ClientboundSendClaimedChunksPacket> {
+                                                 int maxChunkLoaded,
+                                                 int viewDistance) implements Packet<ClientboundSendClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "send_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -53,6 +53,7 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
             buf.writeVarInt(packet.chunkLoadedCount);
             buf.writeVarInt(packet.maxClaims);
             buf.writeVarInt(packet.maxChunkLoaded);
+            buf.writeVarInt(packet.viewDistance);
         }
 
         @Override
@@ -69,22 +70,14 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
             int chunkLoadedCount = buf.readVarInt();
             int maxClaims = buf.readVarInt();
             int maxChunkLoaded = buf.readVarInt();
+            int viewDistance = buf.readVarInt();
 
-            return new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded);
+            return new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded, viewDistance);
         }
 
         @Override
         public PacketContext handle(ClientboundSendClaimedChunksPacket message) {
-            return (player, level) -> Minecraft.getInstance().setScreen(new ClaimScreen(
-                message.claims,
-                message.id,
-                message.color,
-                message.displayName.map(Component::nullToEmpty).orElse(player.getDisplayName()),
-                message.teamDisplayNames,
-                message.claimedCount,
-                message.chunkLoadedCount,
-                message.maxClaims,
-                message.maxChunkLoaded));
+            return (player, level) -> ClaimScreen.createFromPacket(player, message);
         }
     }
 }

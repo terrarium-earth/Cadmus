@@ -41,7 +41,8 @@ processResources {
         expand "version": rootProject.version,
                 "fabric_loader_version": rootProject.fabric_loader_version,
                 "github_name": rootProject.github_name,
-                "resourcefullib_version": rootProject.resourcefullib_version
+                "resourcefullib_version": rootProject.resourcefullib_version,
+                "modrinth_id": rootProject.modrinth_id
     }
 }
 

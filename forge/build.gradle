@@ -36,7 +36,8 @@ processResources {
     filesMatching("META-INF/mods.toml") {
         expand "version": rootProject.version,
                 "github_name": rootProject.github_name,
-                "resourcefullib_version": rootProject.resourcefullib_version
+                "resourcefullib_version": rootProject.resourcefullib_version,
+                "modrinth_id": rootProject.modrinth_id
     }
 }
 

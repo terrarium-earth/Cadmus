@@ -11,4 +11,5 @@ processResources {
     inputs.property "version", rootProject.version
     inputs.property "github_name", rootProject.github_name
     inputs.property "resourcefullib_version", rootProject.resourcefullib_version
+    inputs.property "modrinth_id", rootProject.modrinth_id
 }

@@ -13,6 +13,7 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.network.messages.ClientboundSendClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.ServerboundClearChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.ServerboundUpdateClaimedChunksPacket;
 import net.minecraft.ChatFormatting;
@@ -26,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +54,7 @@ public class ClaimScreen extends BaseCursorScreen {
     private final Map<String, Component> teamDisplayNames = new HashMap<>();
 
     private final Component displayName;
+    private final int viewDistance;
     private final int color;
     private final int maxClaims;
     private final int maxChunkLoaded;
@@ -62,8 +65,9 @@ public class ClaimScreen extends BaseCursorScreen {
     private int claimedCount;
     private int chunkLoadedCount;
 
-    public ClaimScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded) {
+    public ClaimScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded, int viewDistance) {
         super(Component.empty());
+        this.viewDistance = viewDistance;
         refreshMap();
 
         this.color = color.getColor() == null ? AQUA : color.getColor() | 0xff000000;
@@ -83,6 +87,20 @@ public class ClaimScreen extends BaseCursorScreen {
         this.teamDisplayNames.putAll(teamDisplayNames);
         this.maxClaims = maxClaims;
         this.maxChunkLoaded = maxChunkLoaded;
+    }
+
+    public static void createFromPacket(Player player, ClientboundSendClaimedChunksPacket message) {
+        Minecraft.getInstance().setScreen(new ClaimScreen(
+            message.claims(),
+            message.id(),
+            message.color(),
+            message.displayName().map(Component::nullToEmpty).orElse(player.getDisplayName()),
+            message.teamDisplayNames(),
+            message.claimedCount(),
+            message.chunkLoadedCount(),
+            message.maxClaims(),
+            message.maxChunkLoaded(),
+            message.viewDistance()));
     }
 
     public void clearDimension() {
@@ -114,8 +132,8 @@ public class ClaimScreen extends BaseCursorScreen {
         }
     }
 
-    public static int getScaledRenderDistance() {
-        int scale = Math.min(Minecraft.getInstance().options.renderDistance().get(), 32) * 8;
+    public int getScaledRenderDistance() {
+        int scale = this.viewDistance * 8;
         scale -= scale % 16;
         return scale;
     }

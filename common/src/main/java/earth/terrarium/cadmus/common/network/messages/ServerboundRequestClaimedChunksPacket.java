@@ -53,7 +53,8 @@ public record ServerboundRequestClaimedChunksPacket(
         public PacketContext handle(ServerboundRequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
-                int renderDistance = Math.min(message.renderDistance, 32);
+                int viewDistance = Math.min(((ServerLevel)level).getServer().getPlayerList().getViewDistance(), 32);
+                int renderDistance = Math.min(message.renderDistance, viewDistance);
 
                 String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
 
@@ -94,7 +95,7 @@ public record ServerboundRequestClaimedChunksPacket(
 
                 int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
                 int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
-                NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded), player);
+                NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded, renderDistance), player);
             };
         }
     }
