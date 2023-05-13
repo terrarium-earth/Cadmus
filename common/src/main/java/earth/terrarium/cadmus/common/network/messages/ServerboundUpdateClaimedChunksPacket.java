@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.teamresourceful.resourcefullib.common.lib.Constants;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
@@ -7,6 +8,7 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -14,12 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
-                                                   Set<ChunkPos> removedChunks) implements Packet<ServerboundUpdateClaimedChunksPacket> {
+                                                   Map<ChunkPos, ClaimType> removedChunks) implements Packet<ServerboundUpdateClaimedChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "update_claimed_chunks");
     public static final Handler HANDLER = new Handler();
@@ -38,13 +38,13 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
         @Override
         public void encode(ServerboundUpdateClaimedChunksPacket packet, FriendlyByteBuf buf) {
             buf.writeMap(packet.addedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
-            buf.writeCollection(packet.removedChunks, FriendlyByteBuf::writeChunkPos);
+            buf.writeMap(packet.removedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
         }
 
         @Override
         public ServerboundUpdateClaimedChunksPacket decode(FriendlyByteBuf buf) {
             Map<ChunkPos, ClaimType> addedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
-            Set<ChunkPos> removedChunks = buf.readCollection(HashSet::new, FriendlyByteBuf::readChunkPos);
+            Map<ChunkPos, ClaimType> removedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
             return new ServerboundUpdateClaimedChunksPacket(addedChunks, removedChunks);
         }
 
@@ -57,8 +57,29 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
 
                 ClaimHandler.updateChunkLoaded(serverLevel, id, false);
 
+                // Check if the player is claiming more chunks than allowed
+                var teamClaims = ClaimHandler.getTeamClaims(serverLevel, id);
+                int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
+                if ((teamClaims == null ? 0 : teamClaims.values().size()) + message.addedChunks.size() - message.removedChunks.size() > maxClaims) {
+                    Constants.LOGGER.warn("Player {} tried to claim more chunks than allowed! ({} > {})", player.getName().getString(), teamClaims == null ? 0 : teamClaims.values().size() + message.addedChunks.size() - message.removedChunks.size(), maxClaims);
+                    return;
+                }
+
+                // Check if the player is claiming more chunk loaded chunks than allowed
+                int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+                int currentChunkLoaded = 0;
+                int addedChunkLoaded = message.addedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+                int removedChunkLoaded = message.removedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+                if (teamClaims != null) {
+                    currentChunkLoaded = teamClaims.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+                }
+                if (currentChunkLoaded + addedChunkLoaded - removedChunkLoaded > maxChunkLoaded) {
+                    Constants.LOGGER.warn("Player {} tried to claim more chunk loaded chunks than allowed! ({} > {})", player.getName().getString(), currentChunkLoaded + addedChunkLoaded - removedChunkLoaded, maxChunkLoaded);
+                    return;
+                }
+
                 ClaimHandler.addClaims(serverLevel, id, message.addedChunks);
-                ClaimHandler.removeClaims(serverLevel, id, message.removedChunks);
+                ClaimHandler.removeClaims(serverLevel, id, message.removedChunks.keySet());
 
                 ClaimHandler.updateChunkLoaded(serverLevel, id, true);
                 serverLevel.players().forEach(ModUtils::displayTeamName);

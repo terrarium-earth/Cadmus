@@ -34,7 +34,8 @@ public class ClaimHandler extends SavedData {
             });
             claimsById.put(id, claimData);
         });
-        TeamProviderApi.API.setSelected(new ResourceLocation(tag.getString("team_provider")));
+        String teamProvider = tag.getString("team_provider");
+        TeamProviderApi.API.setSelected(teamProvider.isEmpty() ? null : new ResourceLocation(teamProvider));
         updateInternal();
     }
 
@@ -62,6 +63,9 @@ public class ClaimHandler extends SavedData {
 
     public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {
         var data = read(level);
+        // Remove any claims that are already claimed by another team
+        claimData.keySet().removeAll(data.claims.keySet());
+
         claimData.forEach((pos, type) -> data.claims.put(pos, Pair.of(id, type)));
         var currentClaims = data.claimsById.getOrDefault(id, new HashMap<>());
         currentClaims.putAll(claimData);

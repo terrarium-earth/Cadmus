@@ -34,7 +34,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -147,10 +146,10 @@ public class ClaimScreen extends BaseCursorScreen {
             .filter(entry -> !startClaims.containsKey(entry.getKey()) || startClaims.get(entry.getKey()).getSecond() != entry.getValue())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        Set<ChunkPos> removedChunks = startClaims.keySet()
+        Map<ChunkPos, ClaimType> removedChunks = startClaims.entrySet()
             .stream()
-            .filter(chunkPos -> !teamClaims.containsKey(chunkPos))
-            .collect(Collectors.toSet());
+            .filter(entry -> !teamClaims.containsKey(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getSecond()));
 
         // don't send if nothing has changed
         if (addedChunks.isEmpty() && removedChunks.isEmpty()) return;
