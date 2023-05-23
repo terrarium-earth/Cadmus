@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.teams;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -13,9 +14,22 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class VanillaTeamProvider implements TeamProvider {
+
+    @Override
+    public Set<GameProfile> getTeamMembers(String id, MinecraftServer server) {
+        PlayerTeam team = server.getScoreboard().getPlayerTeam(id);
+        Set<GameProfile> profiles = new HashSet<>();
+        if (team == null) return profiles;
+        for (String player : team.getPlayers()) {
+            server.getProfileCache().get(player).ifPresent(profiles::add);
+        }
+        return profiles;
+    }
 
     @Override
     @Nullable
@@ -83,13 +97,15 @@ public class VanillaTeamProvider implements TeamProvider {
         return isMember(id, server, player);
     }
 
-    public void onTeamChanged(MinecraftServer server, String playerName) {
+    public void onTeamChanged(String id, MinecraftServer server, String playerName) {
+        this.onTeamChanged(server, id);
         var profile = server.getProfileCache().get(playerName).orElse(null);
         if (profile == null) return;
         server.getAllLevels().forEach(l -> ClaimHandler.clear(l, profile.getId().toString()));
     }
 
     public void onTeamRemoved(MinecraftServer server, PlayerTeam playerTeam) {
+        this.onTeamRemoved(server, playerTeam.getName());
         server.getAllLevels().forEach(l -> ClaimHandler.clear(l, playerTeam.getName()));
     }
 }

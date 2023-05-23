@@ -1,9 +1,7 @@
 package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -34,8 +32,7 @@ public class ClaimHandler extends SavedData {
             });
             claimsById.put(id, claimData);
         });
-        String teamProvider = tag.getString("team_provider");
-        TeamProviderApi.API.setSelected(teamProvider.isEmpty() ? null : new ResourceLocation(teamProvider));
+
         updateInternal();
     }
 
@@ -50,10 +47,6 @@ public class ClaimHandler extends SavedData {
         });
         tag.put("teams", teamsTag);
 
-        ResourceLocation selectedId = TeamProviderApi.API.getSelectedId();
-        if (selectedId != null) {
-            tag.putString("team_provider", selectedId.toString());
-        }
         return tag;
     }
 

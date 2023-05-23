@@ -33,6 +33,9 @@ dependencies {
 
     include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixinextras_version}")))
     include(modImplementation "eu.pb4:common-protection-api:$rootProject.common_protection_api_version")
+    modLocalRuntime("earth.terrarium.prometheus:prometheus-fabric-$minecraft_version:$prometheus_version") {
+        transitive = false
+    }
 }
 
 processResources {

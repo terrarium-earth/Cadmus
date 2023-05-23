@@ -12,6 +12,7 @@ public class CadmusClientFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        CadmusClient.init();
         ClientTickEvents.START_CLIENT_TICK.register(client -> CadmusClient.clientTick());
         registerClientCommands();
         KeyBindingHelper.registerKeyBinding(CadmusClient.KEY_OPEN_CLAIM_MAP);

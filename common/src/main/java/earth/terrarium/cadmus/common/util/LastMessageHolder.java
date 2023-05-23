@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.claims;
+package earth.terrarium.cadmus.common.util;
 
 import net.minecraft.network.chat.Component;
 

@@ -28,7 +28,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:${rootProject.mixinextras_version}"))
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:$rootProject.mixinextras_version"))
+    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:$rootProject.mixinextras_version"))
+    modLocalRuntime("earth.terrarium.prometheus:prometheus-forge-$minecraft_version:$prometheus_version") {
+        transitive = false
+    }
 }
 
 processResources {

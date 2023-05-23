@@ -20,17 +20,17 @@ public class ServerScoreboardMixin {
     @Final
     private MinecraftServer server;
 
-    @Inject(method = "addPlayerToTeam", at = @At("HEAD"))
+    @Inject(method = "addPlayerToTeam", at = @At("RETURN"))
     private void cadmus$addPlayerToTeam(String playerName, PlayerTeam team, CallbackInfoReturnable<Boolean> ci) {
         if (TeamProviderApi.API.getSelected() instanceof VanillaTeamProvider provider) {
-            provider.onTeamChanged(server, playerName);
+            provider.onTeamChanged(team.getName(), server, playerName);
         }
     }
 
-    @Inject(method = "removePlayerFromTeam(Ljava/lang/String;Lnet/minecraft/world/scores/PlayerTeam;)V", at = @At("HEAD"))
+    @Inject(method = "removePlayerFromTeam(Ljava/lang/String;Lnet/minecraft/world/scores/PlayerTeam;)V", at = @At("RETURN"))
     private void cadmus$removePlayerFromTeam(String username, PlayerTeam playerTeam, CallbackInfo ci) {
         if (TeamProviderApi.API.getSelected() instanceof VanillaTeamProvider provider) {
-            provider.onTeamChanged(server, username);
+            provider.onTeamChanged(server, playerTeam.getName());
         }
     }
 

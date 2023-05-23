@@ -1,6 +1,8 @@
 package earth.terrarium.cadmus.api.teams;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -9,9 +11,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface TeamProvider {
+
+    /**
+     * Gets the team members
+     *
+     * @param id     the id of the team
+     * @param server the server
+     * @return the team members
+     */
+    Set<GameProfile> getTeamMembers(String id, MinecraftServer server);
 
     /**
      * Gets the id of a team
@@ -117,4 +129,22 @@ public interface TeamProvider {
      * @return true if the player can damage the entity, false otherwise
      */
     boolean canDamageEntity(String id, MinecraftServer server, Entity entity, UUID player);
+
+    /**
+     * Called when a player joins or leaves a team
+     *
+     * @param server the server
+     */
+    default void onTeamChanged(MinecraftServer server, String id) {
+        MaxClaimProviderApi.API.getSelected().calculate(id, server);
+    }
+
+    /**
+     * Called when a team is removed
+     *
+     * @param server the server
+     */
+    default void onTeamRemoved(MinecraftServer server, String id) {
+        MaxClaimProviderApi.API.getSelected().removeTeam(id, server);
+    }
 }

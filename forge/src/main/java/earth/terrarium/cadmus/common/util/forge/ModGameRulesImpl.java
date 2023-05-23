@@ -2,7 +2,10 @@ package earth.terrarium.cadmus.common.util.forge;
 
 import earth.terrarium.cadmus.mixin.forge.common.GameRulesBooleanValueInvoker;
 import earth.terrarium.cadmus.mixin.forge.common.GameRulesIntegerValueInvoker;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
+
+import java.util.function.BiConsumer;
 
 public class ModGameRulesImpl {
     public static <T extends GameRules.Value<T>> GameRules.Key<T> register(String name, GameRules.Category category, GameRules.Type<T> type) {
@@ -13,7 +16,7 @@ public class ModGameRulesImpl {
         return GameRulesIntegerValueInvoker.invokeCreate(defaultValue);
     }
 
-    public static GameRules.Type<GameRules.BooleanValue> createBooleanRule(boolean defaultValue) {
-        return GameRulesBooleanValueInvoker.invokeCreate(defaultValue);
+    public static GameRules.Type<GameRules.BooleanValue> createBooleanRule(boolean defaultValue, BiConsumer<MinecraftServer, GameRules.BooleanValue> biConsumer) {
+        return GameRulesBooleanValueInvoker.invokeCreate(defaultValue, biConsumer);
     }
 }

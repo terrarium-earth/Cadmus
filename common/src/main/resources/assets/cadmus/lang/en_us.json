@@ -29,5 +29,10 @@
   "gamerule.doClaimedDamageEntities.description": "Claimed Damage Entities",
   "gamerule.doClaimedEntityInteractions.description": "Claimed Entity Interactions",
   "gamerule.maxChunkLoaded.description": "Max Chunk Loaded",
-  "gamerule.maxClaimedChunks.description": "Max Claimed Chunks"
+  "gamerule.maxClaimedChunks.description": "Max Claimed Chunks",
+
+  "option.prometheus.cadmus/v1": "Cadmus",
+  "cadmus.options.cadmus_options.title": "Cadmus Options",
+  "cadmus.options.cadmus_options.max_claims": "Max Claims",
+  "cadmus.options.cadmus_options.max_loaded_chunks": "Max Chunk Loaded"
 }
