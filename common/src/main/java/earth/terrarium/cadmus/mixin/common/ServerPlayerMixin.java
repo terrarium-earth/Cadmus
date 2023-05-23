@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.mixin.common;
 
-import earth.terrarium.cadmus.common.claims.LastMessageHolder;
+import earth.terrarium.cadmus.common.util.LastMessageHolder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;

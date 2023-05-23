@@ -4,7 +4,10 @@ architectury {
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixinextras_version}"))
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:$rootProject.mixinextras_version"))
+    modCompileOnly("earth.terrarium.prometheus:prometheus-common-$minecraft_version:$prometheus_version") {
+        transitive = false
+    }
 }
 
 processResources {

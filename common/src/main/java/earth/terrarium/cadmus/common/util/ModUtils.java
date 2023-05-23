@@ -3,7 +3,6 @@ package earth.terrarium.cadmus.common.util;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
-import earth.terrarium.cadmus.common.claims.LastMessageHolder;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

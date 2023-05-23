@@ -12,6 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class CadmusClientForge {
     public static void init() {
+        CadmusClient.init();
         MinecraftForge.EVENT_BUS.addListener(CadmusClientForge::onClientTick);
         MinecraftForge.EVENT_BUS.addListener(CadmusClientForge::onRegisterClientCommands);
 

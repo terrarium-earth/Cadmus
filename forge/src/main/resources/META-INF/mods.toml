@@ -6,13 +6,13 @@ issueTrackerURL = "https://github.com/terrarium-earth/${github_name}/issues"
 [[mods]]
 modId = "cadmus"
 version = "${version}"
-displayName = "ModName"
-updateJSONURL="https://api.modrinth.com/updates/${modrinth_id}/forge_updates.json"
+displayName = "Cadmus"
+updateJSONURL = "https://api.modrinth.com/updates/${modrinth_id}/forge_updates.json"
 displayURL = "https://modrinth.com/mod/cadmus"
 logoFile = "icon.png"
 authors = "Alex Nijjar, ThatGravyBoat"
 credits = ""
-description = "idk"
+description = "Modern Chunk Claiming Mod!"
 
 [[dependencies.cadmus]]
 modId = "forge"

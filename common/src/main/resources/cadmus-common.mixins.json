@@ -11,6 +11,7 @@
     "common.chunkprotection.ButtonBlockMixin",
     "common.chunkprotection.EntityMixin",
     "common.chunkprotection.FireBlockMixin",
+    "common.chunkprotection.FrostWalkerEnchantmentMixin",
     "common.chunkprotection.HangingEntityMixin",
     "common.chunkprotection.OnHitMixin",
     "common.chunkprotection.WaterlilyBlockMixin"

@@ -5,11 +5,11 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.util.ModGameRules;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
@@ -53,7 +53,7 @@ public record ServerboundRequestClaimedChunksPacket(
         public PacketContext handle(ServerboundRequestClaimedChunksPacket message) {
             return (player, level) -> {
                 var start = player.chunkPosition();
-                int viewDistance = Math.min(((ServerLevel)level).getServer().getPlayerList().getViewDistance(), 32);
+                int viewDistance = Math.min(((ServerLevel) level).getServer().getPlayerList().getViewDistance(), 32);
                 int renderDistance = Math.min(message.renderDistance, viewDistance);
 
                 String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
@@ -93,8 +93,8 @@ public record ServerboundRequestClaimedChunksPacket(
                     }
                 }
 
-                int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
-                int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+                int maxClaims = MaxClaimProviderApi.API.getSelected().getMaxClaims(id, player.getServer(), player);
+                int maxChunkLoaded = MaxClaimProviderApi.API.getSelected().getMaxChunkLoaded(id, player.getServer(), player);
                 NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedChunks, chunkLoadedCount, maxClaims, maxChunkLoaded, renderDistance), player);
             };
         }

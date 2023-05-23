@@ -5,10 +5,10 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
-import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -59,14 +59,14 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
 
                 // Check if the player is claiming more chunks than allowed
                 var teamClaims = ClaimHandler.getTeamClaims(serverLevel, id);
-                int maxClaims = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
-                if ((teamClaims == null ? 0 : teamClaims.values().size()) + message.addedChunks.size() - message.removedChunks.size() > maxClaims) {
+                int maxClaims = MaxClaimProviderApi.API.getSelected().getMaxClaims(id, player.getServer(), player);
+                if (!message.addedChunks.isEmpty() && (teamClaims == null ? 0 : teamClaims.values().size()) + message.addedChunks.size() - message.removedChunks.size() > maxClaims) {
                     Constants.LOGGER.warn("Player {} tried to claim more chunks than allowed! ({} > {})", player.getName().getString(), teamClaims == null ? 0 : teamClaims.values().size() + message.addedChunks.size() - message.removedChunks.size(), maxClaims);
                     return;
                 }
 
                 // Check if the player is claiming more chunk loaded chunks than allowed
-                int maxChunkLoaded = ModGameRules.getOrCreateIntGameRule(level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+                int maxChunkLoaded = MaxClaimProviderApi.API.getSelected().getMaxChunkLoaded(id, player.getServer(), player);
                 int currentChunkLoaded = 0;
                 int addedChunkLoaded = message.addedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
                 int removedChunkLoaded = message.removedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
