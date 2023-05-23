@@ -4,6 +4,7 @@ import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.compat.prometheus.roles.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, "blockBreaking", ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (id, server) ->
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, (id, server) ->
             TeamProviderApi.API.getSelected().canBreakBlock(id, server, pos, player));
     }
 
@@ -52,7 +53,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, "blockPlacing", ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (id, server) ->
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, (id, server) ->
             TeamProviderApi.API.getSelected().canPlaceBlock(id, server, pos, player));
     }
 
@@ -63,7 +64,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
-        return canAccess(level, pos, player, "blockExplosions", ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (id, server) ->
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, (id, server) ->
             TeamProviderApi.API.getSelected().canExplodeBlock(id, server, pos, explosion, player));
     }
 
@@ -74,7 +75,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
-        return canAccess(level, pos, player, "blockInteractions", ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (id, server) ->
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, (id, server) ->
             TeamProviderApi.API.getSelected().canInteractWithBlock(id, server, pos, type, player));
     }
 
@@ -85,7 +86,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), player, "entityInteractions", ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (id, server) ->
+        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, (id, server) ->
             TeamProviderApi.API.getSelected().canInteractWithEntity(id, server, entity, player));
     }
 
@@ -96,7 +97,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
-        return canAccess(level, entity.blockPosition(), player, "entityDamage", ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (id, server) ->
+        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, (id, server) ->
             TeamProviderApi.API.getSelected().canDamageEntity(id, server, entity, player));
     }
 
@@ -131,11 +132,10 @@ public class ClaimApiImpl implements ClaimApi {
         if (!(level instanceof ServerLevel serverLevel)) return true;
         MinecraftServer server = serverLevel.getServer();
 
-        if (ModUtils.isModLoaded("prometheus")) {
-            if (PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), "cadmus." + permission))
-                return true;
-        } else {
-            if (ModGameRules.getOrCreateBooleanGameRule(level, rule)) return true;
+        if (ModUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
+            return true;
+        } else if (!ModUtils.isModLoaded("prometheus") && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
+            return true;
         }
 
         if (!isClaimed(level, pos)) return true;

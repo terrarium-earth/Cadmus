@@ -3,6 +3,7 @@ package earth.terrarium.cadmus;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.client.CadmusClient;
+import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.maxclaims.CadmusMaxClaimProvider;
@@ -53,5 +54,7 @@ public class Cadmus {
                         level.getLevel().getChunkSource().updateChunkForced(pos, true);
                     }
                 })));
+        // Initialize the data handler
+        CadmusDataHandler.read(server);
     }
 }

@@ -2,7 +2,7 @@ package earth.terrarium.cadmus.common.util;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
-import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.mixin.common.GameRulesAccessor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
@@ -27,7 +27,7 @@ public class ModGameRules {
 
     public static final GameRules.Key<GameRules.BooleanValue> DO_COMBINED_CLAIM_LIMIT = registerIfPrometheusInstalled("doCombinedClaimLimit", GameRules.Category.MISC, createBooleanRule(false, (server, rule) ->
         // recalculate max claims for all teams
-        ClaimHandler.getMaxTeamClaims(server.overworld()).keySet().forEach(id -> MaxClaimProviderApi.API.getSelected().calculate(id, server))));
+        CadmusDataHandler.getMaxTeamClaims(server).keySet().forEach(id -> MaxClaimProviderApi.API.getSelected().calculate(id, server))));
 
     public static void init() {
     }

@@ -1,26 +1,31 @@
 package earth.terrarium.cadmus.common.compat.prometheus;
 
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
+import earth.terrarium.cadmus.common.compat.prometheus.roles.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.roles.CadmusOptions;
 import earth.terrarium.cadmus.common.compat.prometheus.roles.client.CadmusOptionsDisplay;
+import earth.terrarium.prometheus.Prometheus;
 import earth.terrarium.prometheus.api.permissions.PermissionApi;
 import earth.terrarium.prometheus.api.roles.RoleApi;
 import earth.terrarium.prometheus.api.roles.client.OptionDisplayApi;
 import earth.terrarium.prometheus.api.roles.options.RoleOptionsApi;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+
+import java.util.UUID;
 
 public class PrometheusIntegration {
-    public static final ResourceLocation PROMETHEUS_ID = new ResourceLocation("prometheus", "prometheus");
+    public static final ResourceLocation PROMETHEUS_ID = new ResourceLocation(Prometheus.MOD_ID, Prometheus.MOD_ID);
 
     public static void registerClient() {
         var api = PermissionApi.API;
-        api.addAutoComplete("cadmus.block_breaking");
-        api.addAutoComplete("cadmus.block_placing");
-        api.addAutoComplete("cadmus.block_explosions");
-        api.addAutoComplete("cadmus.block_interactions");
-        api.addAutoComplete("cadmus.entity_interactions");
-        api.addAutoComplete("cadmus.entity_damage");
+        api.addAutoComplete(CadmusAutoCompletes.BLOCK_BREAKING);
+        api.addAutoComplete(CadmusAutoCompletes.BLOCK_PLACING);
+        api.addAutoComplete(CadmusAutoCompletes.BLOCK_EXPLOSIONS);
+        api.addAutoComplete(CadmusAutoCompletes.BLOCK_INTERACTIONS);
+        api.addAutoComplete(CadmusAutoCompletes.ENTITY_INTERACTIONS);
+        api.addAutoComplete(CadmusAutoCompletes.ENTITY_DAMAGE);
 
         OptionDisplayApi.API.register(CadmusOptions.SERIALIZER.id(), CadmusOptionsDisplay::create);
     }
@@ -39,7 +44,15 @@ public class PrometheusIntegration {
         return RoleApi.API.getNonNullOption(player, CadmusOptions.SERIALIZER).maxClaims();
     }
 
+    public static int getMaxClaims(Level level, UUID player) {
+        return RoleApi.API.forceGetNonNullOption(level, player, CadmusOptions.SERIALIZER).maxClaims();
+    }
+
     public static int getMaxChunkLoaded(Player player) {
         return RoleApi.API.getNonNullOption(player, CadmusOptions.SERIALIZER).maxChunkLoaded();
+    }
+
+    public static int getMaxChunkLoaded(Level level, UUID player) {
+        return RoleApi.API.forceGetNonNullOption(level, player, CadmusOptions.SERIALIZER).maxChunkLoaded();
     }
 }
