@@ -1,11 +1,11 @@
 package earth.terrarium.cadmus.common.compat.prometheus;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.datafixers.util.Pair;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProvider;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.util.ModGameRules;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 
@@ -36,7 +36,7 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
             }
         }
 
-        CadmusDataHandler.getMaxTeamClaims(server).put(id, Pair.of(maxClaims, maxChunkLoaded));
+        CadmusDataHandler.getMaxTeamClaims(server).put(id, IntIntPair.of(maxClaims, maxChunkLoaded));
     }
 
     @Override
@@ -47,12 +47,12 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
     @Override
     public int getMaxClaims(String id, MinecraftServer server, Player player) {
         var maxClaims = CadmusDataHandler.getMaxTeamClaims(server).get(id);
-        return maxClaims == null ? PrometheusIntegration.getMaxClaims(player) : maxClaims.getFirst();
+        return maxClaims == null ? PrometheusIntegration.getMaxClaims(player) : maxClaims.firstInt();
     }
 
     @Override
     public int getMaxChunkLoaded(String id, MinecraftServer server, Player player) {
         var maxChunkLoaded = CadmusDataHandler.getMaxTeamClaims(server).get(id);
-        return maxChunkLoaded == null ? PrometheusIntegration.getMaxChunkLoaded(player) : maxChunkLoaded.getSecond();
+        return maxChunkLoaded == null ? PrometheusIntegration.getMaxChunkLoaded(player) : maxChunkLoaded.secondInt();
     }
 }

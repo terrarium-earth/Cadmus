@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.common.claims;
 
-import com.mojang.datafixers.util.Pair;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -16,7 +16,7 @@ import java.util.Map;
  * Data that should only have one save instance, the overworld save data.
  */
 public class CadmusDataHandler extends SavedData {
-    private final Map<String, Pair<Integer, Integer>> maxClaimsById = new HashMap<>();
+    private final Map<String, IntIntPair> maxClaimsById = new HashMap<>();
 
     public CadmusDataHandler() {
     }
@@ -27,7 +27,7 @@ public class CadmusDataHandler extends SavedData {
             CompoundTag maxClaimTag = maxClaimsTag.getCompound(id);
             int maxClaims = maxClaimTag.getInt("maxClaims");
             int maxChunkLoaded = maxClaimTag.getInt("maxChunkLoaded");
-            maxClaimsById.put(id, Pair.of(maxClaims, maxChunkLoaded));
+            maxClaimsById.put(id, IntIntPair.of(maxClaims, maxChunkLoaded));
         });
 
         String teamProvider = tag.getString("team_provider");
@@ -47,8 +47,8 @@ public class CadmusDataHandler extends SavedData {
         CompoundTag maxClaimsTag = new CompoundTag();
         maxClaimsById.forEach((id, maxClaims) -> {
             CompoundTag maxClaimTag = new CompoundTag();
-            maxClaimTag.putInt("maxClaims", maxClaims.getFirst());
-            maxClaimTag.putInt("maxChunkLoaded", maxClaims.getSecond());
+            maxClaimTag.putInt("maxClaims", maxClaims.firstInt());
+            maxClaimTag.putInt("maxChunkLoaded", maxClaims.secondInt());
             maxClaimsTag.put(id, maxClaimTag);
         });
         tag.put("max_claims", maxClaimsTag);
@@ -69,7 +69,7 @@ public class CadmusDataHandler extends SavedData {
         return server.overworld().getDataStorage().computeIfAbsent(CadmusDataHandler::new, CadmusDataHandler::new, "cadmus_data");
     }
 
-    public static Map<String, Pair<Integer, Integer>> getMaxTeamClaims(MinecraftServer server) {
+    public static Map<String, IntIntPair> getMaxTeamClaims(MinecraftServer server) {
         return read(server).maxClaimsById;
     }
 
