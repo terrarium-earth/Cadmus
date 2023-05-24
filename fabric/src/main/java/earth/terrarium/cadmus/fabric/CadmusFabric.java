@@ -3,8 +3,10 @@ package earth.terrarium.cadmus.fabric;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.common.commands.ModCommands;
 import earth.terrarium.cadmus.compat.fabric.cpa.CommonProtectionApiCompat;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,6 +20,7 @@ public class CadmusFabric implements ModInitializer {
         if (FabricLoader.getInstance().isModLoaded("common-protection-api")) {
             CommonProtectionApiCompat.init();
         }
+        CommandRegistrationCallback.EVENT.register(ModCommands::register);
         ServerLifecycleEvents.SERVER_STARTED.register(Cadmus::serverStarted);
         registerChunkProtectionEvents();
     }

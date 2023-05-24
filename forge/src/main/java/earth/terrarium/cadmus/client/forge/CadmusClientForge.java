@@ -27,7 +27,7 @@ public class CadmusClientForge {
     }
 
     public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register((Commands.literal("claim").executes(context -> {
+        event.getDispatcher().register((Commands.literal("claimmap").executes(context -> {
             Minecraft.getInstance().tell(CadmusClient::openClaimMap);
             return 0;
         })));

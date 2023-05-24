@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.compat.prometheus.roles;
+package earth.terrarium.cadmus.common.compat.prometheus;
 
 public class CadmusAutoCompletes {
     public static final String BLOCK_BREAKING = "cadmus.block_breaking";

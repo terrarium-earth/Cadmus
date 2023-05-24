@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.common.compat.prometheus;
 
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
-import earth.terrarium.cadmus.common.compat.prometheus.roles.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.roles.CadmusOptions;
 import earth.terrarium.cadmus.common.compat.prometheus.roles.client.CadmusOptionsDisplay;
 import earth.terrarium.prometheus.Prometheus;

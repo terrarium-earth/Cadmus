@@ -9,6 +9,14 @@
   "key.cadmus.open_claim_map": "Open Claim Map",
   "key.categories.odyssey": "Odyssey",
 
+  "text.cadmus.claiming.claimed_chunk_at": "Claimed chunk at: %s, %s, %s",
+  "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: %s, %s, %s",
+  "text.cadmus.unclaiming.unclaimed_chunk_at": "Unclaimed chunk at: %s, %s, %s",
+  "text.cadmus.info.unclaimed": "Unclaimed",
+  "text.cadmus.info.claimed_by": "Claimed by: %s",
+  "text.cadmus.info.chunk_loaded_by": "Chunk loaded by: %s",
+  "text.cadmus.info.location": "Location: %s, %s, %s",
+
   "gamerule.canPickupClaimedItems": "Pickup Claimed Items",
   "gamerule.claimedMobGriefing": "Claimed Mob Griefing",
   "gamerule.doClaimedBlockBreaking": "Claimed Block Breaking",
@@ -34,5 +42,11 @@
   "option.prometheus.cadmus/v1": "Cadmus",
   "cadmus.options.cadmus_options.title": "Cadmus Options",
   "cadmus.options.cadmus_options.max_claims": "Max Claims",
-  "cadmus.options.cadmus_options.max_loaded_chunks": "Max Chunk Loaded"
+  "cadmus.options.cadmus_options.max_loaded_chunks": "Max Chunk Loaded",
+
+  "command.cadmus.exception.chunk_is_already_claimed": "Chunk is already claimed.",
+  "command.cadmus.exception.youve_already_claimed_chunk": "You've already claimed this chunk.",
+  "command.cadmus.exception.youve_maxed_out_your_claims": "You've maxed out your claims.",
+  "command.cadmus.exception.this_chunk_is_not_claimed": "This chunk is not claimed.",
+  "command.cadmus.exception.you_dont_own_this_chunk": "You don't own this chunk."
 }

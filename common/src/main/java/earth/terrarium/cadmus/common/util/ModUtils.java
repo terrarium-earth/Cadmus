@@ -1,14 +1,20 @@
 package earth.terrarium.cadmus.common.util;
 
+import com.teamresourceful.resourcefullib.common.lib.Constants;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class ModUtils {
@@ -34,6 +40,40 @@ public class ModUtils {
             ChatFormatting color = isMember ? teamColor : ChatFormatting.DARK_RED;
             player.displayClientMessage(displayName.copy().withStyle(color), true);
         }
+    }
+
+    public static boolean tryClaim(ServerLevel level, ServerPlayer player, Map<ChunkPos, ClaimType> addedChunks, Map<ChunkPos, ClaimType> removedChunks) {
+        String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
+
+        // Check if the player is claiming more chunks than allowed
+        var teamClaims = ClaimHandler.getTeamClaims(level, id);
+        int maxClaims = MaxClaimProviderApi.API.getSelected().getMaxClaims(id, player.getServer(), player);
+        if (!addedChunks.isEmpty() && (teamClaims == null ? 0 : teamClaims.values().size()) + addedChunks.size() - removedChunks.size() > maxClaims) {
+            Constants.LOGGER.warn("Player {} tried to claim more chunks than allowed! ({} > {})", player.getName().getString(), teamClaims == null ? 0 : teamClaims.values().size() + addedChunks.size() - removedChunks.size(), maxClaims);
+            return false;
+        }
+
+        // Check if the player is claiming more chunk loaded chunks than allowed
+        int maxChunkLoaded = MaxClaimProviderApi.API.getSelected().getMaxChunkLoaded(id, player.getServer(), player);
+        int currentChunkLoaded = 0;
+        int addedChunkLoaded = addedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+        int removedChunkLoaded = removedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+        if (teamClaims != null) {
+            currentChunkLoaded = teamClaims.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+        }
+        if (currentChunkLoaded + addedChunkLoaded - removedChunkLoaded > maxChunkLoaded) {
+            Constants.LOGGER.warn("Player {} tried to claim more chunk loaded chunks than allowed! ({} > {})", player.getName().getString(), currentChunkLoaded + addedChunkLoaded - removedChunkLoaded, maxChunkLoaded);
+            return false;
+        }
+
+        ClaimHandler.updateChunkLoaded(level, id, false);
+
+        ClaimHandler.addClaims(level, id, addedChunks);
+        ClaimHandler.removeClaims(level, id, removedChunks.keySet());
+
+        ClaimHandler.updateChunkLoaded(level, id, true);
+        level.players().forEach(ModUtils::displayTeamName);
+        return true;
     }
 
     @ExpectPlatform

@@ -4,10 +4,12 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
+import earth.terrarium.cadmus.common.commands.ModCommands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
@@ -35,6 +37,7 @@ public class CadmusForge {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> CadmusClientForge::init);
 
         IEventBus bus = MinecraftForge.EVENT_BUS;
+        bus.addListener(CadmusForge::onRegisterCommands);
         bus.addListener(CadmusForge::onServerStarted);
         bus.addListener(CadmusForge::onEnterSection);
         registerChunkProtectionEvents(bus);
@@ -57,6 +60,10 @@ public class CadmusForge {
         bus.addListener(EventPriority.LOWEST, CadmusForge::onProjectileImpact);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onLivingAttack);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onPistonPush);
+    }
+
+    private static void onRegisterCommands(RegisterCommandsEvent event) {
+        ModCommands.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
     }
 
     private static void onServerStarted(ServerStartedEvent event) {
