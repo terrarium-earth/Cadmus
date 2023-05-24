@@ -76,6 +76,15 @@ public class ModUtils {
         return true;
     }
 
+    public static Component serverTranslation(String translation, Object... args) {
+        if (args.length == 0) {
+            Component component = Component.translatable(translation);
+            return Component.translatableWithFallback(translation, component.getString());
+        }
+        Component component = Component.translatable(translation, args);
+        return Component.translatableWithFallback(translation, component.getString(), args);
+    }
+
     @ExpectPlatform
     public static boolean isModLoaded(String modId) {
         throw new NotImplementedException();

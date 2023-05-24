@@ -10,7 +10,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -44,6 +43,6 @@ public class UnclaimCommand {
             throw ClaimException.YOU_DONT_OWN_THIS_CHUNK;
         }
         ModUtils.tryClaim(player.getLevel(), player, Map.of(), Map.of(new ChunkPos(pos), ClaimType.CLAIMED));
-        player.displayClientMessage(Component.translatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.unclaiming.unclaimed_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
     }
 }
