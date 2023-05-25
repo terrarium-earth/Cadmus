@@ -4,6 +4,7 @@
   "package": "earth.terrarium.cadmus.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "common.FireworkRocketEntityMixin",
     "common.GameRulesAccessor",
     "common.ServerPlayerMixin",
     "common.ServerScoreboardMixin",
