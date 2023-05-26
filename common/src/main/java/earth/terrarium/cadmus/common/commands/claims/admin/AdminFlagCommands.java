@@ -14,7 +14,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class AdminFlagCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -55,19 +54,19 @@ public class AdminFlagCommands {
     }
 
     public static void flag(ServerPlayer player, String id, String flagName, Flag<?> flag) {
-        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, UUID.fromString(id), flagName);
-        AdminClaimHandler.setFlag(player.server, UUID.fromString(id), flagName, flag);
+        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, id, flagName);
+        AdminClaimHandler.setFlag(player.server, id, flagName, flag);
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.set_flag", flagName, oldVal.getValue(), flag.getValue()), false);
     }
 
     public static void remove(ServerPlayer player, String id, String flagName) {
-        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, UUID.fromString(id), flagName);
-        AdminClaimHandler.removeFlag(player.server, UUID.fromString(id), flagName);
+        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, id, flagName);
+        AdminClaimHandler.removeFlag(player.server, id, flagName);
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove_flag", flagName, oldVal.getValue()), false);
     }
 
     public static void list(ServerPlayer player, String id) throws ClaimException {
-        Map<String, Flag<?>> flags = AdminClaimHandler.getAllFlags(player.server, UUID.fromString(id));
+        Map<String, Flag<?>> flags = AdminClaimHandler.getAllFlags(player.server, id);
         if (flags.isEmpty()) {
             throw ClaimException.CLAIM_HAS_NO_FLAGS;
         }

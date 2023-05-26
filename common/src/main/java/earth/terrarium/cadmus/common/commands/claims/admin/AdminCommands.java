@@ -15,7 +15,6 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
@@ -26,26 +25,34 @@ import net.minecraft.world.level.ChunkPos;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class AdminCommands {
     public static final SuggestionProvider<CommandSourceStack> ADMIN_CLAIM_SUGGESTION_PROVIDER = (context, builder) -> {
-        Map<UUID, AdminClaim> claims = AdminClaimHandler.getAll(context.getSource().getServer());
-        return SharedSuggestionProvider.suggest((claims.keySet().stream().map(UUID::toString)), builder);
+        Map<String, AdminClaim> claims = AdminClaimHandler.getAll(context.getSource().getServer());
+        return SharedSuggestionProvider.suggest((claims.keySet().stream()), builder);
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("admin")
             .requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
+            .then(Commands.literal("create")
+                .then(Commands.argument("id", StringArgumentType.string())
+                    .executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        String id = StringArgumentType.getString(context, "id");
+                        CommandHelper.runAction(() -> create(player, id));
+                        return 1;
+                    })))
+            .then(Commands.literal("remove")
+                .then(Commands.argument("adminClaim", StringArgumentType.string())
+                    .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                    .executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        String id = StringArgumentType.getString(context, "adminClaim");
+                        CommandHelper.runAction(() -> remove(player, id));
+                        return 1;
+                    })))
             .then(Commands.literal("claim")
-                .then(Commands.literal("create")
-                    .then(Commands.argument("displayName", ComponentArgument.textComponent())
-                        .executes(context -> {
-                            ServerPlayer player = context.getSource().getPlayerOrException();
-                            Component displayName = ComponentArgument.getComponent(context, "displayName");
-                            CommandHelper.runAction(() -> create(player, displayName.copy().setStyle(displayName.getStyle().withClickEvent(null))));
-                            return 1;
-                        })))
                 .then(Commands.argument("adminClaim", StringArgumentType.string())
                     .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
                     .then(Commands.argument("pos", BlockPosArgument.blockPos())
@@ -66,10 +73,15 @@ public class AdminCommands {
                     }))));
     }
 
-    public static void create(ServerPlayer player, Component displayName) {
-        AdminClaim adminClaim = new AdminClaim(displayName, new HashMap<>());
-        AdminClaimHandler.create(player.server, adminClaim);
+    public static void create(ServerPlayer player, String id) {
+        AdminClaim adminClaim = new AdminClaim(Component.literal(id), new HashMap<>());
+        AdminClaimHandler.create(player.server, id, adminClaim);
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.create", adminClaim.displayName().getString()), false);
+    }
+
+    public static void remove(ServerPlayer player, String id) {
+        AdminClaimHandler.remove(player.server, id);
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove", id), false);
     }
 
     public static void claim(ServerPlayer player, String id, BlockPos pos, boolean chunkloaded) throws ClaimException {

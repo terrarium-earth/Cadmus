@@ -36,7 +36,7 @@ public class VanillaTeamProvider implements TeamProvider {
     @Nullable
     public Component getTeamName(String id, MinecraftServer server) {
         if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) {
-            return AdminClaimHandler.get(server, UUID.fromString(id.split(":")[1])).displayName();
+            return AdminClaimHandler.get(server, id.split(":")[1]).displayName();
         }
         var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
         if (playerTeam == null) {

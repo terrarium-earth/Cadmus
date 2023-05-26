@@ -19,6 +19,7 @@
   "text.cadmus.info.location": "Location: x: %s, z: %s",
 
   "text.cadmus.admin.create": "Created admin claim \"%s\"",
+  "text.cadmus.admin.remove": "Removed admin claim \"%s\"",
   "text.cadmus.admin.set_flag": "Set flag \"%s\" from \"%s\" to \"%s\"",
   "text.cadmus.admin.remove_flag": "Removed flag \"%s\" with value \"%s\"",
   "text.cadmus.admin.list": "\"%s\": \"%s\"",

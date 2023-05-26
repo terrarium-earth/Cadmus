@@ -11,10 +11,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class AdminClaimHandler extends SavedData {
-    private final Map<UUID, AdminClaim> claimsById = new HashMap<>();
+    private final Map<String, AdminClaim> claimsById = new HashMap<>();
 
     public AdminClaimHandler() {
     }
@@ -30,7 +29,7 @@ public class AdminClaimHandler extends SavedData {
                 flags.put(flag, value);
             });
             AdminClaim adminClaim = new AdminClaim(displayName, flags);
-            claimsById.put(UUID.fromString(id), adminClaim);
+            claimsById.put(id, adminClaim);
         });
     }
 
@@ -42,7 +41,7 @@ public class AdminClaimHandler extends SavedData {
             CompoundTag flagsTag = new CompoundTag();
             claimData.flags().forEach((flag, value) -> flagsTag.putString(flag, String.valueOf(value.getValue())));
             adminTag.put("flags", flagsTag);
-            tag.put(id.toString(), adminTag);
+            tag.put(id, adminTag);
         });
         return tag;
     }
@@ -51,40 +50,45 @@ public class AdminClaimHandler extends SavedData {
         return server.overworld().getDataStorage().computeIfAbsent(AdminClaimHandler::new, AdminClaimHandler::new, "cadmus_admin_claims");
     }
 
-    public static void create(MinecraftServer server, AdminClaim claim) {
+    public static void create(MinecraftServer server, String id, AdminClaim claim) {
         var data = read(server);
-        data.claimsById.put(UUID.randomUUID(), claim);
+        data.claimsById.put(id, claim);
     }
 
-    public static AdminClaim get(MinecraftServer server, UUID id) {
+    public static void remove(MinecraftServer server, String id) {
+        var data = read(server);
+        data.claimsById.remove(id);
+    }
+
+    public static AdminClaim get(MinecraftServer server, String id) {
         var data = read(server);
         return data.claimsById.get(id);
     }
 
-    public static Map<UUID, AdminClaim> getAll(MinecraftServer server) {
+    public static Map<String, AdminClaim> getAll(MinecraftServer server) {
         return read(server).claimsById;
     }
 
-    public static Flag<?> getFlag(MinecraftServer server, UUID id, String flag) {
+    public static Flag<?> getFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
         var claim = data.claimsById.get(id);
         var value = claim.flags().get(flag);
         return value == null ? FlagApi.API.get(flag) : value;
     }
 
-    public static Map<String, Flag<?>> getAllFlags(MinecraftServer server, UUID id) {
+    public static Map<String, Flag<?>> getAllFlags(MinecraftServer server, String id) {
         var data = read(server);
         var claim = data.claimsById.get(id);
         return claim.flags();
     }
 
-    public static void setFlag(MinecraftServer server, UUID id, String flag, Flag<?> value) {
+    public static void setFlag(MinecraftServer server, String id, String flag, Flag<?> value) {
         var data = read(server);
         var claim = data.claimsById.get(id);
         claim.flags().put(flag, value);
     }
 
-    public static void removeFlag(MinecraftServer server, UUID id, String flag) {
+    public static void removeFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
         var claim = data.claimsById.get(id);
         claim.flags().remove(flag);
