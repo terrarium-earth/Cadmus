@@ -6,6 +6,7 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.claims.maxclaims.CadmusMaxClaimProvider;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -26,6 +27,7 @@ public class Cadmus {
         TeamProviderApi.API.register(DEFAULT_ID, new VanillaTeamProvider());
         MaxClaimProviderApi.API.register(DEFAULT_ID, new CadmusMaxClaimProvider());
         ModGameRules.init();
+        ModFlags.init();
         if (!ModUtils.isModLoaded("argonauts")) {
             TeamProviderApi.API.setSelected(DEFAULT_ID);
         }

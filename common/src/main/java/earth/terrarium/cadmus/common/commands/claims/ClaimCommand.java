@@ -11,6 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -47,9 +48,10 @@ public class ClaimCommand {
             throw ClaimException.YOUVE_MAXED_OUT_YOUR_CLAIMS;
         }
         if (chunkloaded) {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", SectionPos.blockToSectionCoord(pos.getX()) * 16, SectionPos.blockToSectionCoord(pos.getZ()) * 16), false);
         } else {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", SectionPos.blockToSectionCoord(pos.getX()) * 16, SectionPos.blockToSectionCoord(pos.getZ()) * 16), false);
         }
     }
 }
+

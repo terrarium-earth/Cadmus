@@ -16,6 +16,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class ModUtils {
     public static void displayTeamName(ServerPlayer player) {
@@ -66,14 +67,18 @@ public class ModUtils {
             return false;
         }
 
+        claim(id, level, addedChunks, removedChunks.keySet());
+        return true;
+    }
+
+    public static void claim(String id, ServerLevel level, Map<ChunkPos, ClaimType> addedChunks, Set<ChunkPos> removedChunks) {
         ClaimHandler.updateChunkLoaded(level, id, false);
 
         ClaimHandler.addClaims(level, id, addedChunks);
-        ClaimHandler.removeClaims(level, id, removedChunks.keySet());
+        ClaimHandler.removeClaims(level, id, removedChunks);
 
         ClaimHandler.updateChunkLoaded(level, id, true);
         level.players().forEach(ModUtils::displayTeamName);
-        return true;
     }
 
     public static Component serverTranslation(String translation, Object... args) {

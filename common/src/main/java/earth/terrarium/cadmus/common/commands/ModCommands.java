@@ -4,6 +4,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimInfoCommand;
 import earth.terrarium.cadmus.common.commands.claims.UnclaimCommand;
+import earth.terrarium.cadmus.common.commands.claims.admin.AdminCommands;
+import earth.terrarium.cadmus.common.commands.claims.admin.AdminFlagCommands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -15,5 +17,7 @@ public class ModCommands {
         ClaimCommand.register(dispatcher);
         UnclaimCommand.register(dispatcher);
         ClaimInfoCommand.register(dispatcher);
+        AdminCommands.register(dispatcher);
+        AdminFlagCommands.register(dispatcher);
     }
 }

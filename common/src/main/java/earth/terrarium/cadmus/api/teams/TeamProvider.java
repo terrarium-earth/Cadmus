@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.api.teams;
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -136,7 +137,7 @@ public interface TeamProvider {
      * @param server the server
      */
     default void onTeamChanged(MinecraftServer server, String id) {
-        MaxClaimProviderApi.API.getSelected().calculate(id, server);
+        MaxClaimProviderApi.API.getSelected().calculate(ClaimHandler.TEAM_PREFIX + ":" + id, server);
     }
 
     /**

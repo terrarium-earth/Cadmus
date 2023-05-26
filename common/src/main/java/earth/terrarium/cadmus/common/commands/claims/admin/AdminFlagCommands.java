@@ -1,0 +1,76 @@
+package earth.terrarium.cadmus.common.commands.claims.admin;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import earth.terrarium.cadmus.api.claims.admin.FlagApi;
+import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
+import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
+import earth.terrarium.cadmus.common.commands.claims.ClaimException;
+import earth.terrarium.cadmus.common.commands.claims.CommandHelper;
+import earth.terrarium.cadmus.common.util.ModUtils;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Map;
+import java.util.UUID;
+
+public class AdminFlagCommands {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("admin")
+            .requires((commandSourceStack) -> commandSourceStack.hasPermission(2));
+
+        FlagApi.API.getAll().forEach((id, flag) ->
+            dispatcher.register(command.then(Commands.literal("flag")
+                .then(Commands.literal("set")
+                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                        .then(Commands.literal(id)
+                            .then(flag.createArgument("value")
+                                .executes(context -> {
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                    String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                                    CommandHelper.runAction(() -> flag(player, adminClaim, id, flag.getFromArgument(context, "value")));
+                                    return 1;
+                                })))))
+                .then(Commands.literal("remove")
+                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                            CommandHelper.runAction(() -> remove(player, adminClaim, id));
+                            return 1;
+                        })))
+                .then(Commands.literal("list")
+                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                            CommandHelper.runAction(() -> list(player, adminClaim));
+                            return 1;
+                        }))))));
+    }
+
+    public static void flag(ServerPlayer player, String id, String flagName, Flag<?> flag) {
+        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, UUID.fromString(id), flagName);
+        AdminClaimHandler.setFlag(player.server, UUID.fromString(id), flagName, flag);
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.set_flag", flagName, oldVal.getValue(), flag.getValue()), false);
+    }
+
+    public static void remove(ServerPlayer player, String id, String flagName) {
+        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, UUID.fromString(id), flagName);
+        AdminClaimHandler.removeFlag(player.server, UUID.fromString(id), flagName);
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove_flag", flagName, oldVal.getValue()), false);
+    }
+
+    public static void list(ServerPlayer player, String id) throws ClaimException {
+        Map<String, Flag<?>> flags = AdminClaimHandler.getAllFlags(player.server, UUID.fromString(id));
+        if (flags.isEmpty()) {
+            throw ClaimException.CLAIM_HAS_NO_FLAGS;
+        }
+        flags.forEach((name, value) -> player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.list", name, value.getValue()), false));
+    }
+}

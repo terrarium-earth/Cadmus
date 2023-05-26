@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
@@ -22,7 +23,7 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public Set<GameProfile> getTeamMembers(String id, MinecraftServer server) {
-        PlayerTeam team = server.getScoreboard().getPlayerTeam(id);
+        PlayerTeam team = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
         Set<GameProfile> profiles = new HashSet<>();
         if (team == null) return profiles;
         for (String player : team.getPlayers()) {
@@ -34,9 +35,12 @@ public class VanillaTeamProvider implements TeamProvider {
     @Override
     @Nullable
     public Component getTeamName(String id, MinecraftServer server) {
-        var playerTeam = server.getScoreboard().getPlayerTeam(id);
+        if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) {
+            return AdminClaimHandler.get(server, UUID.fromString(id.split(":")[1])).displayName();
+        }
+        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
         if (playerTeam == null) {
-            var profile = server.getProfileCache().get(UUID.fromString(id));
+            var profile = server.getProfileCache().get(UUID.fromString(id.split(":")[1]));
             return profile.map(p -> Component.literal(p.getName())).orElse(null);
         }
         return playerTeam.getDisplayName();
@@ -45,24 +49,26 @@ public class VanillaTeamProvider implements TeamProvider {
     @Override
     public String getTeamId(MinecraftServer server, UUID player) {
         var profile = server.getProfileCache().get(player).orElse(null);
-        if (profile == null) return player.toString();
+        if (profile == null) return ClaimHandler.PLAYER_PREFIX + ":" + player.toString();
         var playerTeam = server.getScoreboard().getPlayersTeam(profile.getName());
-        if (playerTeam == null) return player.toString();
-        return playerTeam.getName();
+        if (playerTeam == null) return ClaimHandler.PLAYER_PREFIX + ":" + player.toString();
+        return ClaimHandler.TEAM_PREFIX + ":" + playerTeam.getName();
     }
 
     @Override
     public boolean isMember(String id, MinecraftServer server, UUID player) {
+        if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) return true;
+        if (id.startsWith(ClaimHandler.PLAYER_PREFIX)) return id.split(":")[1].equals(player.toString());
         var profile = server.getProfileCache().get(player).orElse(null);
         if (profile == null) return false;
-        var playerTeam = server.getScoreboard().getPlayerTeam(id);
-        if (playerTeam == null) return id.equals(player.toString());
+        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
+        if (playerTeam == null) return id.split(":")[1].equals(player.toString());
         return playerTeam.getPlayers().contains(profile.getName());
     }
 
     @Override
     public ChatFormatting getTeamColor(String id, MinecraftServer server) {
-        var playerTeam = server.getScoreboard().getPlayerTeam(id);
+        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
         var result = Optionull.mapOrDefault(playerTeam, PlayerTeam::getColor, ChatFormatting.AQUA);
         return result == ChatFormatting.RESET ? ChatFormatting.AQUA : result;
     }
@@ -106,6 +112,6 @@ public class VanillaTeamProvider implements TeamProvider {
 
     public void onTeamRemoved(MinecraftServer server, PlayerTeam playerTeam) {
         this.onTeamRemoved(server, playerTeam.getName());
-        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, playerTeam.getName()));
+        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.TEAM_PREFIX + ":" + playerTeam.getName()));
     }
 }
