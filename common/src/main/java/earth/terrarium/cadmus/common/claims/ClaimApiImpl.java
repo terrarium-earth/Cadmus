@@ -78,15 +78,7 @@ public class ClaimApiImpl implements ClaimApi {
         Pair<String, ClaimType> claim = ClaimHandler.getClaim((ServerLevel) level, pos);
         boolean isAdmin = claim != null && claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX);
 
-        if (claim != null) {
-            if (!isAdmin) {
-                return true;
-            } else {
-                return !AdminClaimHandler.<Boolean>getFlag(level.getServer(), claim.getFirst(), ModFlags.BLOCK_EXPLOSIONS);
-            }
-        }
-
-        return false;
+        return (claim != null) && (!isAdmin || !AdminClaimHandler.<Boolean>getFlag(level.getServer(), claim.getFirst(), ModFlags.BLOCK_EXPLOSIONS));
     }
 
     @Override
