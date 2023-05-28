@@ -9,8 +9,8 @@ import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
+import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
+import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -20,36 +20,37 @@ public class ClaimCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("claim")
-            .then(Commands.argument("pos", BlockPosArgument.blockPos())
+            .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                 .then(Commands.argument("chunkload", BoolArgumentType.bool())
                     .executes(context -> {
                         ServerPlayer player = context.getSource().getPlayerOrException();
-                        BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+                        ColumnPos pos = ColumnPosArgument.getColumnPos(context, "pos");
                         boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                        CommandHelper.runAction(() -> claim(player, pos, chunkload));
+                        CommandHelper.runAction(() -> claim(player, pos.toChunkPos(), chunkload));
                         return 1;
                     })))
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
-                CommandHelper.runAction(() -> claim(player, player.blockPosition(), false));
+                CommandHelper.runAction(() -> claim(player, player.chunkPosition(), false));
                 return 1;
             }));
     }
 
-    public static void claim(ServerPlayer player, BlockPos pos, boolean chunkloaded) throws ClaimException {
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), new ChunkPos(pos));
+    public static void claim(ServerPlayer player, ChunkPos pos, boolean chunkloaded) throws ClaimException {
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
         }
-        var claim = Map.of(new ChunkPos(pos), chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
+        var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
         if (!ModUtils.tryClaim(player.getLevel(), player, claim, Map.of())) {
             throw ClaimException.YOUVE_MAXED_OUT_YOUR_CLAIMS;
         }
         if (chunkloaded) {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.getX(), pos.getY(), pos.getZ()), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
     }
 }
+

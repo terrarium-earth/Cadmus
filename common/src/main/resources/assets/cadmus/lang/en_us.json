@@ -5,17 +5,29 @@
   "gui.cadmus.claim_map.loading": "Loading...",
   "tooltip.cadmus.claim_map.clear_claimed_chunks": "Clear Claimed Chunks",
   "tooltip.cadmus.claim_map.chunk_loaded": "Chunk Loaded",
+  "tooltip.cadmus.claim_map.admin_claim": "Admin Claim",
   "message.cadmus.wilderness": "§2Wilderness",
   "key.cadmus.open_claim_map": "Open Claim Map",
   "key.categories.odyssey": "Odyssey",
 
-  "text.cadmus.claiming.claimed_chunk_at": "Claimed chunk at: %s, %s, %s",
-  "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: %s, %s, %s",
-  "text.cadmus.unclaiming.unclaimed_chunk_at": "Unclaimed chunk at: %s, %s, %s",
+  "text.cadmus.claiming.claimed_chunk_at": "Claimed chunk at: x: %s, z: %s",
+  "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: x: %s, z: %s",
+  "text.cadmus.unclaiming.unclaimed_chunk_at": "Unclaimed chunk at: x: %s, z: %s",
   "text.cadmus.info.unclaimed": "Unclaimed",
-  "text.cadmus.info.claimed_by": "Claimed by: %s",
-  "text.cadmus.info.chunk_loaded_by": "Chunk loaded by: %s",
-  "text.cadmus.info.location": "Location: %s, %s, %s",
+  "text.cadmus.info.claimed_by": "Claimed by: %s (%s)",
+  "text.cadmus.info.chunk_loaded_by": "Chunk loaded by: %s (%s)",
+  "text.cadmus.info.location": "Location: x: %s, z: %s",
+
+  "text.cadmus.admin.create": "Created admin claim \"%s\"",
+  "text.cadmus.admin.remove": "Removed admin claim \"%s\"",
+  "text.cadmus.admin.set_flag": "Set flag \"%s\" from \"%s\" to \"%s\"",
+  "text.cadmus.admin.remove_flag": "Removed flag \"%s\" with value \"%s\"",
+  "text.cadmus.admin.list": "\"%s\": \"%s\"",
+
+  "text.cadmus.info.team": "Team",
+  "text.cadmus.info.player": "Player",
+  "text.cadmus.info.admin": "Admin",
+  "text.cadmus.info.unknown": "Unknown",
 
   "gamerule.canPickupClaimedItems": "Pickup Claimed Items",
   "gamerule.claimedMobGriefing": "Claimed Mob Griefing",
@@ -48,5 +60,7 @@
   "command.cadmus.exception.youve_already_claimed_chunk": "You've already claimed this chunk.",
   "command.cadmus.exception.youve_maxed_out_your_claims": "You've maxed out your claims.",
   "command.cadmus.exception.this_chunk_is_not_claimed": "This chunk is not claimed.",
-  "command.cadmus.exception.you_dont_own_this_chunk": "You don't own this chunk."
+  "command.cadmus.exception.you_dont_own_this_chunk": "You don't own this chunk.",
+  "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
+  "command.cadmus.exception.claim_does_not_exist": "This claim does not exist."
 }

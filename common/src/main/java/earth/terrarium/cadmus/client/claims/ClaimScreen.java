@@ -10,6 +10,7 @@ import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -24,7 +25,6 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
@@ -341,14 +341,22 @@ public class ClaimScreen extends BaseCursorScreen {
 
     private void drawTooltips(ClaimType teamType, Pair<String, ClaimType> otherInfo) {
         if (otherInfo != null) {
+            ImmutableList.Builder<FormattedCharSequence> tooltips = ImmutableList.builder();
             Component otherTeamDisplayName = teamDisplayNames.get(otherInfo.getFirst());
             if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
-            this.setTooltipForNextRenderPass(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED));
+            tooltips.add(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED).getVisualOrderText());
+            if (otherInfo.getSecond() == ClaimType.CHUNK_LOADED) {
+                tooltips.add(ConstantComponents.CHUNK_LOADED.getVisualOrderText());
+            }
+            if (otherInfo.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX)) {
+                tooltips.add(ConstantComponents.ADMIN_CLAIM.getVisualOrderText());
+            }
+            this.setTooltipForNextRenderPass(tooltips.build());
         } else if (teamType != null && tool == ClaimTool.NONE) {
             ImmutableList.Builder<FormattedCharSequence> tooltips = ImmutableList.builder();
             tooltips.add(this.displayName.copy().withStyle(this.displayName.getStyle().withColor(color)).getVisualOrderText());
             if (teamType == ClaimType.CHUNK_LOADED) {
-                tooltips.add(ConstantComponents.CHUNK_LOADED.copy().withStyle(Style.EMPTY.withColor(ORANGE).withItalic(true)).getVisualOrderText());
+                tooltips.add(ConstantComponents.CHUNK_LOADED.getVisualOrderText());
             }
             this.setTooltipForNextRenderPass(tooltips.build());
         }

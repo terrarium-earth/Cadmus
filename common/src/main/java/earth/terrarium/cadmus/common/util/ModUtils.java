@@ -6,6 +6,8 @@ import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
+import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -16,9 +18,10 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class ModUtils {
-    public static void displayTeamName(ServerPlayer player) {
+    public static void displayTeamName(ServerPlayer player, ChunkPos pos) {
         if (!(player instanceof LastMessageHolder holder)) return;
 
         var claimData = ClaimHandler.getClaim(player.getLevel(), player.chunkPosition());
@@ -28,11 +31,21 @@ public class ModUtils {
         }
 
         Component lastMessage = holder.cadmus$getLastMessage();
+        if (lastMessage == null) {
+            Component greeting = AdminClaimHandler.getFlag((ServerLevel) player.level, player.chunkPosition(), ModFlags.GREETING);
+            if (!greeting.getString().isBlank()) {
+                player.displayClientMessage(greeting, false);
+            }
+        }
         if (Objects.equals(displayName, lastMessage)) return;
         holder.cadmus$setLastMessage(displayName);
 
         if (displayName == null) {
             player.displayClientMessage(ConstantComponents.WILDERNESS, true);
+            Component farewell = AdminClaimHandler.getFlag((ServerLevel) player.level, pos, ModFlags.FAREWELL);
+            if (!farewell.getString().isBlank()) {
+                player.displayClientMessage(farewell, false);
+            }
         } else {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
             ChatFormatting teamColor = TeamProviderApi.API.getSelected().getTeamColor(claimData.getFirst(), player.getServer());
@@ -66,14 +79,18 @@ public class ModUtils {
             return false;
         }
 
+        claim(id, level, addedChunks, removedChunks.keySet());
+        return true;
+    }
+
+    public static void claim(String id, ServerLevel level, Map<ChunkPos, ClaimType> addedChunks, Set<ChunkPos> removedChunks) {
         ClaimHandler.updateChunkLoaded(level, id, false);
 
         ClaimHandler.addClaims(level, id, addedChunks);
-        ClaimHandler.removeClaims(level, id, removedChunks.keySet());
+        ClaimHandler.removeClaims(level, id, removedChunks);
 
         ClaimHandler.updateChunkLoaded(level, id, true);
-        level.players().forEach(ModUtils::displayTeamName);
-        return true;
+        level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
     }
 
     public static Component serverTranslation(String translation, Object... args) {

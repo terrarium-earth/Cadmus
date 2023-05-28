@@ -4,9 +4,14 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.ModCommands;
+import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -40,6 +45,7 @@ public class CadmusForge {
         bus.addListener(CadmusForge::onRegisterCommands);
         bus.addListener(CadmusForge::onServerStarted);
         bus.addListener(CadmusForge::onEnterSection);
+        bus.addListener(CadmusForge::onRightClick);
         registerChunkProtectionEvents(bus);
     }
 
@@ -72,7 +78,7 @@ public class CadmusForge {
 
     private static void onEnterSection(EntityEvent.EnteringSection event) {
         if (event.getEntity() instanceof Player player) {
-            Cadmus.enterChunkSection(player);
+            Cadmus.enterChunkSection(player, event.getOldPos().chunk());
         }
     }
 
@@ -128,8 +134,8 @@ public class CadmusForge {
     // Prevent explosions from destroying blocks in protected chunks
     private static void onExplode(ExplosionEvent.Detonate event) {
         Player player = event.getExplosion().getIndirectSourceEntity() instanceof Player p ? p : null;
-        event.getAffectedBlocks().removeIf(next -> (ClaimApi.API.isClaimed(event.getLevel(), next) && (player == null || !ClaimApi.API.canPlaceBlock(event.getLevel(), next, player))));
-        event.getAffectedEntities().removeIf(next -> (ClaimApi.API.isClaimed(event.getLevel(), next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(event.getLevel(), next, player))));
+        event.getAffectedBlocks().removeIf(next -> (ClaimApi.API.canExplodeBlock(event.getLevel(), new ChunkPos(next)) && (player == null || !ClaimApi.API.canExplodeBlock(event.getLevel(), next, event.getExplosion(), player))));
+        event.getAffectedEntities().removeIf(next -> (ClaimApi.API.canExplodeBlock(event.getLevel(), next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(event.getLevel(), next, player))));
     }
 
     // Prevent players from trampling crops in protected chunks
@@ -167,12 +173,18 @@ public class CadmusForge {
 
     // Prevent entities from being affected by lightning in protected chunks
     private static void onEntityStruckByLightning(EntityStruckByLightningEvent event) {
-        if (event.getLightning().getCause() != null) {
-            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), event.getLightning().getCause())) {
+        if (!event.getEntity().getLevel().isClientSide()) {
+            var claim = ClaimHandler.getClaim((ServerLevel) event.getEntity().getLevel(), event.getEntity().chunkPosition());
+            if (claim != null && claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX)) {
+                event.setCanceled(!AdminClaimHandler.<Boolean>getFlag(event.getEntity().getLevel().getServer(), claim.getFirst(), ModFlags.LIGHTNING));
+            }
+            if (event.getLightning().getCause() != null) {
+                if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), event.getLightning().getCause())) {
+                    event.setCanceled(true);
+                }
+            } else if (!ClaimApi.API.canEntityGrief(event.getLightning().level, event.getLightning())) {
                 event.setCanceled(true);
             }
-        } else if (!ClaimApi.API.canEntityGrief(event.getLightning().level, event.getLightning())) {
-            event.setCanceled(true);
         }
     }
 
@@ -195,5 +207,15 @@ public class CadmusForge {
 
     private static void onPistonPush(PistonEvent.Pre event) {
         // TODO
+    }
+
+    private static void onRightClick(PlayerInteractEvent.RightClickItem event) {
+        if (!event.getLevel().isClientSide()) {
+            var id = ClaimHandler.getClaim((ServerLevel) event.getLevel(), event.getEntity().chunkPosition());
+            if (id == null) return;
+            if (!AdminClaimHandler.<Boolean>getFlag(event.getLevel().getServer(), id.getFirst(), ModFlags.USE)) {
+                event.setCanceled(true);
+            }
+        }
     }
 }

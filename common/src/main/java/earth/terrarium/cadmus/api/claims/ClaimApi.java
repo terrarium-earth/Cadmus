@@ -31,6 +31,8 @@ public interface ClaimApi {
 
     boolean canPlaceBlock(Level level, BlockPos pos, Player player);
 
+    boolean canExplodeBlock(Level level, ChunkPos pos);
+
     boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player);
 
     boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, Player player);

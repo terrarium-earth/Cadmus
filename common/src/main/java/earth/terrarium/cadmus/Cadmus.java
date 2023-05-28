@@ -6,16 +6,19 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.claims.maxclaims.CadmusMaxClaimProvider;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
+import earth.terrarium.cadmus.common.util.AdminUtils;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 
 public class Cadmus {
     public static final String MOD_ID = "cadmus";
@@ -26,6 +29,7 @@ public class Cadmus {
         TeamProviderApi.API.register(DEFAULT_ID, new VanillaTeamProvider());
         MaxClaimProviderApi.API.register(DEFAULT_ID, new CadmusMaxClaimProvider());
         ModGameRules.init();
+        ModFlags.init();
         if (!ModUtils.isModLoaded("argonauts")) {
             TeamProviderApi.API.setSelected(DEFAULT_ID);
         }
@@ -37,11 +41,12 @@ public class Cadmus {
         }
     }
 
-    public static void enterChunkSection(Player player) {
+    public static void enterChunkSection(Player player, ChunkPos pos) {
         if (player.level.isClientSide()) {
             CadmusClient.enterChunkSection();
         } else {
-            ModUtils.displayTeamName((ServerPlayer) player);
+            ModUtils.displayTeamName((ServerPlayer) player, pos);
+            AdminUtils.checkAccess((ServerPlayer) player, pos);
         }
     }
 

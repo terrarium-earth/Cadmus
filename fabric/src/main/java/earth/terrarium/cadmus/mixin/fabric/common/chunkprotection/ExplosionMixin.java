@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,7 @@ public abstract class ExplosionMixin {
     @Inject(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;<init>(DDD)V"))
     private void cadmus$explode(CallbackInfo ci, @Local(ordinal = 0) List<Entity> entities) {
         Player player = this.getIndirectSourceEntity() instanceof Player p ? p : null;
-        toBlow.removeIf(next -> (ClaimApi.API.isClaimed(level, next) && (player == null || !ClaimApi.API.canPlaceBlock(level, next, player))));
-        entities.removeIf(next -> (ClaimApi.API.isClaimed(level, next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(level, next, player))));
+        toBlow.removeIf(next -> (ClaimApi.API.canExplodeBlock(level, new ChunkPos(next)) && (player == null || !ClaimApi.API.canExplodeBlock(level, next, (Explosion) (Object) this, player))));
+        entities.removeIf(next -> (ClaimApi.API.canExplodeBlock(level, next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(level, next, player))));
     }
 }

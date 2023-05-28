@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.mixin.common;
+package earth.terrarium.cadmus.mixin.fabric.common.chunkprotection;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import net.minecraft.world.entity.LivingEntity;
