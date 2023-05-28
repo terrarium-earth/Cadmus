@@ -17,7 +17,12 @@ public abstract class NaturalSpawnerMixin {
 
     @Inject(method = "spawnCategoryForPosition(Lnet/minecraft/world/entity/MobCategory;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/NaturalSpawner$SpawnPredicate;Lnet/minecraft/world/level/NaturalSpawner$AfterSpawnCallback;)V", at = @At("HEAD"), cancellable = true)
     private static void cadmus$spawnCategoryForPosition(MobCategory category, ServerLevel level, ChunkAccess chunk, BlockPos pos, NaturalSpawner.SpawnPredicate filter, NaturalSpawner.AfterSpawnCallback callback, CallbackInfo ci) {
-        if (category == MobCategory.CREATURE && !AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.CREATURE_SPAWNING)) {
+        if ((category == MobCategory.CREATURE
+            || category == MobCategory.AMBIENT
+            || category == MobCategory.AXOLOTLS
+            || category == MobCategory.UNDERGROUND_WATER_CREATURE
+            || category == MobCategory.WATER_AMBIENT)
+            && !AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.CREATURE_SPAWNING)) {
             ci.cancel();
         } else if (category == MobCategory.MONSTER && !AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.MONSTER_SPAWNING)) {
             ci.cancel();

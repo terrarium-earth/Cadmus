@@ -143,7 +143,12 @@ public class ClaimApiImpl implements ClaimApi {
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES,
             (id, server) -> {
-                if (entity.getType().getCategory() == MobCategory.CREATURE || entity instanceof Animal) {
+                if (entity.getType().getCategory() == MobCategory.CREATURE
+                    || entity.getType().getCategory() == MobCategory.AMBIENT
+                    || entity.getType().getCategory() == MobCategory.AXOLOTLS
+                    || entity.getType().getCategory() == MobCategory.UNDERGROUND_WATER_CREATURE
+                    || entity.getType().getCategory() == MobCategory.WATER_AMBIENT
+                    || entity instanceof Animal) {
                     return getBoolFlag(server, id, ModFlags.CREATURE_DAMAGE);
                 }
 

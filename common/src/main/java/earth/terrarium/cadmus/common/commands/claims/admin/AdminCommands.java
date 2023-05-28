@@ -18,10 +18,9 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
+import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
@@ -59,20 +58,20 @@ public class AdminCommands {
                 .then(Commands.literal("claim")
                     .then(Commands.argument("adminClaim", StringArgumentType.string())
                         .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
-                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                        .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                             .then(Commands.argument("chunkload", BoolArgumentType.bool())
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
-                                    BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+                                    ColumnPos pos = ColumnPosArgument.getColumnPos(context, "pos");
                                     String id = StringArgumentType.getString(context, "adminClaim");
                                     boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                    CommandHelper.runAction(() -> claim(player, id, pos, chunkload));
+                                    CommandHelper.runAction(() -> claim(player, id, pos.toChunkPos(), chunkload));
                                     return 1;
                                 })))
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             String id = StringArgumentType.getString(context, "adminClaim");
-                            CommandHelper.runAction(() -> claim(player, id, player.blockPosition(), false));
+                            CommandHelper.runAction(() -> claim(player, id, player.chunkPosition(), false));
                             return 1;
                         })))));
     }
@@ -91,21 +90,21 @@ public class AdminCommands {
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove", id), false);
     }
 
-    public static void claim(ServerPlayer player, String id, BlockPos pos, boolean chunkloaded) throws ClaimException {
+    public static void claim(ServerPlayer player, String id, ChunkPos pos, boolean chunkloaded) throws ClaimException {
         if (AdminClaimHandler.get(player.server, id) == null) {
             throw ClaimException.CLAIM_DOES_NOT_EXIST;
         }
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), new ChunkPos(pos));
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
         }
-        var claim = Map.of(new ChunkPos(pos), chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
+        var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
         ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.getLevel(), claim, Set.of());
         if (chunkloaded) {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", SectionPos.blockToSectionCoord(pos.getX()) * 16, SectionPos.blockToSectionCoord(pos.getZ()) * 16), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", SectionPos.blockToSectionCoord(pos.getX()) * 16, SectionPos.blockToSectionCoord(pos.getZ()) * 16), false);
+            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
     }
 }

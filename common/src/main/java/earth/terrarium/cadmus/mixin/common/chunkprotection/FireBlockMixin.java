@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.mixin.common.chunkprotection;
 
 import com.mojang.datafixers.util.Pair;
-import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
