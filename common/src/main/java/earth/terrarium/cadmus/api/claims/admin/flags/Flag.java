@@ -9,7 +9,11 @@ public interface Flag<T> {
 
     RequiredArgumentBuilder<CommandSourceStack, T> createArgument(String string);
 
-    Flag<T> getFromArgument(CommandContext<?> context, String string);
+    Flag<T> getFromArgument(CommandContext<CommandSourceStack> context, String string);
 
     Flag<T> create(String value);
+
+    default String serialize() {
+        return String.valueOf(getValue());
+    }
 }

@@ -18,7 +18,7 @@ public record IntegerFlag(int value) implements Flag<Integer> {
     }
 
     @Override
-    public Flag<Integer> getFromArgument(CommandContext<?> context, String string) {
+    public Flag<Integer> getFromArgument(CommandContext<CommandSourceStack> context, String string) {
         return new IntegerFlag(IntegerArgumentType.getInteger(context, string));
     }
 

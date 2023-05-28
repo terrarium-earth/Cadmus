@@ -2,7 +2,11 @@ package earth.terrarium.cadmus.mixin.common.chunkprotection;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
+import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -22,6 +26,17 @@ public abstract class EntityMixin {
             }
         } else {
             if (!ClaimApi.API.canEntityGrief(level, pos, (Entity) (Object) this)) {
+                cir.setReturnValue(false);
+            }
+        }
+    }
+
+    @Inject(method = "canRide", at = @At("RETURN"), cancellable = true)
+    private void cadmus$canRide(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValue() && !entity.level.isClientSide) {
+            var id = ClaimHandler.getClaim((ServerLevel) entity.level, entity.chunkPosition());
+            if (id == null) return;
+            if (!AdminClaimHandler.<Boolean>getFlag(entity.level.getServer(), id.getFirst(), ModFlags.USE_VEHICLES)) {
                 cir.setReturnValue(false);
             }
         }

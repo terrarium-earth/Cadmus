@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
@@ -36,7 +37,7 @@ public class VanillaTeamProvider implements TeamProvider {
     @Nullable
     public Component getTeamName(String id, MinecraftServer server) {
         if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) {
-            return AdminClaimHandler.get(server, id.split(":")[1]).displayName();
+            return AdminClaimHandler.getFlag(server, id.split(":")[1], ModFlags.DISPLAY_NAME);
         }
         var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
         if (playerTeam == null) {
@@ -49,10 +50,10 @@ public class VanillaTeamProvider implements TeamProvider {
     @Override
     public String getTeamId(MinecraftServer server, UUID player) {
         var profile = server.getProfileCache().get(player).orElse(null);
-        if (profile == null) return ClaimHandler.PLAYER_PREFIX + ":" + player.toString();
+        if (profile == null) return ClaimHandler.PLAYER_PREFIX + player.toString();
         var playerTeam = server.getScoreboard().getPlayersTeam(profile.getName());
-        if (playerTeam == null) return ClaimHandler.PLAYER_PREFIX + ":" + player.toString();
-        return ClaimHandler.TEAM_PREFIX + ":" + playerTeam.getName();
+        if (playerTeam == null) return ClaimHandler.PLAYER_PREFIX + player.toString();
+        return ClaimHandler.TEAM_PREFIX + playerTeam.getName();
     }
 
     @Override
@@ -112,6 +113,6 @@ public class VanillaTeamProvider implements TeamProvider {
 
     public void onTeamRemoved(MinecraftServer server, PlayerTeam playerTeam) {
         this.onTeamRemoved(server, playerTeam.getName());
-        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.TEAM_PREFIX + ":" + playerTeam.getName()));
+        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.TEAM_PREFIX + playerTeam.getName()));
     }
 }

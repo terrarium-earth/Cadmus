@@ -18,7 +18,7 @@ public record StringFlag(String value) implements Flag<String> {
     }
 
     @Override
-    public Flag<String> getFromArgument(CommandContext<?> context, String string) {
+    public Flag<String> getFromArgument(CommandContext<CommandSourceStack> context, String string) {
         return new StringFlag(StringArgumentType.getString(context, string));
     }
 

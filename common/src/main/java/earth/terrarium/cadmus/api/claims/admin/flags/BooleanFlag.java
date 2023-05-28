@@ -18,7 +18,7 @@ public record BooleanFlag(boolean value) implements Flag<Boolean> {
     }
 
     @Override
-    public Flag<Boolean> getFromArgument(CommandContext<?> context, String string) {
+    public Flag<Boolean> getFromArgument(CommandContext<CommandSourceStack> context, String string) {
         return new BooleanFlag(BoolArgumentType.getBool(context, string));
     }
 

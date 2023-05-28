@@ -1,11 +1,14 @@
 package earth.terrarium.cadmus.common.commands.claims;
 
+import com.mojang.datafixers.util.Pair;
 import earth.terrarium.cadmus.api.claims.admin.FlagApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
-import earth.terrarium.cadmus.common.commands.claims.admin.AdminClaim;
+import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.ClaimType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AdminClaimHandler extends SavedData {
-    private final Map<String, AdminClaim> claimsById = new HashMap<>();
+    private final Map<String, Map<String, Flag<?>>> flagsById = new HashMap<>();
 
     public AdminClaimHandler() {
     }
@@ -21,25 +24,22 @@ public class AdminClaimHandler extends SavedData {
     public AdminClaimHandler(CompoundTag tag) {
         tag.getAllKeys().forEach(id -> {
             CompoundTag adminTag = tag.getCompound(id);
-            Component displayName = Component.Serializer.fromJson(adminTag.getString("displayName"));
             CompoundTag flagsTag = adminTag.getCompound("flags");
             Map<String, Flag<?>> flags = new HashMap<>();
             flagsTag.getAllKeys().forEach(flag -> {
                 Flag<?> value = FlagApi.API.get(flag).create(flagsTag.getString(flag));
                 flags.put(flag, value);
             });
-            AdminClaim adminClaim = new AdminClaim(displayName, flags);
-            claimsById.put(id, adminClaim);
+            flagsById.put(id, flags);
         });
     }
 
     @Override
     public @NotNull CompoundTag save(CompoundTag tag) {
-        claimsById.forEach((id, claimData) -> {
+        flagsById.forEach((id, claimData) -> {
             CompoundTag adminTag = new CompoundTag();
-            adminTag.putString("displayName", Component.Serializer.toJson(claimData.displayName()));
             CompoundTag flagsTag = new CompoundTag();
-            claimData.flags().forEach((flag, value) -> flagsTag.putString(flag, String.valueOf(value.getValue())));
+            claimData.forEach((flag, value) -> flagsTag.putString(flag, value.serialize()));
             adminTag.put("flags", flagsTag);
             tag.put(id, adminTag);
         });
@@ -50,48 +50,57 @@ public class AdminClaimHandler extends SavedData {
         return server.overworld().getDataStorage().computeIfAbsent(AdminClaimHandler::new, AdminClaimHandler::new, "cadmus_admin_claims");
     }
 
-    public static void create(MinecraftServer server, String id, AdminClaim claim) {
+    public static void create(MinecraftServer server, String id, Map<String, Flag<?>> claim) {
         var data = read(server);
-        data.claimsById.put(id, claim);
+        data.flagsById.put(id, claim);
     }
 
     public static void remove(MinecraftServer server, String id) {
         var data = read(server);
-        data.claimsById.remove(id);
+        data.flagsById.remove(id);
     }
 
-    public static AdminClaim get(MinecraftServer server, String id) {
+    public static Map<String, Flag<?>> get(MinecraftServer server, String id) {
         var data = read(server);
-        return data.claimsById.get(id);
+        return data.flagsById.get(id);
     }
 
-    public static Map<String, AdminClaim> getAll(MinecraftServer server) {
-        return read(server).claimsById;
+    public static Map<String, Map<String, Flag<?>>> getAll(MinecraftServer server) {
+        return read(server).flagsById;
     }
 
-    public static Flag<?> getFlag(MinecraftServer server, String id, String flag) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getFlag(ServerLevel level, ChunkPos pos, String flag) {
+        Pair<String, ClaimType> claim = ClaimHandler.getClaim(level, pos);
+        if (claim == null) return (T) FlagApi.API.get(flag).getValue();
+        return getFlag(level.getServer(), claim.getFirst(), flag);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T getFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
-        var claim = data.claimsById.get(id);
-        var value = claim.flags().get(flag);
-        return value == null ? FlagApi.API.get(flag) : value;
+        var claim = data.flagsById.get(id.replace("a:", ""));
+        if (claim == null) return (T) FlagApi.API.get(flag).getValue();
+        var value = claim.get(flag);
+        var result = value == null ? (Flag<T>) FlagApi.API.get(flag) : (Flag<T>) value;
+        return result.getValue();
     }
 
     public static Map<String, Flag<?>> getAllFlags(MinecraftServer server, String id) {
         var data = read(server);
-        var claim = data.claimsById.get(id);
-        return claim.flags();
+        return data.flagsById.get(id);
     }
 
     public static void setFlag(MinecraftServer server, String id, String flag, Flag<?> value) {
         var data = read(server);
-        var claim = data.claimsById.get(id);
-        claim.flags().put(flag, value);
+        var claim = data.flagsById.get(id);
+        claim.put(flag, value);
     }
 
     public static void removeFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
-        var claim = data.claimsById.get(id);
-        claim.flags().remove(flag);
+        var claim = data.flagsById.get(id);
+        claim.remove(flag);
     }
 
     @Override

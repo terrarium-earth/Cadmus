@@ -11,11 +11,14 @@
     "common.chunkprotection.EntityMixin",
     "common.chunkprotection.ExplosionMixin",
     "common.chunkprotection.FarmBlockMixin",
+    "common.chunkprotection.FireworkRocketEntityMixin",
     "common.chunkprotection.ItemEntityMixin",
+    "common.chunkprotection.ItemStackMixin",
     "common.chunkprotection.LightningBoltMixin",
     "common.chunkprotection.PistonBlockMixin",
     "common.chunkprotection.RemoveBlockGoalMixin",
-    "common.chunkprotection.WitherBossMixin"
+    "common.chunkprotection.WitherBossMixin",
+    "common.flags.BlockItemMixin"
   ],
   "client": [
   ],

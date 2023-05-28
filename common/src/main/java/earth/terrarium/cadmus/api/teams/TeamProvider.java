@@ -137,7 +137,7 @@ public interface TeamProvider {
      * @param server the server
      */
     default void onTeamChanged(MinecraftServer server, String id) {
-        MaxClaimProviderApi.API.getSelected().calculate(ClaimHandler.TEAM_PREFIX + ":" + id, server);
+        MaxClaimProviderApi.API.getSelected().calculate(ClaimHandler.TEAM_PREFIX + id, server);
     }
 
     /**

@@ -61,5 +61,6 @@
   "command.cadmus.exception.youve_maxed_out_your_claims": "You've maxed out your claims.",
   "command.cadmus.exception.this_chunk_is_not_claimed": "This chunk is not claimed.",
   "command.cadmus.exception.you_dont_own_this_chunk": "You don't own this chunk.",
-  "command.cadmus.exception.claim_has_no_flags": "Claim has no flags."
+  "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
+  "command.cadmus.exception.claim_does_not_exist": "This claim does not exist."
 }

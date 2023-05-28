@@ -29,8 +29,8 @@ public abstract class PlayerMixin extends LivingEntity {
         var pos = this.chunkPosition();
         // check if player has entered new chunk
         if (!Objects.equals(pos, cadmus$lastChunkPos)) {
+            Cadmus.enterChunkSection((Player) (Object) this, cadmus$lastChunkPos);
             cadmus$lastChunkPos = pos;
-            Cadmus.enterChunkSection((Player) (Object) this);
         }
     }
 }

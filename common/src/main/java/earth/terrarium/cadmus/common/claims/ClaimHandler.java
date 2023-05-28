@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClaimHandler extends SavedData {
-    public static final String PLAYER_PREFIX = "p";
-    public static final String TEAM_PREFIX = "t";
-    public static final String ADMIN_PREFIX = "a";
+    public static final String PLAYER_PREFIX = "p:";
+    public static final String TEAM_PREFIX = "t:";
+    public static final String ADMIN_PREFIX = "a:";
 
     private final Map<ChunkPos, Pair<String, ClaimType>> claims = new HashMap<>();
     private final Map<String, Map<ChunkPos, ClaimType>> claimsById = new HashMap<>();
