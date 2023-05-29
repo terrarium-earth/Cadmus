@@ -1,19 +1,18 @@
 package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.saveddata.SavedData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ClaimHandler extends SavedData {
+public class ClaimHandler extends SaveHandler {
     public static final String PLAYER_PREFIX = "p:";
     public static final String TEAM_PREFIX = "t:";
     public static final String ADMIN_PREFIX = "a:";
@@ -21,10 +20,8 @@ public class ClaimHandler extends SavedData {
     private final Map<ChunkPos, Pair<String, ClaimType>> claims = new HashMap<>();
     private final Map<String, Map<ChunkPos, ClaimType>> claimsById = new HashMap<>();
 
-    public ClaimHandler() {
-    }
-
-    public ClaimHandler(CompoundTag tag) {
+    @Override
+    public void loadData(CompoundTag tag) {
         tag.getAllKeys().forEach(id -> {
             CompoundTag teamTag = tag.getCompound(id);
             Map<ChunkPos, ClaimType> claimData = new HashMap<>();
@@ -40,19 +37,16 @@ public class ClaimHandler extends SavedData {
     }
 
     @Override
-    @NotNull
-    public CompoundTag save(CompoundTag tag) {
+    public void saveData(CompoundTag tag) {
         claimsById.forEach((id, claimData) -> {
             CompoundTag teamTag = new CompoundTag();
             claimData.forEach((pos, type) -> teamTag.putByte(String.valueOf(pos.toLong()), (byte) type.ordinal()));
             tag.put(id, teamTag);
         });
-
-        return tag;
     }
 
     public static ClaimHandler read(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(ClaimHandler::new, ClaimHandler::new, "cadmus_claims");
+        return read(level.getDataStorage(), ClaimHandler::new, "cadmus_claims");
     }
 
     public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {

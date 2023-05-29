@@ -20,7 +20,7 @@ public abstract class BucketItemMixin {
     // Prevent players from using buckets in protected chunks
     @Inject(method = "use", at = @At("HEAD"))
     private void cadmus$use(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
-        if (!ClaimApi.API.canPlaceBlock(player.level, player.blockPosition(), player)) {
+        if (!ClaimApi.API.canPlaceBlock(player.level(), player.blockPosition(), player)) {
             ci.cancel();
         }
     }

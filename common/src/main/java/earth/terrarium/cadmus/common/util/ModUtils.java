@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.common.util;
 
 import com.teamresourceful.resourcefullib.common.lib.Constants;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -14,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +22,7 @@ public class ModUtils {
     public static void displayTeamName(ServerPlayer player, ChunkPos pos) {
         if (!(player instanceof LastMessageHolder holder)) return;
 
-        var claimData = ClaimHandler.getClaim(player.getLevel(), player.chunkPosition());
+        var claimData = ClaimHandler.getClaim(player.serverLevel(), player.chunkPosition());
         Component displayName = null;
         if (claimData != null) {
             displayName = TeamProviderApi.API.getSelected().getTeamName(claimData.getFirst(), player.server);
@@ -32,7 +30,7 @@ public class ModUtils {
 
         Component lastMessage = holder.cadmus$getLastMessage();
         if (lastMessage == null) {
-            Component greeting = AdminClaimHandler.getFlag((ServerLevel) player.level, player.chunkPosition(), ModFlags.GREETING);
+            Component greeting = AdminClaimHandler.getFlag((ServerLevel) player.level(), player.chunkPosition(), ModFlags.GREETING);
             if (!greeting.getString().isBlank()) {
                 player.displayClientMessage(greeting, false);
             }
@@ -42,7 +40,7 @@ public class ModUtils {
 
         if (displayName == null) {
             player.displayClientMessage(ConstantComponents.WILDERNESS, true);
-            Component farewell = AdminClaimHandler.getFlag((ServerLevel) player.level, pos, ModFlags.FAREWELL);
+            Component farewell = AdminClaimHandler.getFlag(player.serverLevel(), pos, ModFlags.FAREWELL);
             if (!farewell.getString().isBlank()) {
                 player.displayClientMessage(farewell, false);
             }
@@ -100,10 +98,5 @@ public class ModUtils {
         }
         Component component = Component.translatable(translation, args);
         return Component.translatableWithFallback(translation, component.getString(), args);
-    }
-
-    @ExpectPlatform
-    public static boolean isModLoaded(String modId) {
-        throw new NotImplementedException();
     }
 }

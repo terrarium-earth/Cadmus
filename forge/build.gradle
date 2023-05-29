@@ -23,13 +23,13 @@ configurations {
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:$rootProject.minecraft_version-$rootProject.forge_version"
+    forge "net.minecraftforge:forge:$minecraft_version-$forge_version"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:$rootProject.mixinextras_version"))
-    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:$rootProject.mixinextras_version"))
+    implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:$mixinextras_version"))
+    include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:$mixinextras_version"))
     modLocalRuntime("earth.terrarium.prometheus:prometheus-forge-$minecraft_version:$prometheus_version") {
         transitive = false
     }
@@ -38,10 +38,10 @@ dependencies {
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     filesMatching("META-INF/mods.toml") {
-        expand "version": rootProject.version,
-                "github_name": rootProject.github_name,
-                "resourcefullib_version": rootProject.resourcefullib_version,
-                "modrinth_id": rootProject.modrinth_id
+        expand "version": version,
+                "github_name": github_name,
+                "resourcefullib_version": resourcefullib_version,
+                "modrinth_id": modrinth_id
     }
 }
 

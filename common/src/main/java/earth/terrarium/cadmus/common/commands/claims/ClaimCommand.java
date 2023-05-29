@@ -37,13 +37,13 @@ public class ClaimCommand {
     }
 
     public static void claim(ServerPlayer player, ChunkPos pos, boolean chunkloaded) throws ClaimException {
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
         }
         var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
-        if (!ModUtils.tryClaim(player.getLevel(), player, claim, Map.of())) {
+        if (!ModUtils.tryClaim(player.serverLevel(), player, claim, Map.of())) {
             throw ClaimException.YOUVE_MAXED_OUT_YOUR_CLAIMS;
         }
         if (chunkloaded) {

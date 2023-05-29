@@ -14,7 +14,7 @@ public abstract class EnderDragonMixin {
     @Inject(method = "checkWalls", at = @At("HEAD"), cancellable = true)
     private void cadmus$checkWalls(AABB area, CallbackInfoReturnable<Boolean> ci) {
         EnderDragon enderDragon = (EnderDragon) (Object) this;
-        if (!ClaimApi.API.canEntityGrief(enderDragon.level, enderDragon)) {
+        if (!ClaimApi.API.canEntityGrief(enderDragon.level(), enderDragon)) {
             ci.setReturnValue(false);
         }
     }

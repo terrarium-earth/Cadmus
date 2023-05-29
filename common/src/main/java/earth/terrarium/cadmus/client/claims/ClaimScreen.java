@@ -2,12 +2,10 @@ package earth.terrarium.cadmus.client.claims;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
-import com.teamresourceful.resourcefullib.client.utils.RenderUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -19,7 +17,7 @@ import earth.terrarium.cadmus.common.network.messages.ServerboundClearChunksPack
 import earth.terrarium.cadmus.common.network.messages.ServerboundUpdateClaimedChunksPacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -183,37 +181,39 @@ public class ClaimScreen extends BaseCursorScreen {
         this.addRenderableWidget(new ImageButton(x + 216 - 11 - 7, y + 6, 11, 11, 227, 0, 11,
             CONTAINER_BACKGROUND,
             button -> this.onClose()
-        ));
+        )).setTooltip(Tooltip.create(ConstantComponents.CLOSE));
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(poseStack);
-        renderBackgroundTexture(poseStack);
+    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics);
+        renderBackgroundTexture(graphics);
         if (this.mapRenderer == null) {
-            GuiComponent.drawCenteredString(poseStack, font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
+            graphics.drawCenteredString(font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
         } else {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) return;
-            this.mapRenderer.render(poseStack, this.width, this.height, MAP_SIZE);
-            this.renderText(poseStack, mouseX, mouseY);
-            this.renderClaims(player, poseStack, mouseX, mouseY);
-            this.renderPlayerAvatar(player, poseStack);
+            this.mapRenderer.render(graphics, this.width, this.height, MAP_SIZE);
+            try (var pose = new CloseablePoseStack(graphics)) {
+                pose.translate(0, 0, 2);
+                this.renderText(graphics, mouseX, mouseY);
+                this.renderClaims(player, graphics, mouseX, mouseY);
+                this.renderPlayerAvatar(player, graphics);
+            }
         }
-        super.render(poseStack, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    private void renderBackgroundTexture(PoseStack poseStack) {
-        fill(poseStack, (width - MAP_SIZE) / 2, (height - MAP_SIZE) / 2, (width + MAP_SIZE) / 2, (height + MAP_SIZE) / 2, 0xff000000);
+    private void renderBackgroundTexture(GuiGraphics graphics) {
+        graphics.fill((width - MAP_SIZE) / 2, (height - MAP_SIZE) / 2, (width + MAP_SIZE) / 2, (height + MAP_SIZE) / 2, 0xff000000);
         int left = (this.width - 216) / 2;
         int top = (this.height - 237) / 2 + 1;
         RenderSystem.enableBlend();
-        RenderUtils.bindTexture(CONTAINER_BACKGROUND);
-        blit(poseStack, left, top, 0, 0, 216, 237);
-        this.font.draw(poseStack, ConstantComponents.TITLE, ((this.width - font.width(ConstantComponents.TITLE)) / 2f), top + 7, 0x404040);
+        graphics.blit(CONTAINER_BACKGROUND, left, top, 0, 0, 216, 237);
+        graphics.drawString(font, ConstantComponents.TITLE, (int) ((this.width - font.width(ConstantComponents.TITLE)) / 2f), top + 7, 0x404040, false);
     }
 
-    private void renderPlayerAvatar(LocalPlayer player, PoseStack poseStack) {
+    private void renderPlayerAvatar(LocalPlayer player, GuiGraphics graphics) {
         float left = (this.width) / 2f;
         float top = (this.height) / 2f;
 
@@ -226,18 +226,17 @@ public class ClaimScreen extends BaseCursorScreen {
 
         x *= scale;
         y *= scale;
-        RenderUtils.bindTexture(MAP_ICONS);
-        try (var ignored = new CloseablePoseStack(poseStack)) {
-            poseStack.translate(left + x, top + y, 0);
-            poseStack.mulPose(Axis.ZP.rotationDegrees(player.getYRot()));
-            poseStack.translate(-4, -4, 0);
-            blit(poseStack, 0, 0, 40, 0, 8, 8, 128, 128);
+        try (var pose = new CloseablePoseStack(graphics)) {
+            pose.translate(left + x, top + y, 0);
+            pose.mulPose(Axis.ZP.rotationDegrees(player.getYRot()));
+            pose.translate(-4, -4, 0);
+            graphics.blit(MAP_ICONS, 0, 0, 40, 0, 8, 8, 128, 128);
         }
     }
 
-    private void renderText(PoseStack poseStack, int mouseX, int mouseY) {
-        this.font.draw(poseStack, claimedCount + "/" + this.maxClaims, ((this.width + 218) / 2f) - 198, ((this.height - 246) / 2f) + 228, 0x404040);
-        this.font.draw(poseStack, chunkLoadedCount + "/" + this.maxChunkLoaded, ((this.width + 218) / 2f) - 119, ((this.height - 246) / 2f) + 228, 0x404040);
+    private void renderText(GuiGraphics graphics, int mouseX, int mouseY) {
+        graphics.drawString(font, claimedCount + "/" + this.maxClaims, (int) (((this.width + 218) / 2f) - 198), (int) (((this.height - 246) / 2f) + 228), 0x404040, false);
+        graphics.drawString(font, chunkLoadedCount + "/" + this.maxChunkLoaded, (int) (((this.width + 218) / 2f) - 119), (int) (((this.height - 246) / 2f) + 228), 0x404040, false);
 
         // text tooltips
         float left = (this.width - MAP_SIZE) / 2f;
@@ -250,7 +249,7 @@ public class ClaimScreen extends BaseCursorScreen {
         }
     }
 
-    private void renderClaims(LocalPlayer player, PoseStack poseStack, int mouseX, int mouseY) {
+    private void renderClaims(LocalPlayer player, GuiGraphics graphics, int mouseX, int mouseY) {
         float left = (this.width - MAP_SIZE) / 2f;
         float top = (this.height - MAP_SIZE) / 2f;
         float scale = getScaledRenderDistance() * 2f + 16;
@@ -295,7 +294,7 @@ public class ClaimScreen extends BaseCursorScreen {
                 boolean southWest = j == chunkScale - 1 || i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j + 1)) != type;
                 boolean northWest = j == 0 || i == 0 || getClaimType(new ChunkPos(playerChunkX + i - 1, playerChunkZ + j - 1)) != type;
 
-                drawCTMSquare(isHovering, poseStack, x, y, width, height, color, north, east, south, west, northEast, southEast, southWest, northWest);
+                drawCTMSquare(isHovering, graphics, x, y, width, height, color, north, east, south, west, northEast, southEast, southWest, northWest);
             }
         }
     }
@@ -362,32 +361,32 @@ public class ClaimScreen extends BaseCursorScreen {
         }
     }
 
-    private void drawCTMSquare(boolean isHovering, PoseStack poseStack, float x, float y, float width, float height, int color, boolean north, boolean east, boolean south, boolean west, boolean northEast, boolean southEast, boolean southWest, boolean northWest) {
+    private void drawCTMSquare(boolean isHovering, GuiGraphics graphics, float x, float y, float width, float height, int color, boolean north, boolean east, boolean south, boolean west, boolean northEast, boolean southEast, boolean southWest, boolean northWest) {
         int roundedX = Math.round(x);
         int roundedY = Math.round(y);
         int roundedWidth = Math.round(x + width);
         int roundedHeight = Math.round(y + height);
         if (north || isHovering) {
-            fill(poseStack, roundedX, roundedY, roundedWidth, roundedY + 1, color);
+            graphics.fill(roundedX, roundedY, roundedWidth, roundedY + 1, color);
         } else if (northEast) {
-            fill(poseStack, roundedWidth - 1, roundedY, roundedWidth, roundedY + 1, color);
+            graphics.fill(roundedWidth - 1, roundedY, roundedWidth, roundedY + 1, color);
         }
         if (east || isHovering) {
-            fill(poseStack, roundedWidth - 1, roundedY, roundedWidth, roundedHeight, color);
+            graphics.fill(roundedWidth - 1, roundedY, roundedWidth, roundedHeight, color);
         } else if (southEast) {
-            fill(poseStack, roundedWidth - 1, roundedHeight - 1, roundedWidth, roundedHeight, color);
+            graphics.fill(roundedWidth - 1, roundedHeight - 1, roundedWidth, roundedHeight, color);
         }
         if (south || isHovering) {
-            fill(poseStack, roundedX, roundedHeight - 1, roundedWidth, roundedHeight, color);
+            graphics.fill(roundedX, roundedHeight - 1, roundedWidth, roundedHeight, color);
         } else if (southWest) {
-            fill(poseStack, roundedX, roundedHeight - 1, roundedX + 1, roundedHeight, color);
+            graphics.fill(roundedX, roundedHeight - 1, roundedX + 1, roundedHeight, color);
         }
         if (west || isHovering) {
-            fill(poseStack, roundedX, roundedY, roundedX + 1, roundedHeight, color);
+            graphics.fill(roundedX, roundedY, roundedX + 1, roundedHeight, color);
         } else if (northWest) {
-            fill(poseStack, roundedX, roundedY, roundedX + 1, roundedY + 1, color);
+            graphics.fill(roundedX, roundedY, roundedX + 1, roundedY + 1, color);
         }
-        fill(poseStack, roundedX, roundedY, roundedWidth, roundedHeight, color & 0x33ffffff);
+        graphics.fill(roundedX, roundedY, roundedWidth, roundedHeight, color & 0x33ffffff);
     }
 
     @Nullable

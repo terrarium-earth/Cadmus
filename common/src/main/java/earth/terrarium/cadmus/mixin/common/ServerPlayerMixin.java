@@ -49,15 +49,15 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci) {
-        if (this.level.getGameTime() % 20 == 0) {
-            float healRate = AdminClaimHandler.<Float>getFlag((ServerLevel) this.level, this.chunkPosition(), ModFlags.HEAL_RATE);
+        if (this.level().getGameTime() % 20 == 0) {
+            float healRate = AdminClaimHandler.<Float>getFlag((ServerLevel) this.level(), this.chunkPosition(), ModFlags.HEAL_RATE);
             if (healRate > 0) {
                 this.heal(healRate);
             } else if (healRate < 0) {
                 this.hurt(this.damageSources().generic(), -healRate);
             }
 
-            float feedRate = AdminClaimHandler.<Float>getFlag((ServerLevel) this.level, this.chunkPosition(), ModFlags.FEED_RATE);
+            float feedRate = AdminClaimHandler.<Float>getFlag((ServerLevel) this.level(), this.chunkPosition(), ModFlags.FEED_RATE);
             if (feedRate > 0) {
                 if (feedRate > this.random.nextFloat()) {
                     this.getFoodData().eat((int) Math.ceil(feedRate), feedRate);
@@ -70,15 +70,15 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
     private void cadmus$teleportTo(double x, double y, double z, CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
 
-        if (!AdminClaimHandler.<Boolean>getFlag(player.getLevel(), new ChunkPos(BlockPos.containing(x, y, z)), ModFlags.ALLOW_ENTRY)) {
-            Component message = AdminClaimHandler.getFlag(player.getLevel(), player.chunkPosition(), ModFlags.ENTRY_DENY_MESSAGE);
+        if (!AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), new ChunkPos(BlockPos.containing(x, y, z)), ModFlags.ALLOW_ENTRY)) {
+            Component message = AdminClaimHandler.getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ENTRY_DENY_MESSAGE);
             if (!message.getString().isBlank()) {
                 player.displayClientMessage(message.copy().withStyle(ChatFormatting.RED), false);
             }
             ci.cancel();
         }
 
-        if (!AdminClaimHandler.<Boolean>getFlag(player.getLevel(), player.chunkPosition(), ModFlags.ALLOW_EXIT)) {
+        if (!AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_EXIT)) {
             ci.cancel();
         }
     }

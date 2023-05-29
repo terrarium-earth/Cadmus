@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.util;
 
+import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
@@ -33,11 +34,11 @@ public class ModGameRules {
     }
 
     public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusNotInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
-        return ModUtils.isModLoaded("prometheus") ? null : register(name, category, type);
+        return ModInfoUtils.isModLoaded("prometheus") ? null : register(name, category, type);
     }
 
     public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
-        return ModUtils.isModLoaded("prometheus") ? register(name, category, type) : null;
+        return ModInfoUtils.isModLoaded("prometheus") ? register(name, category, type) : null;
     }
 
     @ExpectPlatform

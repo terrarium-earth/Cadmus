@@ -34,7 +34,7 @@ public class UnclaimCommand {
     }
 
     public static void unclaim(ServerPlayer player, ChunkPos pos) throws ClaimException {
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData == null) {
             throw ClaimException.THIS_CHUNK_IS_NOT_CLAIMED;
         }
@@ -42,7 +42,7 @@ public class UnclaimCommand {
         if (!isMember) {
             throw ClaimException.YOU_DONT_OWN_THIS_CHUNK;
         }
-        ModUtils.tryClaim(player.getLevel(), player, Map.of(), Map.of(pos, ClaimType.CLAIMED));
+        ModUtils.tryClaim(player.serverLevel(), player, Map.of(), Map.of(pos, ClaimType.CLAIMED));
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 }

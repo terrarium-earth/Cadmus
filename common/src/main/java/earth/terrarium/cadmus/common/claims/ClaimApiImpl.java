@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
@@ -205,9 +206,9 @@ public class ClaimApiImpl implements ClaimApi {
             return false;
         }
 
-        if (ModUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
+        if (ModInfoUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
             return true;
-        } else if (!ModUtils.isModLoaded("prometheus") && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
+        } else if (!ModInfoUtils.isModLoaded("prometheus") && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
             return true;
         }
 

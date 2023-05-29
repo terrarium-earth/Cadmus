@@ -18,7 +18,7 @@ public abstract class FarmBlockMixin {
     @Inject(method = "fallOn", at = @At("HEAD"), cancellable = true)
     private void cadmus$fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance, CallbackInfo ci) {
         if (entity instanceof Player player) {
-            if (!ClaimApi.API.canBreakBlock(player.level, pos, player)) {
+            if (!ClaimApi.API.canBreakBlock(player.level(), pos, player)) {
                 ci.cancel();
             }
         } else if (!ClaimApi.API.canEntityGrief(level, pos, entity)) {

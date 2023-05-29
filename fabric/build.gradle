@@ -25,14 +25,14 @@ repositories {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-    modApi "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version+$rootProject.minecraft_version"
+    modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
+    modApi "net.fabricmc.fabric-api:fabric-api:$fabric_api_version+$minecraft_version"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
-    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${rootProject.mixinextras_version}")))
-    include(modImplementation "eu.pb4:common-protection-api:$rootProject.common_protection_api_version")
+    include(implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-fabric:${mixinextras_version}")))
+    include(modImplementation "eu.pb4:common-protection-api:$common_protection_api_version")
     modLocalRuntime("earth.terrarium.prometheus:prometheus-fabric-$minecraft_version:$prometheus_version") {
         transitive = false
     }
@@ -41,11 +41,11 @@ dependencies {
 processResources {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     filesMatching("fabric.mod.json") {
-        expand "version": rootProject.version,
-                "fabric_loader_version": rootProject.fabric_loader_version,
-                "github_name": rootProject.github_name,
-                "resourcefullib_version": rootProject.resourcefullib_version,
-                "modrinth_id": rootProject.modrinth_id
+        expand "version": version,
+                "fabric_loader_version": fabric_loader_version,
+                "github_name": github_name,
+                "resourcefullib_version": resourcefullib_version,
+                "modrinth_id": modrinth_id
     }
 }
 

@@ -13,7 +13,7 @@ public abstract class ArmorStandMixin {
     @Inject(method = "ignoreExplosion", at = @At("HEAD"), cancellable = true)
     private void cadmus$ignoreExplosion(CallbackInfoReturnable<Boolean> cir) {
         ArmorStand armorStand = (ArmorStand) (Object) this;
-        if (!ClaimApi.API.canEntityGrief(armorStand.level, armorStand)) {
+        if (!ClaimApi.API.canEntityGrief(armorStand.level(), armorStand)) {
             cir.setReturnValue(true);
         }
     }

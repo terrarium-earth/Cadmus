@@ -20,7 +20,7 @@ public abstract class ItemEntityMixin extends Entity {
     // Prevent players from picking up items in protected chunks unless they dropped them
     @Inject(method = "playerTouch", at = @At("HEAD"), cancellable = true)
     private void cadmus$playerTouch(Player player, CallbackInfo ci) {
-        if (!ClaimApi.API.canPickupItem(player.level, this.blockPosition(), (ItemEntity) (Object) this, player)) {
+        if (!ClaimApi.API.canPickupItem(player.level(), this.blockPosition(), (ItemEntity) (Object) this, player)) {
             ci.cancel();
         }
     }

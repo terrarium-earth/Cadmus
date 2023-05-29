@@ -12,11 +12,11 @@ import net.minecraft.world.level.ChunkPos;
 public class AdminUtils {
     public static void preventAdminChunkEntry(ServerPlayer player, ChunkPos lastChunkPos) {
         if (lastChunkPos == null) return;
-        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.getLevel(), player.chunkPosition(), ModFlags.ALLOW_ENTRY)) {
+        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_ENTRY)) {
             return;
         }
 
-        Component message = AdminClaimHandler.getFlag((ServerLevel) player.level, player.chunkPosition(), ModFlags.ENTRY_DENY_MESSAGE);
+        Component message = AdminClaimHandler.getFlag((ServerLevel) player.level(), player.chunkPosition(), ModFlags.ENTRY_DENY_MESSAGE);
         if (!message.getString().isBlank()) {
             player.displayClientMessage(message.copy().withStyle(ChatFormatting.RED), false);
         }
@@ -35,12 +35,12 @@ public class AdminUtils {
 
     public static void preventAdminChunkExit(ServerPlayer player, ChunkPos lastChunkPos) {
         if (lastChunkPos == null) return;
-        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.getLevel(), lastChunkPos, ModFlags.ALLOW_EXIT)) {
+        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), lastChunkPos, ModFlags.ALLOW_EXIT)) {
             return;
         }
 
-        Component message = AdminClaimHandler.getFlag((ServerLevel) player.level, lastChunkPos, ModFlags.EXIT_DENY_MESSAGE);
-        if (!message.getString().isBlank() && AdminClaimHandler.<Component>getFlag((ServerLevel) player.level, player.chunkPosition(), ModFlags.EXIT_DENY_MESSAGE).getString().isBlank()) {
+        Component message = AdminClaimHandler.getFlag((ServerLevel) player.level(), lastChunkPos, ModFlags.EXIT_DENY_MESSAGE);
+        if (!message.getString().isBlank() && AdminClaimHandler.<Component>getFlag((ServerLevel) player.level(), player.chunkPosition(), ModFlags.EXIT_DENY_MESSAGE).getString().isBlank()) {
             player.displayClientMessage(message.copy().withStyle(ChatFormatting.RED), false);
         }
 

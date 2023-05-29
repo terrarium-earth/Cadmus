@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 public class ClaimMapTopologyAlgorithm {
     public static final int BRIGHTER_COLOR = 0xff030303;
@@ -32,7 +32,7 @@ public class ClaimMapTopologyAlgorithm {
                 pos1.setZ(z);
                 LevelChunk chunk = level.getChunk(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
                 if (!chunk.isEmpty()) {
-                    MaterialColor color = MaterialColor.NONE;
+                    MapColor color = MapColor.NONE;
                     double yDiff = 0.0;
                     int y = level.dimensionType().hasCeiling() ?
                         findBlockWithAirAbove(level, new BlockPos(x, player.getBlockY(), z)) :
@@ -60,29 +60,29 @@ public class ClaimMapTopologyAlgorithm {
                         }
 
                         yDiff += y;
-                        color = Optionull.mapOrDefault(state, b -> b.getMapColor(level, pos1), MaterialColor.NONE);
+                        color = Optionull.mapOrDefault(state, b -> b.getMapColor(level, pos1), MapColor.NONE);
                     }
 
                     fluidDepth /= 2.5;
 
-                    MaterialColor.Brightness brightness;
-                    if (color == MaterialColor.WATER) {
+                    MapColor.Brightness brightness;
+                    if (color == MapColor.WATER) {
                         double darkness = fluidDepth * 0.1 + (double) (x + z & 1) * 0.2;
                         if (darkness < 0.5) {
-                            brightness = MaterialColor.Brightness.HIGH;
+                            brightness = MapColor.Brightness.HIGH;
                         } else if (darkness > 0.9) {
-                            brightness = MaterialColor.Brightness.LOW;
+                            brightness = MapColor.Brightness.LOW;
                         } else {
-                            brightness = MaterialColor.Brightness.NORMAL;
+                            brightness = MapColor.Brightness.NORMAL;
                         }
                     } else {
                         double darkness = (yDiff - depth) * 4.0 / 5D + ((double) (x + z & 1) - 0.5) * 0.4;
                         if (darkness > 0.6) {
-                            brightness = MaterialColor.Brightness.HIGH;
+                            brightness = MapColor.Brightness.HIGH;
                         } else if (darkness < -0.6) {
-                            brightness = MaterialColor.Brightness.LOW;
+                            brightness = MapColor.Brightness.LOW;
                         } else {
-                            brightness = MaterialColor.Brightness.NORMAL;
+                            brightness = MapColor.Brightness.NORMAL;
                         }
                     }
 
@@ -102,18 +102,18 @@ public class ClaimMapTopologyAlgorithm {
     }
 
     public static boolean shouldRender(BlockState state, Level level, BlockPos pos) {
-        if (state.getMapColor(level, pos) == MaterialColor.NONE) return false;
-        if (state.getFluidState().isEmpty()) return state.is(Blocks.SNOW) || !state.getMaterial().isReplaceable();
+        if (state.getMapColor(level, pos) == MapColor.NONE) return false;
+        if (state.getFluidState().isEmpty()) return state.is(Blocks.SNOW) || !state.canBeReplaced();
         return true;
     }
 
-    public static int getTintShade(MaterialColor color, BlockState state, Level level, BlockPos pos, MaterialColor.Brightness brightness) {
-        if (color == MaterialColor.WATER || color == MaterialColor.GRASS || color == MaterialColor.PLANT) {
+    public static int getTintShade(MapColor color, BlockState state, Level level, BlockPos pos, MapColor.Brightness brightness) {
+        if (color == MapColor.WATER || color == MapColor.GRASS || color == MapColor.PLANT) {
             int tintColor = BiomeColors.getAverageGrassColor(level, pos);
-            if (color == MaterialColor.WATER) tintColor = BiomeColors.getAverageWaterColor(level, pos);
-            if (color == MaterialColor.PLANT) tintColor = BiomeColors.getAverageFoliageColor(level, pos);
+            if (color == MapColor.WATER) tintColor = BiomeColors.getAverageWaterColor(level, pos);
+            if (color == MapColor.PLANT) tintColor = BiomeColors.getAverageFoliageColor(level, pos);
             int intColor = rgb2abgr(tintColor);
-            if (color == MaterialColor.WATER) {
+            if (color == MapColor.WATER) {
                 intColor = brighter(intColor);
             }
             return switch (brightness) {

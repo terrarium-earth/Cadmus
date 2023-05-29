@@ -27,14 +27,14 @@ public abstract class HangingEntityMixin extends Entity {
     private void cadmus$hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
         if (source.getEntity() instanceof Projectile projectile) {
             if (projectile.getOwner() instanceof Player player) {
-                if (!ClaimApi.API.canDamageEntity(player.level, this, player)) {
+                if (!ClaimApi.API.canDamageEntity(player.level(), this, player)) {
                     cir.setReturnValue(false);
                 }
-            } else if (projectile.getOwner() != null && !ClaimApi.API.canEntityGrief(level, projectile.getOwner())) {
+            } else if (projectile.getOwner() != null && !ClaimApi.API.canEntityGrief(level(), projectile.getOwner())) {
                 cir.setReturnValue(false);
             }
         } else if (source.is(DamageTypeTags.IS_EXPLOSION)) {
-            if (!ClaimApi.API.isClaimed(level, blockPosition())) {
+            if (!ClaimApi.API.isClaimed(level(), blockPosition())) {
                 cir.setReturnValue(false);
             }
         }

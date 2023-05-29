@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Style;
 public class ConstantComponents {
     public static final Component TITLE = Component.translatable("gui.cadmus.claim_map.title");
     public static final Component LOADING = Component.translatable("gui.cadmus.claim_map.loading");
+    public static final Component CLOSE = Component.translatable("gui.cadmus.claim_map.close");
     public static final Component CLEAR_CLAIMED_CHUNKS = Component.translatable("tooltip.cadmus.claim_map.clear_claimed_chunks");
     public static final Component CHUNK_LOADED = Component.translatable("tooltip.cadmus.claim_map.chunk_loaded").withStyle(Style.EMPTY.withColor(0xfff59a22).withItalic(true));
     public static final Component ADMIN_CLAIM = Component.translatable("tooltip.cadmus.claim_map.admin_claim").withStyle(Style.EMPTY.withColor(0xfff59a22).withItalic(true));

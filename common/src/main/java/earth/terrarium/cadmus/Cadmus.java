@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus;
 
+import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.client.CadmusClient;
@@ -30,11 +31,11 @@ public class Cadmus {
         MaxClaimProviderApi.API.register(DEFAULT_ID, new CadmusMaxClaimProvider());
         ModGameRules.init();
         ModFlags.init();
-        if (!ModUtils.isModLoaded("argonauts")) {
+        if (!ModInfoUtils.isModLoaded("argonauts")) {
             TeamProviderApi.API.setSelected(DEFAULT_ID);
         }
 
-        if (ModUtils.isModLoaded("prometheus")) {
+        if (ModInfoUtils.isModLoaded("prometheus")) {
             PrometheusIntegration.register();
         } else {
             MaxClaimProviderApi.API.setSelected(DEFAULT_ID);
@@ -42,7 +43,7 @@ public class Cadmus {
     }
 
     public static void enterChunkSection(Player player, ChunkPos pos) {
-        if (player.level.isClientSide()) {
+        if (player.level().isClientSide()) {
             CadmusClient.enterChunkSection();
         } else {
             ModUtils.displayTeamName((ServerPlayer) player, pos);

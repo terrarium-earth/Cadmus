@@ -94,13 +94,13 @@ public class AdminCommands {
         if (AdminClaimHandler.get(player.server, id) == null) {
             throw ClaimException.CLAIM_DOES_NOT_EXIST;
         }
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
         }
         var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
-        ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.getLevel(), claim, Set.of());
+        ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), claim, Set.of());
         if (chunkloaded) {
             player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {

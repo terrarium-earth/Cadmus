@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import earth.terrarium.cadmus.api.claims.admin.FlagApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -9,19 +10,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.saveddata.SavedData;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AdminClaimHandler extends SavedData {
+public class AdminClaimHandler extends SaveHandler {
     private final Map<String, Map<String, Flag<?>>> flagsById = new HashMap<>();
 
-    public AdminClaimHandler() {
-    }
-
-    public AdminClaimHandler(CompoundTag tag) {
+    @Override
+    public void loadData(CompoundTag tag) {
         tag.getAllKeys().forEach(id -> {
             CompoundTag adminTag = tag.getCompound(id);
             CompoundTag flagsTag = adminTag.getCompound("flags");
@@ -35,7 +32,7 @@ public class AdminClaimHandler extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag tag) {
+    public void saveData(CompoundTag tag) {
         flagsById.forEach((id, claimData) -> {
             CompoundTag adminTag = new CompoundTag();
             CompoundTag flagsTag = new CompoundTag();
@@ -43,11 +40,10 @@ public class AdminClaimHandler extends SavedData {
             adminTag.put("flags", flagsTag);
             tag.put(id, adminTag);
         });
-        return tag;
     }
 
     public static AdminClaimHandler read(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(AdminClaimHandler::new, AdminClaimHandler::new, "cadmus_admin_claims");
+        return read(server.overworld().getDataStorage(), AdminClaimHandler::new, "cadmus_admin_claims");
     }
 
     public static void create(MinecraftServer server, String id, Map<String, Flag<?>> claim) {

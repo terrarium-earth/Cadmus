@@ -39,7 +39,7 @@ public class ClaimInfoCommand {
     }
 
     public static void claimInfo(ServerPlayer player, ChunkPos pos) {
-        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.getLevel(), pos);
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         Component status = null;
         if (claimData == null) {
             status = ConstantComponents.UNCLAIMED;

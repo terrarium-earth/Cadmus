@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.client.claims;
 
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 
 public class ClaimMapPalette {
     public static final int[][] COLORS = new int[][]{
@@ -68,9 +68,9 @@ public class ClaimMapPalette {
         {0x789D88, 0x6D8F7E, 0x5B7469, 0x495B56}, // Glow Lichen
     };
 
-    public static int getColor(int index, MaterialColor.Brightness brightness) {
+    public static int getColor(int index, MapColor.Brightness brightness) {
         if (index >= COLORS.length) {
-            return MaterialColor.getColorFromPackedId(MaterialColor.byId(index).getPackedId(brightness));
+            return MapColor.getColorFromPackedId(MapColor.byId(index).getPackedId(brightness));
         }
 
         return COLORS[index][switch (brightness) {

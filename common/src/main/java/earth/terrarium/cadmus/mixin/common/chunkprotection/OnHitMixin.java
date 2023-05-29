@@ -16,7 +16,7 @@ public abstract class OnHitMixin {
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void cadmus$onHitEntity(EntityHitResult result, CallbackInfo ci) {
         if (((AbstractArrow) (Object) this).getOwner() instanceof Player player) {
-            if (!ClaimApi.API.canDamageEntity(player.level, result.getEntity(), player)) {
+            if (!ClaimApi.API.canDamageEntity(player.level(), result.getEntity(), player)) {
                 ci.cancel();
             }
         }

@@ -17,7 +17,7 @@ public abstract class WitherBossMixin {
     @Inject(method = "customServerAiStep", at = @At("HEAD"))
     private void cadmus$customServerAiStep(CallbackInfo ci) {
         WitherBoss wither = (WitherBoss) (Object) this;
-        if (!ClaimApi.API.canEntityGrief(wither.level, wither)) {
+        if (!ClaimApi.API.canEntityGrief(wither.level(), wither)) {
             destroyBlocksTick = 20;
         }
     }

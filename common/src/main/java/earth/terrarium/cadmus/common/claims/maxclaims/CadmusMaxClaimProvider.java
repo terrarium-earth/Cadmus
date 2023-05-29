@@ -18,11 +18,11 @@ public class CadmusMaxClaimProvider implements MaxClaimProvider {
     // The Cadmus one just uses the game rule for the max claims
     @Override
     public int getMaxClaims(String id, MinecraftServer server, Player player) {
-        return ModGameRules.getOrCreateIntGameRule(player.level, ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
+        return ModGameRules.getOrCreateIntGameRule(player.level(), ModGameRules.RULE_MAX_CLAIMED_CHUNKS);
     }
 
     @Override
     public int getMaxChunkLoaded(String id, MinecraftServer server, Player player) {
-        return ModGameRules.getOrCreateIntGameRule(player.level, ModGameRules.RULE_MAX_CHUNK_LOADED);
+        return ModGameRules.getOrCreateIntGameRule(player.level(), ModGameRules.RULE_MAX_CHUNK_LOADED);
     }
 }

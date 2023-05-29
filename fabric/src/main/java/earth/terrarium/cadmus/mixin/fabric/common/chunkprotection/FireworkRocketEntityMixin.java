@@ -17,7 +17,7 @@ public abstract class FireworkRocketEntityMixin {
     private List<LivingEntity> cadmus$dealExplosionDamage(List<LivingEntity> entities) {
         FireworkRocketEntity entity = ((FireworkRocketEntity) (Object) this);
         Player player = entity.getOwner() instanceof Player p ? p : null;
-        entities.removeIf(next -> (ClaimApi.API.isClaimed(entity.level, next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(entity.level, next, player))));
+        entities.removeIf(next -> (ClaimApi.API.isClaimed(entity.level(), next.chunkPosition()) && (player == null || !ClaimApi.API.canDamageEntity(entity.level(), next, player))));
         return entities;
     }
 }

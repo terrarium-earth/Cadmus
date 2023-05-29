@@ -15,7 +15,7 @@ public abstract class EntityMixin {
     @Inject(method = "isInvulnerableTo", at = @At("HEAD"), cancellable = true)
     private void cadmus$isInvulnerableTo(DamageSource source, CallbackInfoReturnable<Boolean> ci) {
         if (source.getEntity() instanceof Player player) {
-            if (!ClaimApi.API.canDamageEntity(player.level, (Entity) (Object) this, player)) {
+            if (!ClaimApi.API.canDamageEntity(player.level(), (Entity) (Object) this, player)) {
                 ci.setReturnValue(false);
             }
         }
