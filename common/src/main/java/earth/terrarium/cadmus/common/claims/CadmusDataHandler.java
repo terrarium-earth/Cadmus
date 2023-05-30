@@ -3,7 +3,6 @@ package earth.terrarium.cadmus.common.claims;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

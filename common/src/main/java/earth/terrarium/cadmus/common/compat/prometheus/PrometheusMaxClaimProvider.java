@@ -2,8 +2,8 @@ package earth.terrarium.cadmus.common.compat.prometheus;
 
 import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProvider;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.server.MinecraftServer;
@@ -15,7 +15,7 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
 
     @Override
     public void calculate(String id, MinecraftServer server) {
-        Set<GameProfile> members = TeamProviderApi.API.getSelected().getTeamMembers(id, server);
+        Set<GameProfile> members = TeamHelper.getTeamMembers(id, server);
         if (members.isEmpty()) return;
 
         boolean combinedClaimLimit = ModGameRules.getOrCreateBooleanGameRule(server.overworld(), ModGameRules.DO_COMBINED_CLAIM_LIMIT);

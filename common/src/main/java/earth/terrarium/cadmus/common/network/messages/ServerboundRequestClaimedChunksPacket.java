@@ -6,10 +6,10 @@ import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.FriendlyByteBuf;
@@ -56,7 +56,7 @@ public record ServerboundRequestClaimedChunksPacket(
                 int viewDistance = Math.min(((ServerLevel) level).getServer().getPlayerList().getViewDistance(), 32);
                 int renderDistance = Math.min(message.renderDistance, viewDistance);
 
-                String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
+                String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
 
                 // Get all claims within the render distance
                 var claimData = ClaimHandler.getAllTeamClaims((ServerLevel) level);
@@ -71,13 +71,13 @@ public record ServerboundRequestClaimedChunksPacket(
                         }));
                 }
 
-                Optional<String> displayName = Optional.ofNullable(Optionull.map(TeamProviderApi.API.getSelected().getTeamName(id, player.getServer()), Component::getString));
-                ChatFormatting color = TeamProviderApi.API.getSelected().getTeamColor(id, player.getServer());
+                Optional<String> displayName = Optional.ofNullable(Optionull.map(TeamHelper.getTeamName(id, player.getServer()), Component::getString));
+                ChatFormatting color = TeamHelper.getTeamColor(id, player.getServer());
 
                 Map<String, Component> teamDisplayNames = ClaimHandler.getAllTeamClaims((ServerLevel) level).keySet().stream()
                     .filter(t -> !t.equals(id))
                     .collect(HashMap::new, (map, teamId) -> map.put(teamId,
-                        Optional.ofNullable(TeamProviderApi.API.getSelected().getTeamName(teamId, player.getServer())).orElse(Component.literal("ERROR"))
+                        Optional.ofNullable(TeamHelper.getTeamName(teamId, player.getServer())).orElse(Component.literal("ERROR"))
                     ), HashMap::putAll);
 
                 int claimedChunks = 0;

@@ -2,12 +2,12 @@ package earth.terrarium.cadmus.common.util;
 
 import com.teamresourceful.resourcefullib.common.lib.Constants;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +25,7 @@ public class ModUtils {
         var claimData = ClaimHandler.getClaim(player.serverLevel(), player.chunkPosition());
         Component displayName = null;
         if (claimData != null) {
-            displayName = TeamProviderApi.API.getSelected().getTeamName(claimData.getFirst(), player.server);
+            displayName = TeamHelper.getTeamName(claimData.getFirst(), player.server);
         }
 
         Component lastMessage = holder.cadmus$getLastMessage();
@@ -45,8 +45,8 @@ public class ModUtils {
                 player.displayClientMessage(farewell, false);
             }
         } else {
-            boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
-            ChatFormatting teamColor = TeamProviderApi.API.getSelected().getTeamColor(claimData.getFirst(), player.getServer());
+            boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
+            ChatFormatting teamColor = TeamHelper.getTeamColor(claimData.getFirst(), player.getServer());
 
             ChatFormatting color = isMember ? teamColor : ChatFormatting.DARK_RED;
             player.displayClientMessage(displayName.copy().withStyle(color), true);
@@ -54,7 +54,7 @@ public class ModUtils {
     }
 
     public static boolean tryClaim(ServerLevel level, ServerPlayer player, Map<ChunkPos, ClaimType> addedChunks, Map<ChunkPos, ClaimType> removedChunks) {
-        String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
+        String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
 
         // Check if the player is claiming more chunks than allowed
         var teamClaims = ClaimHandler.getTeamClaims(level, id);

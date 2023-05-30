@@ -4,8 +4,8 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -39,7 +39,7 @@ public record ServerboundClearChunksPacket(boolean allDimensions) implements Pac
         @Override
         public PacketContext handle(ServerboundClearChunksPacket message) {
             return (player, level) -> {
-                String id = TeamProviderApi.API.getSelected().getTeamId(player.getServer(), player.getUUID());
+                String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
                 if (!message.allDimensions) {
                     ClaimHandler.clear((ServerLevel) level, id);
                 } else {

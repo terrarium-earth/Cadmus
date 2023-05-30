@@ -2,10 +2,10 @@ package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -44,9 +44,9 @@ public class ClaimInfoCommand {
         if (claimData == null) {
             status = ConstantComponents.UNCLAIMED;
         } else {
-            Component displayName = TeamProviderApi.API.getSelected().getTeamName(claimData.getFirst(), player.server);
-            boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
-            ChatFormatting color = isMember ? TeamProviderApi.API.getSelected().getTeamColor(claimData.getFirst(), player.server) : ChatFormatting.DARK_RED;
+            Component displayName = TeamHelper.getTeamName(claimData.getFirst(), player.server);
+            boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
+            ChatFormatting color = isMember ? TeamHelper.getTeamColor(claimData.getFirst(), player.server) : ChatFormatting.DARK_RED;
             if (displayName != null && color != null) {
                 Component type = switch (claimData.getFirst().split(":")[0] + ":") {
                     case ClaimHandler.TEAM_PREFIX -> ConstantComponents.TEAM;

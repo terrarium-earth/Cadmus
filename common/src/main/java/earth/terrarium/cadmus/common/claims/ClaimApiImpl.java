@@ -10,7 +10,6 @@ import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.common.util.ModGameRules;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;

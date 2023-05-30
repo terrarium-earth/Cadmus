@@ -4,8 +4,6 @@ import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
-import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
@@ -24,7 +22,7 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public Set<GameProfile> getTeamMembers(String id, MinecraftServer server) {
-        PlayerTeam team = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
+        PlayerTeam team = server.getScoreboard().getPlayerTeam(id);
         Set<GameProfile> profiles = new HashSet<>();
         if (team == null) return profiles;
         for (String player : team.getPlayers()) {
@@ -36,12 +34,9 @@ public class VanillaTeamProvider implements TeamProvider {
     @Override
     @Nullable
     public Component getTeamName(String id, MinecraftServer server) {
-        if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) {
-            return AdminClaimHandler.getFlag(server, id.split(":")[1], ModFlags.DISPLAY_NAME);
-        }
-        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
+        var playerTeam = server.getScoreboard().getPlayerTeam(id);
         if (playerTeam == null) {
-            var profile = server.getProfileCache().get(UUID.fromString(id.split(":")[1]));
+            var profile = server.getProfileCache().get(UUID.fromString(id));
             return profile.map(p -> Component.literal(p.getName())).orElse(null);
         }
         return playerTeam.getDisplayName();
@@ -58,18 +53,16 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public boolean isMember(String id, MinecraftServer server, UUID player) {
-        if (id.startsWith(ClaimHandler.ADMIN_PREFIX)) return true;
-        if (id.startsWith(ClaimHandler.PLAYER_PREFIX)) return id.split(":")[1].equals(player.toString());
         var profile = server.getProfileCache().get(player).orElse(null);
         if (profile == null) return false;
-        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
-        if (playerTeam == null) return id.split(":")[1].equals(player.toString());
+        var playerTeam = server.getScoreboard().getPlayerTeam(id);
+        if (playerTeam == null) return id.equals(player.toString());
         return playerTeam.getPlayers().contains(profile.getName());
     }
 
     @Override
     public ChatFormatting getTeamColor(String id, MinecraftServer server) {
-        var playerTeam = server.getScoreboard().getPlayerTeam(id.split(":")[1]);
+        var playerTeam = server.getScoreboard().getPlayerTeam(id);
         var result = Optionull.mapOrDefault(playerTeam, PlayerTeam::getColor, ChatFormatting.AQUA);
         return result == ChatFormatting.RESET ? ChatFormatting.AQUA : result;
     }

@@ -2,9 +2,9 @@ package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
-import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -38,7 +38,7 @@ public class UnclaimCommand {
         if (claimData == null) {
             throw ClaimException.THIS_CHUNK_IS_NOT_CLAIMED;
         }
-        boolean isMember = TeamProviderApi.API.getSelected().isMember(claimData.getFirst(), player.server, player.getUUID());
+        boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
         if (!isMember) {
             throw ClaimException.YOU_DONT_OWN_THIS_CHUNK;
         }
