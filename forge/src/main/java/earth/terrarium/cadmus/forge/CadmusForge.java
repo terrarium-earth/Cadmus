@@ -175,8 +175,8 @@ public class CadmusForge {
     private static void onEntityStruckByLightning(EntityStruckByLightningEvent event) {
         if (!event.getEntity().getLevel().isClientSide()) {
             var claim = ClaimHandler.getClaim((ServerLevel) event.getEntity().getLevel(), event.getEntity().chunkPosition());
-            if (claim != null && claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX)) {
-                event.setCanceled(!AdminClaimHandler.<Boolean>getFlag(event.getEntity().getLevel().getServer(), claim.getFirst(), ModFlags.LIGHTNING));
+            if (claim != null && ModUtils.isAdmin(claim.getFirst())) {
+                event.setCanceled(!AdminClaimHandler.getBooleanFlag(event.getEntity().getLevel().getServer(), claim.getFirst(), ModFlags.LIGHTNING));
             }
             if (event.getLightning().getCause() != null) {
                 if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), event.getLightning().getCause())) {
@@ -213,7 +213,7 @@ public class CadmusForge {
         if (!event.getLevel().isClientSide()) {
             var id = ClaimHandler.getClaim((ServerLevel) event.getLevel(), event.getEntity().chunkPosition());
             if (id == null) return;
-            if (!AdminClaimHandler.<Boolean>getFlag(event.getLevel().getServer(), id.getFirst(), ModFlags.USE)) {
+            if (!AdminClaimHandler.getBooleanFlag(event.getLevel().getServer(), id.getFirst(), ModFlags.USE)) {
                 event.setCanceled(true);
             }
         }

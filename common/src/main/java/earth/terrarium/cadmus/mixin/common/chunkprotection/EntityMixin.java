@@ -2,9 +2,9 @@ package earth.terrarium.cadmus.mixin.common.chunkprotection;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -36,7 +36,7 @@ public abstract class EntityMixin {
         if (cir.getReturnValue() && !entity.level().isClientSide) {
             var id = ClaimHandler.getClaim((ServerLevel) entity.level(), entity.chunkPosition());
             if (id == null) return;
-            if (!AdminClaimHandler.<Boolean>getFlag(entity.level().getServer(), id.getFirst(), ModFlags.USE_VEHICLES)) {
+            if (!AdminClaimHandler.getBooleanFlag(entity.level().getServer(), id.getFirst(), ModFlags.USE_VEHICLES)) {
                 cir.setReturnValue(false);
             }
         }

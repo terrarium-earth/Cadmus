@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
@@ -25,9 +26,7 @@ public class VanillaTeamProvider implements TeamProvider {
         PlayerTeam team = server.getScoreboard().getPlayerTeam(id);
         Set<GameProfile> profiles = new HashSet<>();
         if (team == null) return profiles;
-        for (String player : team.getPlayers()) {
-            server.getProfileCache().get(player).ifPresent(profiles::add);
-        }
+        team.getPlayers().forEach(p -> ModUtils.getProfileCache(server).get(p).ifPresent(profiles::add));
         return profiles;
     }
 
@@ -35,25 +34,21 @@ public class VanillaTeamProvider implements TeamProvider {
     @Nullable
     public Component getTeamName(String id, MinecraftServer server) {
         var playerTeam = server.getScoreboard().getPlayerTeam(id);
-        if (playerTeam == null) {
-            var profile = server.getProfileCache().get(UUID.fromString(id));
-            return profile.map(p -> Component.literal(p.getName())).orElse(null);
-        }
-        return playerTeam.getDisplayName();
+        return Optionull.map(playerTeam, PlayerTeam::getDisplayName);
     }
 
     @Override
+    @Nullable
     public String getTeamId(MinecraftServer server, UUID player) {
-        var profile = server.getProfileCache().get(player).orElse(null);
-        if (profile == null) return ClaimHandler.PLAYER_PREFIX + player.toString();
-        var playerTeam = server.getScoreboard().getPlayersTeam(profile.getName());
-        if (playerTeam == null) return ClaimHandler.PLAYER_PREFIX + player.toString();
-        return ClaimHandler.TEAM_PREFIX + playerTeam.getName();
+        var profile = ModUtils.getProfileCache(server).get(player);
+        if (profile.isEmpty()) return null;
+        var playerTeam = server.getScoreboard().getPlayersTeam(profile.get().getName());
+        return Optionull.map(playerTeam, t -> ClaimHandler.TEAM_PREFIX + t.getName());
     }
 
     @Override
     public boolean isMember(String id, MinecraftServer server, UUID player) {
-        var profile = server.getProfileCache().get(player).orElse(null);
+        var profile = ModUtils.getProfileCache(server).get(player).orElse(null);
         if (profile == null) return false;
         var playerTeam = server.getScoreboard().getPlayerTeam(id);
         if (playerTeam == null) return id.equals(player.toString());
@@ -98,14 +93,14 @@ public class VanillaTeamProvider implements TeamProvider {
     }
 
     public void onTeamChanged(String id, MinecraftServer server, String playerName) {
-        this.onTeamChanged(server, id);
-        var profile = server.getProfileCache().get(playerName).orElse(null);
+        TeamProvider.super.onTeamChanged(server, id);
+        var profile = ModUtils.getProfileCache(server).get(playerName).orElse(null);
         if (profile == null) return;
-        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, profile.getId().toString()));
+        server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.PLAYER_PREFIX + profile.getId().toString()));
     }
 
     public void onTeamRemoved(MinecraftServer server, PlayerTeam playerTeam) {
-        this.onTeamRemoved(server, playerTeam.getName());
+        TeamProvider.super.onTeamRemoved(server, playerTeam.getName());
         server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.TEAM_PREFIX + playerTeam.getName()));
     }
 }

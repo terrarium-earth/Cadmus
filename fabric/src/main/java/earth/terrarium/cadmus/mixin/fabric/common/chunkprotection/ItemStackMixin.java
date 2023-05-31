@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.mixin.fabric.common.chunkprotection;
 
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -22,7 +22,7 @@ public abstract class ItemStackMixin {
         if (!level.isClientSide()) {
             var id = ClaimHandler.getClaim((ServerLevel) level, player.chunkPosition());
             if (id == null) return;
-            if (!AdminClaimHandler.<Boolean>getFlag(level.getServer(), id.getFirst(), ModFlags.USE)) {
+            if (!AdminClaimHandler.getBooleanFlag(level.getServer(), id.getFirst(), ModFlags.USE)) {
                 cir.setReturnValue(InteractionResultHolder.fail(player.getItemInHand(interactionHand)));
             }
         }

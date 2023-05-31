@@ -37,12 +37,13 @@ public interface TeamProvider {
     Component getTeamName(String id, MinecraftServer server);
 
     /**
-     * Gets the id of the team a player is in
+     * Gets the id of a team
      *
      * @param server the server
      * @param player the uuid of the player
-     * @return the id of the team, or null if the player is not in a team
+     * @return the id of the team, or null if no team is found
      */
+    @Nullable
     String getTeamId(MinecraftServer server, UUID player);
 
     /**
@@ -146,6 +147,6 @@ public interface TeamProvider {
      * @param server the server
      */
     default void onTeamRemoved(MinecraftServer server, String id) {
-        MaxClaimProviderApi.API.getSelected().removeTeam(id, server);
+        MaxClaimProviderApi.API.getSelected().removeTeam(ClaimHandler.TEAM_PREFIX + id, server);
     }
 }

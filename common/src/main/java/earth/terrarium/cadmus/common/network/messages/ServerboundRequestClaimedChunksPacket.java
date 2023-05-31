@@ -8,6 +8,7 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
+import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.ChatFormatting;
@@ -77,7 +78,7 @@ public record ServerboundRequestClaimedChunksPacket(
                 Map<String, Component> teamDisplayNames = ClaimHandler.getAllTeamClaims((ServerLevel) level).keySet().stream()
                     .filter(t -> !t.equals(id))
                     .collect(HashMap::new, (map, teamId) -> map.put(teamId,
-                        Optional.ofNullable(TeamHelper.getTeamName(teamId, player.getServer())).orElse(Component.literal("ERROR"))
+                        Optional.ofNullable(TeamHelper.getTeamName(teamId, player.getServer())).orElse(ConstantComponents.UNKNOWN)
                     ), HashMap::putAll);
 
                 int claimedChunks = 0;

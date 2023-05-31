@@ -2,16 +2,18 @@ package earth.terrarium.cadmus.common.util;
 
 import com.teamresourceful.resourcefullib.common.lib.Constants;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.Map;
@@ -98,5 +100,17 @@ public class ModUtils {
         }
         Component component = Component.translatable(translation, args);
         return Component.translatableWithFallback(translation, component.getString(), args);
+    }
+
+    public static GameProfileCache getProfileCache(MinecraftServer server) {
+        return Objects.requireNonNull(server.getProfileCache());
+    }
+
+    public static boolean isAdmin(String id) {
+        return id.charAt(0) == 'a';
+    }
+
+    public static boolean isPlayer(String id) {
+        return id.charAt(0) == 'p';
     }
 }

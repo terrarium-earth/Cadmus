@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.common.util;
 
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.ChunkPos;
 public class AdminUtils {
     public static void preventAdminChunkEntry(ServerPlayer player, ChunkPos lastChunkPos) {
         if (lastChunkPos == null) return;
-        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_ENTRY)) {
+        if (player.isSpectator() || AdminClaimHandler.getBooleanFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_ENTRY)) {
             return;
         }
 
@@ -35,7 +35,7 @@ public class AdminUtils {
 
     public static void preventAdminChunkExit(ServerPlayer player, ChunkPos lastChunkPos) {
         if (lastChunkPos == null) return;
-        if (player.isSpectator() || AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), lastChunkPos, ModFlags.ALLOW_EXIT)) {
+        if (player.isSpectator() || AdminClaimHandler.getBooleanFlag(player.serverLevel(), lastChunkPos, ModFlags.ALLOW_EXIT)) {
             return;
         }
 

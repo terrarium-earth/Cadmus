@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.mixin.common.flags;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -16,11 +16,11 @@ public abstract class ServerLevelMixin {
 
     @WrapWithCondition(method = "tickChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z", ordinal = 2))
     private boolean cadmus$tickChunk(ServerLevel level, BlockPos pos, BlockState state, LevelChunk chunk, int randomTickSpeed) {
-        return AdminClaimHandler.<Boolean>getFlag(level, new ChunkPos(pos), ModFlags.SNOW_FALL);
+        return AdminClaimHandler.getBooleanFlag(level, new ChunkPos(pos), ModFlags.SNOW_FALL);
     }
 
     @WrapWithCondition(method = "tickChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
     private boolean cadmus$tickChunkIce(ServerLevel level, BlockPos pos, BlockState state, LevelChunk chunk, int randomTickSpeed) {
-        return AdminClaimHandler.<Boolean>getFlag(level, new ChunkPos(pos), ModFlags.ICE_FORM);
+        return AdminClaimHandler.getBooleanFlag(level, new ChunkPos(pos), ModFlags.ICE_FORM);
     }
 }

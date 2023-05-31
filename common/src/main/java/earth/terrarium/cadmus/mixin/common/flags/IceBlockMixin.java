@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.mixin.common.flags;
 
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -18,7 +18,7 @@ public abstract class IceBlockMixin {
     @Inject(method = "melt", at = @At(value = "HEAD"), cancellable = true)
     private void cadmus$melt(BlockState state, Level level, BlockPos pos, CallbackInfo ci) {
         if (!level.isClientSide()) {
-            if (!AdminClaimHandler.<Boolean>getFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ICE_MELT)) {
+            if (!AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ICE_MELT)) {
                 ci.cancel();
             }
         }

@@ -48,10 +48,10 @@ public class ClaimInfoCommand {
             boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
             ChatFormatting color = isMember ? TeamHelper.getTeamColor(claimData.getFirst(), player.server) : ChatFormatting.DARK_RED;
             if (displayName != null && color != null) {
-                Component type = switch (claimData.getFirst().split(":")[0] + ":") {
-                    case ClaimHandler.TEAM_PREFIX -> ConstantComponents.TEAM;
-                    case ClaimHandler.PLAYER_PREFIX -> ConstantComponents.PLAYER;
-                    case ClaimHandler.ADMIN_PREFIX -> ConstantComponents.ADMIN;
+                Component type = switch (claimData.getFirst().charAt(0)) {
+                    case 't' -> ConstantComponents.TEAM;
+                    case 'p' -> ConstantComponents.PLAYER;
+                    case 'a' -> ConstantComponents.ADMIN;
                     default -> ConstantComponents.UNKNOWN;
                 };
                 status = switch (claimData.getSecond()) {

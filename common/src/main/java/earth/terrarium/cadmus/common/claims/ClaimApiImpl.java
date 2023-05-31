@@ -6,10 +6,10 @@ import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.common.util.ModGameRules;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -50,7 +50,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING,
-            (id, server) -> getBoolFlag(server, id, ModFlags.BLOCK_BREAK),
+            (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_BREAK),
             (id, server) -> TeamProviderApi.API.getSelected().canBreakBlock(id, server, pos, player));
     }
 
@@ -62,7 +62,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING,
-            (id, server) -> getBoolFlag(server, id, ModFlags.BLOCK_PLACE),
+            (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_PLACE),
             (id, server) -> TeamProviderApi.API.getSelected().canPlaceBlock(id, server, pos, player));
     }
 
@@ -76,15 +76,15 @@ public class ClaimApiImpl implements ClaimApi {
         if (level.isClientSide()) return false;
 
         Pair<String, ClaimType> claim = ClaimHandler.getClaim((ServerLevel) level, pos);
-        boolean isAdmin = claim != null && claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX);
+        boolean isAdmin = claim != null && ModUtils.isAdmin(claim.getFirst());
 
-        return (claim != null) && (!isAdmin || !AdminClaimHandler.<Boolean>getFlag(level.getServer(), claim.getFirst(), ModFlags.BLOCK_EXPLOSIONS));
+        return (claim != null) && (!isAdmin || !AdminClaimHandler.getBooleanFlag(level.getServer(), claim.getFirst(), ModFlags.BLOCK_EXPLOSIONS));
     }
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS,
-            (id, server) -> getBoolFlag(server, id, ModFlags.BLOCK_EXPLOSIONS),
+            (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_EXPLOSIONS),
             (id, server) -> TeamProviderApi.API.getSelected().canExplodeBlock(id, server, pos, explosion, player));
     }
 
@@ -99,17 +99,17 @@ public class ClaimApiImpl implements ClaimApi {
             (id, server) -> {
                 Block block = level.getBlockState(pos).getBlock();
                 if (block instanceof DoorBlock || block instanceof TrapDoorBlock) {
-                    return getBoolFlag(server, id, ModFlags.USE_DOORS);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_DOORS);
                 }
 
                 if (block instanceof AbstractChestBlock<?>) {
-                    return getBoolFlag(server, id, ModFlags.USE_CHESTS);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_CHESTS);
                 }
 
                 if (block instanceof LeverBlock || block instanceof ButtonBlock || block instanceof PressurePlateBlock) {
-                    return getBoolFlag(server, id, ModFlags.USE_REDSTONE);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_REDSTONE);
                 }
-                return getBoolFlag(server, id, ModFlags.BLOCK_INTERACTIONS);
+                return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_INTERACTIONS);
             },
             (id, server) -> TeamProviderApi.API.getSelected().canInteractWithBlock(id, server, pos, type, player));
     }
@@ -122,7 +122,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS,
-            (id, server) -> getBoolFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
+            (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
             (id, server) -> TeamProviderApi.API.getSelected().canInteractWithEntity(id, server, entity, player));
     }
 
@@ -141,16 +141,16 @@ public class ClaimApiImpl implements ClaimApi {
                     || entity.getType().getCategory() == MobCategory.UNDERGROUND_WATER_CREATURE
                     || entity.getType().getCategory() == MobCategory.WATER_AMBIENT
                     || entity instanceof Animal) {
-                    return getBoolFlag(server, id, ModFlags.CREATURE_DAMAGE);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
                 }
 
                 if (entity.getType().getCategory() == MobCategory.MONSTER || entity instanceof Monster) {
-                    return getBoolFlag(server, id, ModFlags.MONSTER_DAMAGE);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
                 }
                 if (entity instanceof Player) {
-                    return getBoolFlag(server, id, ModFlags.PVP);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.PVP);
                 }
-                return getBoolFlag(server, id, ModFlags.ENTITY_DAMAGE);
+                return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
             },
             (id, server) -> TeamProviderApi.API.getSelected().canDamageEntity(id, server, entity, player));
     }
@@ -170,8 +170,8 @@ public class ClaimApiImpl implements ClaimApi {
         if (!level.isClientSide()) {
             var claim = ClaimHandler.getClaim((ServerLevel) level, new ChunkPos(pos));
             if (claim == null) return true;
-            if (claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX)) {
-                return AdminClaimHandler.<Boolean>getFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.MOB_GRIEFING);
+            if (ModUtils.isAdmin(claim.getFirst())) {
+                return AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.MOB_GRIEFING);
             }
         }
         return ModGameRules.getOrCreateBooleanGameRule(level, ModGameRules.RULE_CLAIMED_MOB_GRIEFING);
@@ -180,7 +180,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, Entity picker) {
         if (!level.isClientSide()) {
-            if (!AdminClaimHandler.<Boolean>getFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ITEM_PICKUP)) {
+            if (!AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ITEM_PICKUP)) {
                 return false;
             }
         }
@@ -201,7 +201,7 @@ public class ClaimApiImpl implements ClaimApi {
 
         var claim = ClaimHandler.getClaim(serverLevel, new ChunkPos(pos));
         if (claim == null) return true;
-        if (claim.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX) && !checkFlags.apply(claim.getFirst(), serverLevel.getServer())) {
+        if (ModUtils.isAdmin(claim.getFirst()) && !checkFlags.apply(claim.getFirst(), serverLevel.getServer())) {
             return false;
         }
 
@@ -214,9 +214,5 @@ public class ClaimApiImpl implements ClaimApi {
         if (!isClaimed(level, pos)) return true;
 
         return checkTeamPermission.apply(claim.getFirst(), serverLevel.getServer());
-    }
-
-    private boolean getBoolFlag(MinecraftServer server, String id, String flag) {
-        return AdminClaimHandler.<Boolean>getFlag(server, id, flag);
     }
 }

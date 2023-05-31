@@ -5,7 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import earth.terrarium.cadmus.api.claims.admin.FlagApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.commands.claims.ClaimException;
 import earth.terrarium.cadmus.common.commands.claims.CommandHelper;
 import earth.terrarium.cadmus.common.util.ModUtils;

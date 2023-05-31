@@ -1,15 +1,14 @@
-package earth.terrarium.cadmus.common.commands.claims;
+package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import earth.terrarium.cadmus.api.claims.admin.FlagApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
-import earth.terrarium.cadmus.common.claims.ClaimHandler;
-import earth.terrarium.cadmus.common.claims.ClaimType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +55,7 @@ public class AdminClaimHandler extends SaveHandler {
         data.flagsById.remove(id);
     }
 
+    @Nullable
     public static Map<String, Flag<?>> get(MinecraftServer server, String id) {
         var data = read(server);
         return data.flagsById.get(id);
@@ -65,6 +65,19 @@ public class AdminClaimHandler extends SaveHandler {
         return read(server).flagsById;
     }
 
+    public static boolean contains(MinecraftServer server, String id) {
+        var data = read(server);
+        return data.flagsById.containsKey(id);
+    }
+
+    public static boolean getBooleanFlag(ServerLevel level, ChunkPos pos, String flag) {
+        return getFlag(level, pos, flag);
+    }
+
+    public static boolean getBooleanFlag(MinecraftServer server, String id, String flag) {
+        return getFlag(server, id, flag);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getFlag(ServerLevel level, ChunkPos pos, String flag) {
         Pair<String, ClaimType> claim = ClaimHandler.getClaim(level, pos);
@@ -72,10 +85,11 @@ public class AdminClaimHandler extends SaveHandler {
         return getFlag(level.getServer(), claim.getFirst(), flag);
     }
 
+
     @SuppressWarnings("unchecked")
     public static <T> T getFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
-        var claim = data.flagsById.get(id.replace("a:", ""));
+        var claim = data.flagsById.get(id);
         if (claim == null) return (T) FlagApi.API.get(flag).getValue();
         var value = claim.get(flag);
         var result = value == null ? (Flag<T>) FlagApi.API.get(flag) : (Flag<T>) value;

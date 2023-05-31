@@ -8,13 +8,13 @@ import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
-import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.ClientboundSendClaimedChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.ServerboundClearChunksPacket;
 import earth.terrarium.cadmus.common.network.messages.ServerboundUpdateClaimedChunksPacket;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -280,7 +280,7 @@ public class ClaimScreen extends BaseCursorScreen {
                     drawTooltips(teamType, otherInfo);
                     color = Screen.hasShiftDown() ? ORANGE : tool == ClaimTool.ERASER || otherInfo != null ? DARK_RED : this.color;
                 } else {
-                    color = otherInfo != null ? DARK_RED : teamType != null ? teamType == ClaimType.CHUNK_LOADED ? ORANGE : this.color : 0x00FFFFFF;
+                    color = otherInfo != null ? ModUtils.isAdmin(otherInfo.getFirst()) ? 0xffff55ff : DARK_RED : teamType != null ? teamType == ClaimType.CHUNK_LOADED ? ORANGE : this.color : 0x00FFFFFF;
                 }
 
                 if (type == null && !isHovering) continue;
@@ -343,11 +343,11 @@ public class ClaimScreen extends BaseCursorScreen {
             ImmutableList.Builder<FormattedCharSequence> tooltips = ImmutableList.builder();
             Component otherTeamDisplayName = teamDisplayNames.get(otherInfo.getFirst());
             if (otherTeamDisplayName == null || otherTeamDisplayName.getString().isEmpty()) return;
-            tooltips.add(otherTeamDisplayName.copy().withStyle(ChatFormatting.DARK_RED).getVisualOrderText());
+            tooltips.add(otherTeamDisplayName.copy().withStyle(ModUtils.isAdmin(otherInfo.getFirst()) ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.DARK_RED).getVisualOrderText());
             if (otherInfo.getSecond() == ClaimType.CHUNK_LOADED) {
                 tooltips.add(ConstantComponents.CHUNK_LOADED.getVisualOrderText());
             }
-            if (otherInfo.getFirst().startsWith(ClaimHandler.ADMIN_PREFIX)) {
+            if (ModUtils.isAdmin(otherInfo.getFirst())) {
                 tooltips.add(ConstantComponents.ADMIN_CLAIM.getVisualOrderText());
             }
             this.setTooltipForNextRenderPass(tooltips.build());

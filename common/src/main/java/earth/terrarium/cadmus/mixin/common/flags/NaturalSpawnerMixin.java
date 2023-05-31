@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.mixin.common.flags;
 
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MobCategory;
@@ -22,11 +22,11 @@ public abstract class NaturalSpawnerMixin {
             || category == MobCategory.AXOLOTLS
             || category == MobCategory.UNDERGROUND_WATER_CREATURE
             || category == MobCategory.WATER_AMBIENT)
-            && !AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.CREATURE_SPAWNING)) {
+            && !AdminClaimHandler.getBooleanFlag(level, chunk.getPos(), ModFlags.CREATURE_SPAWNING)) {
             ci.cancel();
-        } else if (category == MobCategory.MONSTER && !AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.MONSTER_SPAWNING)) {
+        } else if (category == MobCategory.MONSTER && !AdminClaimHandler.getBooleanFlag(level, chunk.getPos(), ModFlags.MONSTER_SPAWNING)) {
             ci.cancel();
-        } else if (!AdminClaimHandler.<Boolean>getFlag(level, chunk.getPos(), ModFlags.MOB_SPAWNING)) {
+        } else if (!AdminClaimHandler.getBooleanFlag(level, chunk.getPos(), ModFlags.MOB_SPAWNING)) {
             ci.cancel();
         }
     }

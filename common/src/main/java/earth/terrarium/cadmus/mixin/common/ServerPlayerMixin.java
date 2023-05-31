@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.mixin.common;
 
 import com.mojang.authlib.GameProfile;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.util.LastMessageHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -70,7 +70,7 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
     private void cadmus$teleportTo(double x, double y, double z, CallbackInfo ci) {
         ServerPlayer player = (ServerPlayer) (Object) this;
 
-        if (!AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), new ChunkPos(BlockPos.containing(x, y, z)), ModFlags.ALLOW_ENTRY)) {
+        if (!AdminClaimHandler.getBooleanFlag(player.serverLevel(), new ChunkPos(BlockPos.containing(x, y, z)), ModFlags.ALLOW_ENTRY)) {
             Component message = AdminClaimHandler.getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ENTRY_DENY_MESSAGE);
             if (!message.getString().isBlank()) {
                 player.displayClientMessage(message.copy().withStyle(ChatFormatting.RED), false);
@@ -78,7 +78,7 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
             ci.cancel();
         }
 
-        if (!AdminClaimHandler.<Boolean>getFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_EXIT)) {
+        if (!AdminClaimHandler.getBooleanFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_EXIT)) {
             ci.cancel();
         }
     }
