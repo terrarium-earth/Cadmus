@@ -37,12 +37,13 @@ public class AdminFlagCommands {
                     .then(Commands.literal("remove")
                         .then(Commands.argument("adminClaim", StringArgumentType.string())
                             .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
-                            .executes(context -> {
-                                ServerPlayer player = context.getSource().getPlayerOrException();
-                                String adminClaim = StringArgumentType.getString(context, "adminClaim");
-                                CommandHelper.runAction(() -> remove(player, adminClaim, id));
-                                return 1;
-                            })))
+                            .then(Commands.literal(id)
+                                .executes(context -> {
+                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                    String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                                    CommandHelper.runAction(() -> remove(player, adminClaim, id));
+                                    return 1;
+                                }))))
                     .then(Commands.literal("list")
                         .then(Commands.argument("adminClaim", StringArgumentType.string())
                             .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
@@ -67,9 +68,8 @@ public class AdminFlagCommands {
         if (AdminClaimHandler.get(player.server, id) == null) {
             throw ClaimException.CLAIM_DOES_NOT_EXIST;
         }
-        Flag<?> oldVal = AdminClaimHandler.getFlag(player.server, id, flagName);
         AdminClaimHandler.removeFlag(player.server, id, flagName);
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove_flag", flagName, oldVal.getValue()), false);
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove_flag", flagName), false);
     }
 
     public static void list(ServerPlayer player, String id) throws ClaimException {

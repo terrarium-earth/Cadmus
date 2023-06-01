@@ -89,7 +89,7 @@ public class AdminClaimHandler extends SaveHandler {
     @SuppressWarnings("unchecked")
     public static <T> T getFlag(MinecraftServer server, String id, String flag) {
         var data = read(server);
-        var claim = data.flagsById.get(id);
+        var claim = data.flagsById.get(id.replace(ClaimHandler.ADMIN_PREFIX, ""));
         if (claim == null) return (T) FlagApi.API.get(flag).getValue();
         var value = claim.get(flag);
         var result = value == null ? (Flag<T>) FlagApi.API.get(flag) : (Flag<T>) value;

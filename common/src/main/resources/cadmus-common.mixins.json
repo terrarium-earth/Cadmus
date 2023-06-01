@@ -18,6 +18,7 @@
     "common.flags.IceBlockMixin",
     "common.flags.LeavesBlockMixin",
     "common.flags.NaturalSpawnerMixin",
+    "common.flags.PlayerMixin",
     "common.flags.ServerLevelMixin",
     "common.flags.SnowLayerBlockMixin"
   ],

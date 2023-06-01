@@ -40,11 +40,11 @@ public class ClaimCommand {
         Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
-            throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
+            throw isMember ? ClaimException.ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_ALREADY_CLAIMED;
         }
         var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
         if (!ModUtils.tryClaim(player.serverLevel(), player, claim, Map.of())) {
-            throw ClaimException.YOUVE_MAXED_OUT_YOUR_CLAIMS;
+            throw ClaimException.MAXED_OUT_CLAIMS;
         }
         if (chunkloaded) {
             player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);

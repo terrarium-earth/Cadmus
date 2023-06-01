@@ -64,32 +64,32 @@ public class VanillaTeamProvider implements TeamProvider {
 
     @Override
     public boolean canBreakBlock(String id, MinecraftServer server, BlockPos pos, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     @Override
     public boolean canPlaceBlock(String id, MinecraftServer server, BlockPos pos, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     @Override
     public boolean canExplodeBlock(String id, MinecraftServer server, BlockPos pos, Explosion explosion, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     @Override
     public boolean canInteractWithBlock(String id, MinecraftServer server, BlockPos pos, InteractionType type, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     @Override
     public boolean canInteractWithEntity(String id, MinecraftServer server, Entity entity, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     @Override
     public boolean canDamageEntity(String id, MinecraftServer server, Entity entity, UUID player) {
-        return isMember(id, server, player);
+        return TeamHelper.isMember(id, server, player);
     }
 
     public void onTeamChanged(String id, MinecraftServer server, String playerName) {

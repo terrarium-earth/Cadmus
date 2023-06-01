@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -26,9 +25,6 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
 
     @Shadow
     public abstract boolean hurt(DamageSource arg, float f);
-
-    @Shadow
-    public ServerGamePacketListenerImpl connection;
 
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
@@ -80,6 +76,17 @@ public abstract class ServerPlayerMixin extends Player implements LastMessageHol
 
         if (!AdminClaimHandler.getBooleanFlag(player.serverLevel(), player.chunkPosition(), ModFlags.ALLOW_EXIT)) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "restoreFrom", at = @At(value = "HEAD", target = "Lnet/minecraft/server/level/ServerPlayer;onUpdateAbilities()V"))
+    private void cadmus$restoreFrom(ServerPlayer that, boolean keepEverything, CallbackInfo ci) {
+        if (!keepEverything && AdminClaimHandler.getBooleanFlag(that.serverLevel(), that.chunkPosition(), ModFlags.KEEP_INVENTORY)) {
+            this.getInventory().replaceWith(that.getInventory());
+            this.experienceLevel = that.experienceLevel;
+            this.totalExperience = that.totalExperience;
+            this.experienceProgress = that.experienceProgress;
+            this.setScore(that.getScore());
         }
     }
 }

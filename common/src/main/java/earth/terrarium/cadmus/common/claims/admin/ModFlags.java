@@ -18,6 +18,7 @@ public class ModFlags {
     public static final String ENTITY_DAMAGE = "entity-damage";
     public static final String ENTITY_INTERACTIONS = "entity-interactions";
     public static final String FIRE_SPREAD = "fire-spread";
+    public static final String KEEP_INVENTORY = "keep-inventory";
     public static final String MONSTER_SPAWNING = "monster-spawning";
     public static final String ICE_FORM = "ice-form";
     public static final String ICE_MELT = "ice-melt";
@@ -59,6 +60,7 @@ public class ModFlags {
         api.register(ENTITY_DAMAGE, new BooleanFlag(true));
         api.register(ENTITY_INTERACTIONS, new BooleanFlag(true));
         api.register(FIRE_SPREAD, new BooleanFlag(true));
+        api.register(KEEP_INVENTORY, new BooleanFlag(false));
         api.register(MONSTER_SPAWNING, new BooleanFlag(true));
         api.register(ICE_FORM, new BooleanFlag(true));
         api.register(ICE_MELT, new BooleanFlag(true));

@@ -76,7 +76,10 @@ public class AdminCommands {
                         })))));
     }
 
-    public static void create(ServerPlayer player, String id) {
+    public static void create(ServerPlayer player, String id) throws ClaimException {
+        if (AdminClaimHandler.get(player.server, id) != null) {
+            throw ClaimException.CLAIM_ALREADY_EXISTS;
+        }
         AdminClaimHandler.create(player.server, id, new HashMap<>());
         AdminClaimHandler.setFlag(player.server, id, ModFlags.DISPLAY_NAME, new ComponentFlag(Component.literal(id)));
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.create", id), false);
@@ -97,7 +100,7 @@ public class AdminCommands {
         Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData != null) {
             boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
-            throw isMember ? ClaimException.YOUVE_ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_IS_ALREADY_CLAIMED;
+            throw isMember ? ClaimException.ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_ALREADY_CLAIMED;
         }
         var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
         ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), claim, Set.of());

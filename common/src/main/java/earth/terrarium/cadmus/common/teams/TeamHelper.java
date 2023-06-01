@@ -52,6 +52,6 @@ public class TeamHelper {
     }
 
     private static String teamId(String id) {
-        return id.split(":")[1];
+        return id.substring(2);
     }
 }

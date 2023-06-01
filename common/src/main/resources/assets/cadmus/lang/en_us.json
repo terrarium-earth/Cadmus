@@ -22,7 +22,7 @@
   "text.cadmus.admin.create": "Created admin claim \"%s\"",
   "text.cadmus.admin.remove": "Removed admin claim \"%s\"",
   "text.cadmus.admin.set_flag": "Set flag \"%s\" from \"%s\" to \"%s\"",
-  "text.cadmus.admin.remove_flag": "Removed flag \"%s\" with value \"%s\"",
+  "text.cadmus.admin.remove_flag": "Removed flag \"%s\"",
   "text.cadmus.admin.list": "\"%s\": \"%s\"",
 
   "text.cadmus.info.team": "Team",
@@ -57,11 +57,12 @@
   "cadmus.options.cadmus_options.max_claims": "Max Claims",
   "cadmus.options.cadmus_options.max_loaded_chunks": "Max Chunk Loaded",
 
-  "command.cadmus.exception.chunk_is_already_claimed": "Chunk is already claimed.",
-  "command.cadmus.exception.youve_already_claimed_chunk": "You've already claimed this chunk.",
+  "command.cadmus.exception.chunk_already_claimed": "Chunk is already claimed.",
+  "command.cadmus.exception.already_claimed_chunk": "You've already claimed this chunk.",
   "command.cadmus.exception.maxed_out_claims": "You've maxed out your claims.",
-  "command.cadmus.exception.this_chunk_is_not_claimed": "This chunk is not claimed.",
-  "command.cadmus.exception.you_dont_own_this_chunk": "You don't own this chunk.",
+  "command.cadmus.exception.chunk_not_claimed": "This chunk is not claimed.",
+  "command.cadmus.exception.dont_own_chunk": "You don't own this chunk.",
   "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
+  "command.cadmus.exception.claim_already_exists": "This claim already exists.",
   "command.cadmus.exception.claim_does_not_exist": "This claim does not exist."
 }
