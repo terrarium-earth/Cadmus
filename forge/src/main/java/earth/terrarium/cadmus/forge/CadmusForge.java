@@ -4,10 +4,11 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.client.forge.CadmusClientForge;
+import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.ModCommands;
-import earth.terrarium.cadmus.common.commands.claims.AdminClaimHandler;
+import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -83,41 +84,41 @@ public class CadmusForge {
     }
 
     private static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!ClaimApi.API.canBreakBlock(event.getPlayer().getLevel(), event.getPos(), event.getPlayer())) {
+        if (!ClaimApi.API.canBreakBlock(event.getPlayer().level(), event.getPos(), event.getPlayer())) {
             event.setCanceled(true);
         }
     }
 
     private static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (!ClaimApi.API.canPlaceBlock(player.getLevel(), event.getPos(), player)) {
+            if (!ClaimApi.API.canPlaceBlock(player.level(), event.getPos(), player)) {
                 event.setCanceled(true);
             }
-        } else if (event.getEntity() != null && !ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
+        } else if (event.getEntity() != null && !ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
-        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().getLevel(), event.getPos(), InteractionType.USE, event.getEntity())) {
+        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().level(), event.getPos(), InteractionType.USE, event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (!ClaimApi.API.canInteractWithEntity(event.getEntity().getLevel(), event.getTarget(), event.getEntity())) {
+        if (!ClaimApi.API.canInteractWithEntity(event.getEntity().level(), event.getTarget(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onAttackBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().getLevel(), event.getPos(), InteractionType.ATTACK, event.getEntity())) {
+        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().level(), event.getPos(), InteractionType.ATTACK, event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onAttackEntity(AttackEntityEvent event) {
-        if (!ClaimApi.API.canDamageEntity(event.getEntity().getLevel(), event.getTarget(), event.getEntity())) {
+        if (!ClaimApi.API.canDamageEntity(event.getEntity().level(), event.getTarget(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
@@ -141,16 +142,16 @@ public class CadmusForge {
     // Prevent players from trampling crops in protected chunks
     private static void onFarmLandTrample(BlockEvent.FarmlandTrampleEvent event) {
         if (event.getEntity() instanceof Player player) {
-            if (!ClaimApi.API.canBreakBlock(player.level, event.getPos(), player)) {
+            if (!ClaimApi.API.canBreakBlock(player.level(), event.getPos(), player)) {
                 event.setCanceled(true);
             }
-        } else if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
+        } else if (!ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     private static void onEntityMobGriefing(EntityMobGriefingEvent event) {
-        if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getEntity())) {
+        if (!ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
@@ -158,14 +159,14 @@ public class CadmusForge {
 
     // Prevent mobs destroying blocks in protected chunks
     private static void onLivingDestroyBlock(LivingDestroyBlockEvent event) {
-        if (!ClaimApi.API.canEntityGrief(event.getEntity().getLevel(), event.getPos(), event.getEntity())) {
+        if (!ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
 
     // Prevent players from picking up items in protected chunks unless they dropped them
     private static void onItemPickup(EntityItemPickupEvent event) {
-        if (!ClaimApi.API.canPickupItem(event.getItem().level, event.getItem().blockPosition(), event.getItem(), event.getEntity())) {
+        if (!ClaimApi.API.canPickupItem(event.getItem().level(), event.getItem().blockPosition(), event.getItem(), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
@@ -173,16 +174,16 @@ public class CadmusForge {
 
     // Prevent entities from being affected by lightning in protected chunks
     private static void onEntityStruckByLightning(EntityStruckByLightningEvent event) {
-        if (!event.getEntity().getLevel().isClientSide()) {
-            var claim = ClaimHandler.getClaim((ServerLevel) event.getEntity().getLevel(), event.getEntity().chunkPosition());
+        if (!event.getEntity().level().isClientSide()) {
+            var claim = ClaimHandler.getClaim((ServerLevel) event.getEntity().level(), event.getEntity().chunkPosition());
             if (claim != null && ModUtils.isAdmin(claim.getFirst())) {
-                event.setCanceled(!AdminClaimHandler.getBooleanFlag(event.getEntity().getLevel().getServer(), claim.getFirst(), ModFlags.LIGHTNING));
+                event.setCanceled(!AdminClaimHandler.getBooleanFlag(event.getEntity().level().getServer(), claim.getFirst(), ModFlags.LIGHTNING));
             }
             if (event.getLightning().getCause() != null) {
-                if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), event.getLightning().getCause())) {
+                if (!ClaimApi.API.canDamageEntity(event.getEntity().level(), event.getEntity(), event.getLightning().getCause())) {
                     event.setCanceled(true);
                 }
-            } else if (!ClaimApi.API.canEntityGrief(event.getLightning().level, event.getLightning())) {
+            } else if (!ClaimApi.API.canEntityGrief(event.getLightning().level(), event.getLightning())) {
                 event.setCanceled(true);
             }
         }
@@ -190,7 +191,7 @@ public class CadmusForge {
 
     private static void onProjectileImpact(ProjectileImpactEvent event) {
         if (event.getProjectile().getOwner() instanceof Player player) {
-            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), player)) {
+            if (!ClaimApi.API.canDamageEntity(event.getEntity().level(), event.getEntity(), player)) {
                 event.setCanceled(true);
             }
         }
@@ -199,7 +200,7 @@ public class CadmusForge {
     // Prevent mobs from taking damage from players in protected chunks
     private static void onLivingAttack(LivingAttackEvent event) {
         if (event.getSource().getEntity() instanceof Player player) {
-            if (!ClaimApi.API.canDamageEntity(event.getEntity().level, event.getEntity(), player)) {
+            if (!ClaimApi.API.canDamageEntity(event.getEntity().level(), event.getEntity(), player)) {
                 event.setCanceled(true);
             }
         }

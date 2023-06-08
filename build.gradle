@@ -81,7 +81,6 @@ allprojects {
                 includeGroup 'com.github.llamalad7.mixinextras'
             }
         }
-        mavenLocal()
     }
 
     tasks.withType(JavaCompile).tap {

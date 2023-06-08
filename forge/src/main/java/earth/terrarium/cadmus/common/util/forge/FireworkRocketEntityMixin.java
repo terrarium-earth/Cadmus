@@ -24,8 +24,8 @@ public abstract class FireworkRocketEntityMixin {
         entities.forEachRemaining(entityList::add);
 
         entityList.removeIf(next ->
-            (ClaimApi.API.isClaimed(entity.level, next.chunkPosition()) &&
-                (player == null || !ClaimApi.API.canDamageEntity(entity.level, next, player))));
+            (ClaimApi.API.isClaimed(entity.level(), next.chunkPosition()) &&
+                (player == null || !ClaimApi.API.canDamageEntity(entity.level(), next, player))));
 
         return entityList.iterator();
     }

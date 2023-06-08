@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.common.teams;
 
 import com.mojang.authlib.GameProfile;
-import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
