@@ -80,7 +80,9 @@ public class ClaimHandler extends SaveHandler {
 
     public static void clear(ServerLevel level, String id) {
         var data = read(level);
-        data.listenHandler.removeClaims(level, id, data.claimsById.get(id).keySet());
+        if (data.claimsById.containsKey(id)) {
+            data.listenHandler.removeClaims(level, id, data.claimsById.get(id).keySet());
+        }
         data.claimsById.remove(id);
         data.updateInternal();
     }
