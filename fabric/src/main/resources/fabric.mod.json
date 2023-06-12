@@ -24,6 +24,9 @@
     ],
     "client": [
       "earth.terrarium.cadmus.client.fabric.CadmusClientFabric"
+    ],
+    "journeymap": [
+      "earth.terrarium.cadmus.common.compat.journeymap.JourneyMapCompat"
     ]
   },
   "mixins": [

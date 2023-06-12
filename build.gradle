@@ -73,6 +73,10 @@ allprojects {
     group = maven_group
 
     repositories {
+        maven {
+            name = "JourneyMap (Public)"
+            url = "https://jm.gserv.me/repository/maven-public/"
+        }
         maven { url = "https://maven.resourcefulbees.com/repository/maven-public/" }
         maven {
             url = 'https://jitpack.io'
