@@ -16,6 +16,18 @@ import java.util.Set;
 import java.util.UUID;
 
 public class TeamHelper {
+
+    private static final ChatFormatting[] COLORS = new ChatFormatting[]{
+            ChatFormatting.DARK_GREEN,
+            ChatFormatting.GREEN,
+            ChatFormatting.AQUA,
+            ChatFormatting.DARK_AQUA,
+            ChatFormatting.DARK_BLUE,
+            ChatFormatting.BLUE,
+            ChatFormatting.LIGHT_PURPLE,
+            ChatFormatting.DARK_PURPLE,
+    };
+
     public static Set<GameProfile> getTeamMembers(String id, MinecraftServer server) {
         if (ModUtils.isAdmin(id) || ModUtils.isPlayer(id)) return new HashSet<>();
         return TeamProviderApi.API.getSelected().getTeamMembers(teamId(id), server);
@@ -46,7 +58,10 @@ public class TeamHelper {
 
     public static ChatFormatting getTeamColor(String id, MinecraftServer server) {
         if (ModUtils.isAdmin(id)) return ChatFormatting.LIGHT_PURPLE;
-        if (ModUtils.isPlayer(id)) return ChatFormatting.AQUA;
+        if (ModUtils.isPlayer(id)) {
+            int uniqueishId = id.isEmpty() ? 0 : id.charAt(id.length() - 1);
+            return COLORS[Math.abs(uniqueishId) % COLORS.length];
+        }
         return TeamProviderApi.API.getSelected().getTeamColor(teamId(id), server);
     }
 

@@ -3,22 +3,29 @@ package earth.terrarium.cadmus.common.claims;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkSource;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ClaimHandler extends SaveHandler {
+
     public static final String PLAYER_PREFIX = "p:";
     public static final String TEAM_PREFIX = "t:";
     public static final String ADMIN_PREFIX = "a:";
 
     private final Map<ChunkPos, Pair<String, ClaimType>> claims = new HashMap<>();
     private final Map<String, Map<ChunkPos, ClaimType>> claimsById = new HashMap<>();
+
+    private final ClaimListenHandler listenHandler;
+
+    private ClaimHandler(ResourceKey<Level> dimension) {
+        this.listenHandler = new ClaimListenHandler(dimension);
+    }
 
     @Override
     public void loadData(CompoundTag tag) {
@@ -46,13 +53,15 @@ public class ClaimHandler extends SaveHandler {
     }
 
     public static ClaimHandler read(ServerLevel level) {
-        return read(level.getDataStorage(), ClaimHandler::new, "cadmus_claims");
+        return read(level.getDataStorage(), () -> new ClaimHandler(level.dimension()), "cadmus_claims");
     }
 
     public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {
         var data = read(level);
         // Remove any claims that are already claimed by another team
         claimData.keySet().removeAll(data.claims.keySet());
+
+        data.listenHandler.addClaims(level, id, claimData.keySet());
 
         claimData.forEach((pos, type) -> data.claims.put(pos, Pair.of(id, type)));
         var currentClaims = data.claimsById.getOrDefault(id, new HashMap<>());
@@ -62,6 +71,7 @@ public class ClaimHandler extends SaveHandler {
 
     public static void removeClaims(ServerLevel level, String id, Set<ChunkPos> claimData) {
         var data = read(level);
+        data.listenHandler.removeClaims(level, id, claimData);
         claimData.forEach(pos -> {
             data.claims.remove(pos);
             data.claimsById.get(id).remove(pos);
@@ -70,6 +80,9 @@ public class ClaimHandler extends SaveHandler {
 
     public static void clear(ServerLevel level, String id) {
         var data = read(level);
+        if (data.claimsById.containsKey(id)) {
+            data.listenHandler.removeClaims(level, id, data.claimsById.get(id).keySet());
+        }
         data.claimsById.remove(id);
         data.updateInternal();
     }
@@ -97,6 +110,10 @@ public class ClaimHandler extends SaveHandler {
                 chunkSource.updateChunkForced(pos, setLoaded);
             }
         });
+    }
+
+    public static ClaimListenHandler getListener(ServerLevel level) {
+        return read(level).listenHandler;
     }
 
     @Override

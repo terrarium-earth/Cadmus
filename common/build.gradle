@@ -8,6 +8,7 @@ dependencies {
     modCompileOnly("earth.terrarium.prometheus:prometheus-common-$minecraft_version:$prometheus_version") {
         transitive = false
     }
+    modCompileOnly("info.journeymap:journeymap-api:$journeymap_version")
 }
 
 processResources {
