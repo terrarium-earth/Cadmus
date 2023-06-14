@@ -79,6 +79,12 @@ allprojects {
         }
         maven { url = "https://maven.resourcefulbees.com/repository/maven-public/" }
         maven {
+            url = "https://api.modrinth.com/maven"
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+        maven {
             url = 'https://jitpack.io'
             content {
                 includeGroup 'com.github.LlamaLad7'

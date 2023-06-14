@@ -9,6 +9,10 @@ dependencies {
         transitive = false
     }
     modCompileOnly("info.journeymap:journeymap-api:$journeymap_version")
+
+    // there are no xplat xaeros jars, so fabric will have to suffice
+//    modCompileOnly("maven.modrinth:xaeros-minimap:23.4.4_Fabric_1.20")
+    modCompileOnly("maven.modrinth:xaeros-world-map:1.30.4_Fabric_1.20")
 }
 
 processResources {

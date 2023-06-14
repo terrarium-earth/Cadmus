@@ -20,7 +20,9 @@
     "common.flags.NaturalSpawnerMixin",
     "common.flags.PlayerMixin",
     "common.flags.ServerLevelMixin",
-    "common.flags.SnowLayerBlockMixin"
+    "common.flags.SnowLayerBlockMixin",
+    "common.xaero.MapProcessorMixin",
+    "common.xaero.WorldMapSessionMixin"
   ],
   "client": [
   ],
