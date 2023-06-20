@@ -35,7 +35,7 @@ public class AdminCommands {
     };
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("claim")
+        dispatcher.register(Commands.literal("cadmus")
             .then(Commands.literal("admin")
                 .requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
                 .then(Commands.literal("create")
@@ -53,6 +53,23 @@ public class AdminCommands {
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             String id = StringArgumentType.getString(context, "adminClaim");
                             CommandHelper.runAction(() -> remove(player, id));
+                            return 1;
+                        })))
+                .then(Commands.literal("unclaim")
+                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                        .then(Commands.argument("pos", ColumnPosArgument.columnPos())
+                            .executes(context -> {
+                                ServerPlayer player = context.getSource().getPlayerOrException();
+                                ColumnPos pos = ColumnPosArgument.getColumnPos(context, "pos");
+                                String id = StringArgumentType.getString(context, "adminClaim");
+                                CommandHelper.runAction(() -> unclaim(player, id, pos.toChunkPos()));
+                                return 1;
+                            }))
+                        .executes(context -> {
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            String id = StringArgumentType.getString(context, "adminClaim");
+                            CommandHelper.runAction(() -> unclaim(player, id, player.chunkPosition()));
                             return 1;
                         })))
                 .then(Commands.literal("claim")
@@ -90,6 +107,7 @@ public class AdminCommands {
             throw ClaimException.CLAIM_DOES_NOT_EXIST;
         }
         AdminClaimHandler.remove(player.server, id);
+        ClaimHandler.clear(player.serverLevel(), ClaimHandler.ADMIN_PREFIX + id);
         player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove", id), false);
     }
 
@@ -109,5 +127,18 @@ public class AdminCommands {
         } else {
             player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
+    }
+
+    public static void unclaim(ServerPlayer player, String id, ChunkPos pos) throws ClaimException {
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
+        if (claimData == null) {
+            throw ClaimException.CHUNK_NOT_CLAIMED;
+        }
+        boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
+        if (!isMember) {
+            throw ClaimException.DONT_OWN_CHUNK;
+        }
+        ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), Map.of(), Set.of(pos));
+        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 }

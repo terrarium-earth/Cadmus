@@ -126,7 +126,7 @@ public class CadmusForge {
     // Prevent players from using buckets in protected chunks
     private static void onFillBucket(FillBucketEvent event) {
         var target = event.getTarget();
-        if (target != null && ClaimApi.API.canBreakBlock(event.getLevel(), BlockPos.containing(target.getLocation()), event.getEntity())) {
+        if (target != null && !ClaimApi.API.canBreakBlock(event.getLevel(), BlockPos.containing(target.getLocation()), event.getEntity())) {
             event.setResult(Event.Result.DENY);
             event.setCanceled(true);
         }
