@@ -21,7 +21,7 @@ public class ServerScoreboardMixin {
     private MinecraftServer server;
 
     @Inject(method = "addPlayerToTeam", at = @At("RETURN"))
-    private void cadmus$addPlayerToTeam(String playerName, PlayerTeam team, CallbackInfoReturnable<Boolean> ci) {
+    private void cadmus$addPlayerToTeam(String playerName, PlayerTeam team, CallbackInfoReturnable<Boolean> cir) {
         if (TeamProviderApi.API.getSelected() instanceof VanillaTeamProvider provider) {
             provider.onTeamChanged(team.getName(), server, playerName);
         }

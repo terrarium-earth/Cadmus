@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[46,)"
+loaderVersion = "[47,)"
 license = "MIT"
 issueTrackerURL = "https://github.com/terrarium-earth/${github_name}/issues"
 
@@ -13,11 +13,12 @@ logoFile = "icon.png"
 authors = "Alex Nijjar, ThatGravyBoat"
 credits = ""
 description = "Modern Chunk Claiming Mod!"
+displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.cadmus]]
 modId = "forge"
 mandatory = true
-versionRange = "[46,)"
+versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
 

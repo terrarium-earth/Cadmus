@@ -47,47 +47,47 @@ public class AdminCommands {
                             return 1;
                         })))
                 .then(Commands.literal("remove")
-                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                    .then(Commands.argument("id", StringArgumentType.string())
                         .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            String id = StringArgumentType.getString(context, "adminClaim");
+                            String id = StringArgumentType.getString(context, "id");
                             CommandHelper.runAction(() -> remove(player, id));
                             return 1;
                         })))
                 .then(Commands.literal("unclaim")
-                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                    .then(Commands.argument("id", StringArgumentType.string())
                         .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
                         .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                             .executes(context -> {
                                 ServerPlayer player = context.getSource().getPlayerOrException();
                                 ColumnPos pos = ColumnPosArgument.getColumnPos(context, "pos");
-                                String id = StringArgumentType.getString(context, "adminClaim");
+                                String id = StringArgumentType.getString(context, "id");
                                 CommandHelper.runAction(() -> unclaim(player, id, pos.toChunkPos()));
                                 return 1;
                             }))
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            String id = StringArgumentType.getString(context, "adminClaim");
+                            String id = StringArgumentType.getString(context, "id");
                             CommandHelper.runAction(() -> unclaim(player, id, player.chunkPosition()));
                             return 1;
                         })))
                 .then(Commands.literal("claim")
-                    .then(Commands.argument("adminClaim", StringArgumentType.string())
+                    .then(Commands.argument("id", StringArgumentType.string())
                         .suggests(ADMIN_CLAIM_SUGGESTION_PROVIDER)
                         .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                             .then(Commands.argument("chunkload", BoolArgumentType.bool())
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
                                     ColumnPos pos = ColumnPosArgument.getColumnPos(context, "pos");
-                                    String id = StringArgumentType.getString(context, "adminClaim");
+                                    String id = StringArgumentType.getString(context, "id");
                                     boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
                                     CommandHelper.runAction(() -> claim(player, id, pos.toChunkPos(), chunkload));
                                     return 1;
                                 })))
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
-                            String id = StringArgumentType.getString(context, "adminClaim");
+                            String id = StringArgumentType.getString(context, "id");
                             CommandHelper.runAction(() -> claim(player, id, player.chunkPosition(), false));
                             return 1;
                         })))));

@@ -18,9 +18,9 @@ public abstract class RemoveBlockGoalMixin {
 
     // Prevent zombies from breaking down doors in protected chunks
     @Inject(method = "canUse", at = @At("HEAD"), cancellable = true)
-    private void cadmus$canUse(CallbackInfoReturnable<Boolean> ci) {
+    private void cadmus$canUse(CallbackInfoReturnable<Boolean> cir) {
         if (!ClaimApi.API.canEntityGrief(removerMob.level(), removerMob)) {
-            ci.setReturnValue(false);
+            cir.setReturnValue(false);
         }
     }
 }

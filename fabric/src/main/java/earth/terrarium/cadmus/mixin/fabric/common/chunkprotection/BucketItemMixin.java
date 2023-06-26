@@ -18,21 +18,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BucketItem.class)
 public abstract class BucketItemMixin {
     // Prevent players from using buckets in protected chunks
-    @Inject(method = "use", at = @At("HEAD"))
-    private void cadmus$use(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> ci) {
+    @Inject(method = "use", at = @At("HEAD"), cancellable = true)
+    private void cadmus$use(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
         if (!ClaimApi.API.canPlaceBlock(player.level(), player.blockPosition(), player)) {
-            ci.cancel();
+            cir.setReturnValue(InteractionResultHolder.fail(player.getItemInHand(usedHand)));
         }
     }
 
-    @Inject(method = "emptyContents", at = @At("HEAD"))
-    private void cadmus$emptyContents(@Nullable Player player, Level level, BlockPos pos, @Nullable BlockHitResult result, CallbackInfoReturnable<Boolean> ci) {
+    @Inject(method = "emptyContents", at = @At("HEAD"), cancellable = true)
+    private void cadmus$emptyContents(@Nullable Player player, Level level, BlockPos pos, @Nullable BlockHitResult result, CallbackInfoReturnable<Boolean> cir) {
         if (player != null) {
             if (!ClaimApi.API.canPlaceBlock(level, pos, player)) {
-                ci.cancel();
+                cir.setReturnValue(false);
             }
         } else if (!ClaimApi.API.isClaimed(level, pos)) {
-            ci.cancel();
+            cir.setReturnValue(false);
         }
     }
 }

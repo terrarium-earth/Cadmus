@@ -30,7 +30,7 @@ dependencies {
 
     implementation(annotationProcessor("com.github.llamalad7.mixinextras:mixinextras-common:$mixinextras_version"))
     include(implementation("com.github.llamalad7.mixinextras:mixinextras-forge:$mixinextras_version"))
-    modLocalRuntime("earth.terrarium.prometheus:prometheus-forge-$minecraft_version:$prometheus_version") {
+    modLocalRuntime("earth.terrarium.prometheus:prometheus-forge-1.20:$prometheus_version") {
         transitive = false
     }
 }

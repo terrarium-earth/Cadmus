@@ -12,10 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class EnderDragonMixin {
     // Prevent the ender dragon from destroying blocks in protected chunks
     @Inject(method = "checkWalls", at = @At("HEAD"), cancellable = true)
-    private void cadmus$checkWalls(AABB area, CallbackInfoReturnable<Boolean> ci) {
+    private void cadmus$checkWalls(AABB area, CallbackInfoReturnable<Boolean> cir) {
         EnderDragon enderDragon = (EnderDragon) (Object) this;
         if (!ClaimApi.API.canEntityGrief(enderDragon.level(), enderDragon)) {
-            ci.setReturnValue(false);
+            cir.setReturnValue(false);
         }
     }
 }

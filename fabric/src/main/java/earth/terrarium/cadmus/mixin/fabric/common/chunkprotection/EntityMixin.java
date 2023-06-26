@@ -13,10 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class EntityMixin {
     // Prevent entities from being damaged by players in protected chunks
     @Inject(method = "isInvulnerableTo", at = @At("HEAD"), cancellable = true)
-    private void cadmus$isInvulnerableTo(DamageSource source, CallbackInfoReturnable<Boolean> ci) {
+    private void cadmus$isInvulnerableTo(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         if (source.getEntity() instanceof Player player) {
             if (!ClaimApi.API.canDamageEntity(player.level(), (Entity) (Object) this, player)) {
-                ci.setReturnValue(false);
+                cir.setReturnValue(false);
             }
         }
     }

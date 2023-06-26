@@ -69,9 +69,9 @@ public class ClaimMapTopologyAlgorithm {
                     if (color == MapColor.WATER) {
                         double darkness = fluidDepth * 0.1 + (double) (x + z & 1) * 0.2;
                         if (darkness < 0.5) {
-                            brightness = MapColor.Brightness.HIGH;
-                        } else if (darkness > 0.9) {
                             brightness = MapColor.Brightness.LOW;
+                        } else if (darkness > 0.9) {
+                            brightness = MapColor.Brightness.HIGH;
                         } else {
                             brightness = MapColor.Brightness.NORMAL;
                         }

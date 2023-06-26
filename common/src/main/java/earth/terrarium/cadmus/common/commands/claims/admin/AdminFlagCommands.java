@@ -24,32 +24,32 @@ public class AdminFlagCommands {
             dispatcher.register(command.then(Commands.literal("admin")
                 .then(Commands.literal("flag")
                     .then(Commands.literal("set")
-                        .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .then(Commands.argument("id", StringArgumentType.string())
                             .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .then(Commands.literal(id)
                                 .then(flag.createArgument("value")
                                     .executes(context -> {
                                         ServerPlayer player = context.getSource().getPlayerOrException();
-                                        String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                                        String adminClaim = StringArgumentType.getString(context, "id");
                                         CommandHelper.runAction(() -> flag(player, adminClaim, id, flag.getFromArgument(context, "value")));
                                         return 1;
                                     })))))
                     .then(Commands.literal("remove")
-                        .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .then(Commands.argument("id", StringArgumentType.string())
                             .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .then(Commands.literal(id)
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
-                                    String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                                    String adminClaim = StringArgumentType.getString(context, "id");
                                     CommandHelper.runAction(() -> remove(player, adminClaim, id));
                                     return 1;
                                 }))))
                     .then(Commands.literal("list")
-                        .then(Commands.argument("adminClaim", StringArgumentType.string())
+                        .then(Commands.argument("id", StringArgumentType.string())
                             .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .executes(context -> {
                                 ServerPlayer player = context.getSource().getPlayerOrException();
-                                String adminClaim = StringArgumentType.getString(context, "adminClaim");
+                                String adminClaim = StringArgumentType.getString(context, "id");
                                 CommandHelper.runAction(() -> list(player, adminClaim));
                                 return 1;
                             })))))));
