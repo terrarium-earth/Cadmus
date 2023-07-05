@@ -12,7 +12,7 @@ displayURL = "https://modrinth.com/mod/cadmus"
 logoFile = "icon.png"
 authors = "Alex Nijjar, ThatGravyBoat"
 credits = ""
-description = "Modern Chunk Claiming Mod!"
+description = "A land claiming mod that allows users to claim land to protect your home from thieves, bandits and monsters, and admins to claim land with region flags and advanced protection!"
 displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.cadmus]]

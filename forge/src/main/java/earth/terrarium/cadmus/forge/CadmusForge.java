@@ -149,7 +149,6 @@ public class CadmusForge {
     private static void onEntityMobGriefing(EntityMobGriefingEvent event) {
         if (!ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getEntity())) {
             event.setResult(Event.Result.DENY);
-            event.setCanceled(true);
         }
     }
 
