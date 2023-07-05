@@ -1,13 +1,13 @@
 modLoader = "javafml"
 loaderVersion = "[47,)"
 license = "MIT"
-issueTrackerURL = "https://github.com/terrarium-earth/${github_name}/issues"
+issueTrackerURL = "https://github.com/terrarium-earth/cadmus/issues"
 
 [[mods]]
 modId = "cadmus"
 version = "${version}"
 displayName = "Cadmus"
-updateJSONURL = "https://api.modrinth.com/updates/${modrinth_id}/forge_updates.json"
+updateJSONURL = "https://api.modrinth.com/updates/fEWKxVzh/forge_updates.json"
 displayURL = "https://modrinth.com/mod/cadmus"
 logoFile = "icon.png"
 authors = "Alex Nijjar, ThatGravyBoat"
@@ -32,6 +32,6 @@ side = "BOTH"
 [[dependencies.cadmus]]
 modId = "resourcefullib"
 mandatory = true
-versionRange = "[${resourcefullib_version},)"
+versionRange = "[2.1.1,)"
 ordering = "NONE"
 side = "BOTH"

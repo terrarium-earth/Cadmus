@@ -6,7 +6,7 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.network.messages.*;
 
 public class NetworkHandler {
-    public static final NetworkChannel CHANNEL = new NetworkChannel(Cadmus.MOD_ID, 1, "main");
+    public static final NetworkChannel CHANNEL = new NetworkChannel(Cadmus.MOD_ID, 1, "main", true);
 
     public static void init() {
         CHANNEL.registerPacket(NetworkDirection.CLIENT_TO_SERVER, ServerboundRequestClaimedChunksPacket.ID, ServerboundRequestClaimedChunksPacket.HANDLER, ServerboundRequestClaimedChunksPacket.class);

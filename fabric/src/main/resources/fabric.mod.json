@@ -12,8 +12,8 @@
   ],
   "contact": {
     "website": "https://modrinth.com/mod/cadmus",
-    "repo": "https://github.com/terrarium-earth/${github_name}",
-    "issues": "https://github.com/terrarium-earth/${github_name}/issues"
+    "repo": "https://github.com/terrarium-earth/cadmus",
+    "issues": "https://github.com/terrarium-earth/cadmus/issues"
   },
   "license": "MIT",
   "icon": "icon.png",
@@ -36,6 +36,6 @@
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.20",
-    "resourcefullib": ">=${resourcefullib_version}"
+    "resourcefullib": ">=2.1.1"
   }
 }

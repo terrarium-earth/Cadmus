@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.common.util.forge;
 
-import earth.terrarium.cadmus.mixin.forge.common.GameRulesBooleanValueInvoker;
-import earth.terrarium.cadmus.mixin.forge.common.GameRulesIntegerValueInvoker;
+import earth.terrarium.cadmus.mixins.forge.common.GameRulesBooleanValueInvoker;
+import earth.terrarium.cadmus.mixins.forge.common.GameRulesIntegerValueInvoker;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 

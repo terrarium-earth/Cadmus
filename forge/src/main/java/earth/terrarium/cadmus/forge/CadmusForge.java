@@ -3,7 +3,6 @@ package earth.terrarium.cadmus.forge;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
-import earth.terrarium.cadmus.client.forge.CadmusClientForge;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
@@ -13,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -33,14 +31,12 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod(Cadmus.MOD_ID)
 public class CadmusForge {
     public CadmusForge() {
         Cadmus.init();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> CadmusClientForge::init);
 
         IEventBus bus = MinecraftForge.EVENT_BUS;
         bus.addListener(CadmusForge::onRegisterCommands);

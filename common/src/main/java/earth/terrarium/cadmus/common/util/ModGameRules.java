@@ -4,7 +4,7 @@ import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
-import earth.terrarium.cadmus.mixin.common.GameRulesAccessor;
+import earth.terrarium.cadmus.mixins.common.GameRulesAccessor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;

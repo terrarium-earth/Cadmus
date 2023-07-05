@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "earth.terrarium.cadmus.mixin.forge",
+  "package": "earth.terrarium.cadmus.mixins.forge",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "common.GameRulesBooleanValueInvoker",
