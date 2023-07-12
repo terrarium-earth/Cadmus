@@ -2,12 +2,12 @@ package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
+import earth.terrarium.cadmus.Cadmus;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.ChunkSource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -102,12 +102,11 @@ public class ClaimHandler extends SaveHandler {
     }
 
     public static void updateChunkLoaded(ServerLevel level, String id, boolean setLoaded) {
-        ChunkSource chunkSource = level.getChunkSource();
         var claimData = getTeamClaims(level, id);
         if (claimData == null) return;
         claimData.forEach((pos, type) -> {
             if (type == ClaimType.CHUNK_LOADED) {
-                chunkSource.updateChunkForced(pos, setLoaded);
+                Cadmus.updateChunkForced(level, pos, setLoaded);
             }
         });
     }

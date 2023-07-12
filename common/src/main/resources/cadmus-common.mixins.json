@@ -15,6 +15,7 @@
     "common.chunkprotection.HangingEntityMixin",
     "common.chunkprotection.OnHitMixin",
     "common.chunkprotection.WaterlilyBlockMixin",
+    "common.fixes.ServerLevelMixin",
     "common.flags.IceBlockMixin",
     "common.flags.LeavesBlockMixin",
     "common.flags.NaturalSpawnerMixin",
