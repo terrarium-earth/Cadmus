@@ -73,6 +73,6 @@ public class Cadmus {
         } else {
             Cadmus.FORCE_LOADED_CHUNK_COUNT--;
         }
-        level.getLevel().getChunkSource().updateChunkForced(chunkPos, add);
+        level.getChunkSource().updateChunkForced(chunkPos, add);
     }
 }

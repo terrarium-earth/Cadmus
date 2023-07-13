@@ -30,7 +30,7 @@ subprojects {
     val isCommon = modLoader == rootProject.projects.common.name
 
     base {
-        archivesName.set("$rootProject.name-$modLoader-$minecraftVersion")
+        archivesName.set("$modId-$modLoader-$minecraftVersion")
     }
 
     configure<LoomGradleExtensionAPI> {
