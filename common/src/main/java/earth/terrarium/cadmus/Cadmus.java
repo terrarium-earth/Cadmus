@@ -17,6 +17,7 @@ import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.ChunkPos;
 public class Cadmus {
     public static final String MOD_ID = "cadmus";
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(MOD_ID, "default");
+
+    public static int FORCE_LOADED_CHUNK_COUNT = 0;
 
     public static void init() {
         NetworkHandler.init();
@@ -57,10 +60,19 @@ public class Cadmus {
             ClaimHandler.getAllTeamClaims(level).forEach((id, data) ->
                 data.forEach((pos, type) -> {
                     if (type == ClaimType.CHUNK_LOADED) {
-                        level.getLevel().getChunkSource().updateChunkForced(pos, true);
+                        updateChunkForced(level, pos, true);
                     }
                 })));
         // Initialize the data handler
         CadmusDataHandler.read(server);
+    }
+
+    public static void updateChunkForced(ServerLevel level, ChunkPos chunkPos, boolean add) {
+        if (add) {
+            Cadmus.FORCE_LOADED_CHUNK_COUNT++;
+        } else {
+            Cadmus.FORCE_LOADED_CHUNK_COUNT--;
+        }
+        level.getLevel().getChunkSource().updateChunkForced(chunkPos, add);
     }
 }
