@@ -75,6 +75,6 @@ public class JourneyMapCompat implements IClientPlugin {
     private void update(ChunkPos pos, ClientClaims.Entry entry, ResourceKey<Level> dimension) {
         try {
             api.show(ClaimedChunkDisplay.create(pos, entry, dimension));
-        }catch (Exception ignored) {}
+        } catch (Exception ignored) {}
     }
 }

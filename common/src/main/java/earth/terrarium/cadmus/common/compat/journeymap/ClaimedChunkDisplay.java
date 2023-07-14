@@ -57,8 +57,11 @@ public class ClaimedChunkDisplay {
         }
 
         public void onActivate(UIState mapState) {}
+
         public void onDeactivate(UIState mapState) {}
+
         public boolean onMouseClick(UIState mapState, Point2D.Double mousePosition, BlockPos blockPosition, int button, boolean doubleClick) {return false;}
+
         public void onOverlayMenuPopup(UIState mapState, Point2D.Double mousePosition, BlockPos blockPosition, ModPopupMenu modPopupMenu) {}
     }
 }

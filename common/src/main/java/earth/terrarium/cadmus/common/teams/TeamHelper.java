@@ -18,14 +18,14 @@ import java.util.UUID;
 public class TeamHelper {
 
     private static final ChatFormatting[] COLORS = new ChatFormatting[]{
-            ChatFormatting.DARK_GREEN,
-            ChatFormatting.GREEN,
-            ChatFormatting.AQUA,
-            ChatFormatting.DARK_AQUA,
-            ChatFormatting.DARK_BLUE,
-            ChatFormatting.BLUE,
-            ChatFormatting.LIGHT_PURPLE,
-            ChatFormatting.DARK_PURPLE,
+        ChatFormatting.DARK_GREEN,
+        ChatFormatting.GREEN,
+        ChatFormatting.AQUA,
+        ChatFormatting.DARK_AQUA,
+        ChatFormatting.DARK_BLUE,
+        ChatFormatting.BLUE,
+        ChatFormatting.LIGHT_PURPLE,
+        ChatFormatting.DARK_PURPLE,
     };
 
     public static Set<GameProfile> getTeamMembers(String id, MinecraftServer server) {

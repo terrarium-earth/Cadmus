@@ -24,12 +24,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public class ServerLevelMixin {
 
     @ModifyExpressionValue(
-            method = "tick(Ljava/util/function/BooleanSupplier;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lit/unimi/dsi/fastutil/longs/LongSet;isEmpty()Z",
-                    ordinal = 0
-            )
+        method = "tick(Ljava/util/function/BooleanSupplier;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/List;isEmpty()Z",
+            ordinal = 0
+        )
     )
     private boolean cadmus$fixOfflineChunkLoading(boolean isEmpty) {
         return isEmpty && Cadmus.FORCE_LOADED_CHUNK_COUNT <= 0;
