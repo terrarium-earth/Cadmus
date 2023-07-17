@@ -14,7 +14,7 @@ public class ConstantComponents {
     public static final Component WILDERNESS = ModUtils.serverTranslation("message.cadmus.wilderness");
 
     public static final Component OPEN_CLAIM_MAP_KEY = Component.translatable("key.cadmus.open_claim_map");
-    public static final Component ODYSSEY_CATEGORY = Component.translatable("key.categories.odyssey");
+    public static final Component ODYSSEY_CATEGORY = Component.translatable("key.categories.project_odyssey");
 
     public static final Component CADMUS_TITLE = Component.translatable("cadmus.options.cadmus_options.title");
     public static final Component CLAIMS_MAX = Component.translatable("cadmus.options.cadmus_options.max_claims");
