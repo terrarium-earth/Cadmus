@@ -9,7 +9,7 @@
   "tooltip.cadmus.claim_map.admin_claim": "Admin Claim",
   "message.cadmus.wilderness": "§2Wilderness",
   "key.cadmus.open_claim_map": "Open Claim Map",
-  "key.categories.odyssey": "Odyssey",
+  "key.categories.project_odyssey": "Odyssey",
 
   "text.cadmus.claiming.claimed_chunk_at": "Claimed chunk at: x: %s, z: %s",
   "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: x: %s, z: %s",
@@ -64,5 +64,8 @@
   "command.cadmus.exception.dont_own_chunk": "You don't own this chunk.",
   "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
   "command.cadmus.exception.claim_already_exists": "This claim already exists.",
-  "command.cadmus.exception.claim_does_not_exist": "This claim does not exist."
+  "command.cadmus.exception.claim_does_not_exist": "This claim does not exist.",
+
+  "rei.sections.odyssey": "Project Odyssey",
+  "rei.cadmus.cadmus.tooltip": "Open Claim Map"
 }

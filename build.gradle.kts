@@ -54,6 +54,7 @@ subprojects {
         val resourcefulLibVersion: String by project
         val prometheusVersion: String by project
         val mixinExtrasVersion: String by project
+        val reiVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
@@ -68,14 +69,24 @@ subprojects {
 
         compileOnly(group = "com.teamresourceful", name = "yabn", version = "1.0.3")
         "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = resourcefulLibVersion)
+        implementation("annotationProcessor"(group = "com.github.llamalad7.mixinextras", name = "mixinextras-common", version = mixinExtrasVersion))
         if (isCommon) {
             "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20", version = prometheusVersion) {
                 isTransitive = false
             }
-            implementation(annotationProcessor(group = "com.github.llamalad7.mixinextras", name = "mixinextras-$modLoader", version = mixinExtrasVersion))
+
+            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
+            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
+            "annotationProcessor"(group = "com.github.llamalad7.mixinextras", name = "mixinextras-$modLoader", version = mixinExtrasVersion).apply {
+                implementation(this)
+                "include"(this)
+            }
             "modLocalRuntime"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20", version = prometheusVersion)
-            "include"(implementation(annotationProcessor(group = "com.github.llamalad7.mixinextras", name = "mixinextras-$modLoader", version = mixinExtrasVersion))!!)
+
+            "modRuntimeOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
+            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
+            "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
         }
     }
 

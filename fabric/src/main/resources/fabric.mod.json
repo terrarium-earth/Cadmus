@@ -25,6 +25,9 @@
     "client": [
       "earth.terrarium.cadmus.client.fabric.CadmusClientFabric"
     ],
+    "rei_client": [
+      "earth.terrarium.cadmus.client.compat.rei.CadmusReiClientPlugin"
+    ],
     "journeymap": [
       "earth.terrarium.cadmus.common.compat.journeymap.JourneyMapCompat"
     ]
