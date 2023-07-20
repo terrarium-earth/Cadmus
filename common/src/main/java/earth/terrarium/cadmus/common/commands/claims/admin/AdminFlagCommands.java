@@ -17,15 +17,15 @@ import java.util.Map;
 
 public class AdminFlagCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("claim")
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("cadmus")
             .requires((commandSourceStack) -> commandSourceStack.hasPermission(2));
 
         FlagApi.API.getAll().forEach((id, flag) ->
-            dispatcher.register(command.then(Commands.literal("admin")
+            dispatcher.register(command.then(Commands.literal("adminclaims")
                 .then(Commands.literal("flag")
                     .then(Commands.literal("set")
                         .then(Commands.argument("id", StringArgumentType.string())
-                            .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                            .suggests(AdminClaimCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .then(Commands.literal(id)
                                 .then(flag.createArgument("value")
                                     .executes(context -> {
@@ -36,7 +36,7 @@ public class AdminFlagCommands {
                                     })))))
                     .then(Commands.literal("remove")
                         .then(Commands.argument("id", StringArgumentType.string())
-                            .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                            .suggests(AdminClaimCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .then(Commands.literal(id)
                                 .executes(context -> {
                                     ServerPlayer player = context.getSource().getPlayerOrException();
@@ -46,7 +46,7 @@ public class AdminFlagCommands {
                                 }))))
                     .then(Commands.literal("list")
                         .then(Commands.argument("id", StringArgumentType.string())
-                            .suggests(AdminCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
+                            .suggests(AdminClaimCommands.ADMIN_CLAIM_SUGGESTION_PROVIDER)
                             .executes(context -> {
                                 ServerPlayer player = context.getSource().getPlayerOrException();
                                 String adminClaim = StringArgumentType.getString(context, "id");

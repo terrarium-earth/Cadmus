@@ -79,15 +79,32 @@ public class ModUtils {
             return false;
         }
 
-        claim(id, level, addedChunks, removedChunks.keySet());
+        claim(id, level, addedChunks);
+        unclaim(id, level, removedChunks.keySet());
         return true;
     }
 
-    public static void claim(String id, ServerLevel level, Map<ChunkPos, ClaimType> addedChunks, Set<ChunkPos> removedChunks) {
+    public static void claim(String id, ServerLevel level, ChunkPos pos, ClaimType type) {
+        claim(id, level, Map.of(pos, type));
+    }
+
+    public static void claim(String id, ServerLevel level, Map<ChunkPos, ClaimType> chunks) {
         ClaimHandler.updateChunkLoaded(level, id, false);
 
-        ClaimHandler.addClaims(level, id, addedChunks);
-        ClaimHandler.removeClaims(level, id, removedChunks);
+        ClaimHandler.addClaims(level, id, chunks);
+
+        ClaimHandler.updateChunkLoaded(level, id, true);
+        level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
+    }
+
+    public static void unclaim(String id, ServerLevel level, ChunkPos chunk) {
+        unclaim(id, level, Set.of(chunk));
+    }
+
+    public static void unclaim(String id, ServerLevel level, Set<ChunkPos> chunks) {
+        ClaimHandler.updateChunkLoaded(level, id, false);
+
+        ClaimHandler.removeClaims(level, id, chunks);
 
         ClaimHandler.updateChunkLoaded(level, id, true);
         level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
