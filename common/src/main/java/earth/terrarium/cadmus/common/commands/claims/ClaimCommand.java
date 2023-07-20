@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.commands.claims;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
@@ -47,9 +48,9 @@ public class ClaimCommand {
             throw ClaimException.MAXED_OUT_CLAIMS;
         }
         if (chunkloaded) {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
     }
 }

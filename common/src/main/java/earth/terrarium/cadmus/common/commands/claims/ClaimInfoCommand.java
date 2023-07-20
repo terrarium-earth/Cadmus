@@ -2,11 +2,11 @@ package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -56,14 +56,14 @@ public class ClaimInfoCommand {
                 };
                 status = switch (claimData.getSecond()) {
                     case CLAIMED ->
-                        ModUtils.serverTranslation("text.cadmus.info.claimed_by", displayName.getString(), type.getString());
+                        CommonUtils.serverTranslatable("text.cadmus.info.claimed_by", displayName.getString(), type.getString());
                     case CHUNK_LOADED ->
-                        ModUtils.serverTranslation("text.cadmus.info.chunk_loaded_by", displayName.getString(), type.getString());
+                        CommonUtils.serverTranslatable("text.cadmus.info.chunk_loaded_by", displayName.getString(), type.getString());
                 };
                 status = status.copy().withStyle(Style.EMPTY.withColor(color).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(claimData.getFirst()).withStyle(color))));
             }
         }
-        Component location = ModUtils.serverTranslation("text.cadmus.info.location", pos.x, pos.z);
+        Component location = CommonUtils.serverTranslatable("text.cadmus.info.location", pos.x, pos.z);
         if (status != null) {
             player.displayClientMessage(status, false);
         }

@@ -93,15 +93,6 @@ public class ModUtils {
         level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
     }
 
-    public static Component serverTranslation(String translation, Object... args) {
-        if (args.length == 0) {
-            Component component = Component.translatable(translation);
-            return Component.translatableWithFallback(translation, component.getString());
-        }
-        Component component = Component.translatable(translation, args);
-        return Component.translatableWithFallback(translation, component.getString(), args);
-    }
-
     public static GameProfileCache getProfileCache(MinecraftServer server) {
         return Objects.requireNonNull(server.getProfileCache());
     }

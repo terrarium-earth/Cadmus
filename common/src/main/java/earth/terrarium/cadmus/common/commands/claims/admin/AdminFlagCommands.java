@@ -3,12 +3,12 @@ package earth.terrarium.cadmus.common.commands.claims.admin;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.api.claims.admin.FlagApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.commands.claims.ClaimException;
 import earth.terrarium.cadmus.common.commands.claims.CommandHelper;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,7 +61,7 @@ public class AdminFlagCommands {
         }
         var oldVal = AdminClaimHandler.getFlag(player.server, id, flagName);
         AdminClaimHandler.setFlag(player.server, id, flagName, flag);
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.set_flag", flagName, oldVal, flag.getValue()), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.admin.set_flag", flagName, oldVal, flag.getValue()), false);
     }
 
     public static void remove(ServerPlayer player, String id, String flagName) throws ClaimException {
@@ -69,7 +69,7 @@ public class AdminFlagCommands {
             throw ClaimException.CLAIM_DOES_NOT_EXIST;
         }
         AdminClaimHandler.removeFlag(player.server, id, flagName);
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove_flag", flagName), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.admin.remove_flag", flagName), false);
     }
 
     public static void list(ServerPlayer player, String id) throws ClaimException {
@@ -80,7 +80,7 @@ public class AdminFlagCommands {
         if (flags.isEmpty()) {
             throw ClaimException.CLAIM_HAS_NO_FLAGS;
         }
-        flags.forEach((name, value) -> player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.list", name, value.getValue()), false));
+        flags.forEach((name, value) -> player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.admin.list", name, value.getValue()), false));
     }
 }
 

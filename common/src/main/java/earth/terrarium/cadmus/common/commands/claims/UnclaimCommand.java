@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
@@ -43,6 +44,6 @@ public class UnclaimCommand {
             throw ClaimException.DONT_OWN_CHUNK;
         }
         ModUtils.tryClaim(player.serverLevel(), player, Map.of(), Map.of(pos, ClaimType.CLAIMED));
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 }

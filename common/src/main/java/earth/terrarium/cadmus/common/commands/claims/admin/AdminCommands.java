@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.api.claims.admin.flags.ComponentFlag;
 import earth.terrarium.cadmus.api.claims.admin.flags.Flag;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
@@ -99,7 +100,7 @@ public class AdminCommands {
         }
         AdminClaimHandler.create(player.server, id, new HashMap<>());
         AdminClaimHandler.setFlag(player.server, id, ModFlags.DISPLAY_NAME, new ComponentFlag(Component.literal(id)));
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.create", id), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.admin.create", id), false);
     }
 
     public static void remove(ServerPlayer player, String id) throws ClaimException {
@@ -108,7 +109,7 @@ public class AdminCommands {
         }
         AdminClaimHandler.remove(player.server, id);
         ClaimHandler.clear(player.serverLevel(), ClaimHandler.ADMIN_PREFIX + id);
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.admin.remove", id), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.admin.remove", id), false);
     }
 
     public static void claim(ServerPlayer player, String id, ChunkPos pos, boolean chunkloaded) throws ClaimException {
@@ -123,9 +124,9 @@ public class AdminCommands {
         var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
         ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), claim, Set.of());
         if (chunkloaded) {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {
-            player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
     }
 
@@ -139,6 +140,6 @@ public class AdminCommands {
             throw ClaimException.DONT_OWN_CHUNK;
         }
         ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), Map.of(), Set.of(pos));
-        player.displayClientMessage(ModUtils.serverTranslation("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 }
