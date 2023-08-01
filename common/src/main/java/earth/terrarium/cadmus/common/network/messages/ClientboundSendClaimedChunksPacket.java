@@ -1,6 +1,12 @@
 package earth.terrarium.cadmus.common.network.messages;
 
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.bytecodecs.base.ByteCodec;
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.bytecodecs.defaults.EnumCodec;
+import com.teamresourceful.bytecodecs.defaults.MapCodec;
+import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
@@ -8,7 +14,6 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.claims.ClaimScreen;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
@@ -37,42 +42,35 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ClientboundSendClaimedChunksPacket> {
-        @Override
-        public void encode(ClientboundSendClaimedChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeMap(packet.claims, FriendlyByteBuf::writeChunkPos, (buf1, info) -> {
-                buf1.writeUtf(info.getFirst());
-                buf1.writeEnum(info.getSecond());
-            });
+    private static class Handler extends CodecPacketHandler<ClientboundSendClaimedChunksPacket> {
+        private static final MapCodec<ChunkPos, Pair<String, ClaimType>> CHUNK_POS_CLAIM_CODEC = new MapCodec<>(
+            ExtraByteCodecs.CHUNK_POS,
+            ObjectByteCodec.create(
+                ByteCodec.STRING.fieldOf(Pair::getFirst),
+                ClaimType.CODEC.fieldOf(Pair::getSecond),
+                Pair::new
+            )
+        );
 
-            buf.writeUtf(packet.id);
-            buf.writeEnum(packet.color);
-            buf.writeOptional(packet.displayName, FriendlyByteBuf::writeUtf);
-            buf.writeMap(packet.teamDisplayNames, FriendlyByteBuf::writeUtf, FriendlyByteBuf::writeComponent);
-            buf.writeVarInt(packet.claimedCount);
-            buf.writeVarInt(packet.chunkLoadedCount);
-            buf.writeVarInt(packet.maxClaims);
-            buf.writeVarInt(packet.maxChunkLoaded);
-            buf.writeVarInt(packet.viewDistance);
-        }
+        private static final ByteCodec<Component> COMPONENT_CODEC = ObjectByteCodec.create(
+            ByteCodec.STRING.fieldOf(Component.Serializer::toJson),
+            Component.Serializer::fromJson
+        );
 
-        @Override
-        public ClientboundSendClaimedChunksPacket decode(FriendlyByteBuf buf) {
-            Map<ChunkPos, Pair<String, ClaimType>> claims = buf.readMap(
-                FriendlyByteBuf::readChunkPos,
-                buf1 -> Pair.of(buf1.readUtf(), buf1.readEnum(ClaimType.class))
-            );
-            String id = buf.readUtf();
-            ChatFormatting color = buf.readEnum(ChatFormatting.class);
-            Optional<String> displayName = buf.readOptional(FriendlyByteBuf::readUtf);
-            Map<String, Component> teamDisplayNames = buf.readMap(FriendlyByteBuf::readUtf, FriendlyByteBuf::readComponent);
-            int claimedCount = buf.readVarInt();
-            int chunkLoadedCount = buf.readVarInt();
-            int maxClaims = buf.readVarInt();
-            int maxChunkLoaded = buf.readVarInt();
-            int viewDistance = buf.readVarInt();
-
-            return new ClientboundSendClaimedChunksPacket(claims, id, color, displayName, teamDisplayNames, claimedCount, chunkLoadedCount, maxClaims, maxChunkLoaded, viewDistance);
+        public Handler() {
+            super(ObjectByteCodec.create(
+                CHUNK_POS_CLAIM_CODEC.fieldOf(ClientboundSendClaimedChunksPacket::claims),
+                ByteCodec.STRING.fieldOf(ClientboundSendClaimedChunksPacket::id),
+                new EnumCodec<>(ChatFormatting.class).fieldOf(ClientboundSendClaimedChunksPacket::color),
+                ByteCodec.STRING.optionalOf().fieldOf(ClientboundSendClaimedChunksPacket::displayName),
+                new MapCodec<>(ByteCodec.STRING, COMPONENT_CODEC).fieldOf(ClientboundSendClaimedChunksPacket::teamDisplayNames),
+                ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::claimedCount),
+                ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::chunkLoadedCount),
+                ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::maxClaims),
+                ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::maxChunkLoaded),
+                ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::viewDistance),
+                ClientboundSendClaimedChunksPacket::new
+            ));
         }
 
         @Override

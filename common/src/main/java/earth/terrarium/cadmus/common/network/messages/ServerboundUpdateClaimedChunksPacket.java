@@ -1,18 +1,20 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.bytecodecs.defaults.MapCodec;
+import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.util.ModUtils;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> addedChunks,
@@ -31,18 +33,13 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ServerboundUpdateClaimedChunksPacket> {
-        @Override
-        public void encode(ServerboundUpdateClaimedChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeMap(packet.addedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
-            buf.writeMap(packet.removedChunks, FriendlyByteBuf::writeChunkPos, FriendlyByteBuf::writeEnum);
-        }
-
-        @Override
-        public ServerboundUpdateClaimedChunksPacket decode(FriendlyByteBuf buf) {
-            Map<ChunkPos, ClaimType> addedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
-            Map<ChunkPos, ClaimType> removedChunks = buf.readMap(HashMap::new, FriendlyByteBuf::readChunkPos, buf1 -> buf1.readEnum(ClaimType.class));
-            return new ServerboundUpdateClaimedChunksPacket(addedChunks, removedChunks);
+    private static class Handler extends CodecPacketHandler<ServerboundUpdateClaimedChunksPacket> {
+        public Handler() {
+            super(ObjectByteCodec.create(
+                new MapCodec<>(ExtraByteCodecs.CHUNK_POS, ClaimType.CODEC).fieldOf(ServerboundUpdateClaimedChunksPacket::addedChunks),
+                new MapCodec<>(ExtraByteCodecs.CHUNK_POS, ClaimType.CODEC).fieldOf(ServerboundUpdateClaimedChunksPacket::removedChunks),
+                ServerboundUpdateClaimedChunksPacket::new
+            ));
         }
 
         @Override

@@ -1,6 +1,9 @@
 package earth.terrarium.cadmus.common.network.messages;
 
 import com.mojang.datafixers.util.Pair;
+import com.teamresourceful.bytecodecs.base.ByteCodec;
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
@@ -13,7 +16,6 @@ import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -39,15 +41,12 @@ public record ServerboundRequestClaimedChunksPacket(
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ServerboundRequestClaimedChunksPacket> {
-        @Override
-        public void encode(ServerboundRequestClaimedChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeVarInt(packet.renderDistance);
-        }
-
-        @Override
-        public ServerboundRequestClaimedChunksPacket decode(FriendlyByteBuf buf) {
-            return new ServerboundRequestClaimedChunksPacket(Math.min(buf.readVarInt(), 32));
+    private static class Handler extends CodecPacketHandler<ServerboundRequestClaimedChunksPacket> {
+        public Handler() {
+            super(ObjectByteCodec.create(
+                ByteCodec.VAR_INT.fieldOf(ServerboundRequestClaimedChunksPacket::renderDistance),
+                ServerboundRequestClaimedChunksPacket::new
+            ));
         }
 
         @Override

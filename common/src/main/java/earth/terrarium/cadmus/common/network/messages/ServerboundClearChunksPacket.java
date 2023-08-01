@@ -1,12 +1,14 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.teamresourceful.bytecodecs.base.ByteCodec;
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 
@@ -25,15 +27,12 @@ public record ServerboundClearChunksPacket(boolean allDimensions) implements Pac
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ServerboundClearChunksPacket> {
-        @Override
-        public void encode(ServerboundClearChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeBoolean(packet.allDimensions);
-        }
-
-        @Override
-        public ServerboundClearChunksPacket decode(FriendlyByteBuf buf) {
-            return new ServerboundClearChunksPacket(buf.readBoolean());
+    private static class Handler extends CodecPacketHandler<ServerboundClearChunksPacket> {
+        public Handler() {
+            super(ObjectByteCodec.create(
+                ByteCodec.BOOLEAN.fieldOf(ServerboundClearChunksPacket::allDimensions),
+                ServerboundClearChunksPacket::new
+            ));
         }
 
         @Override

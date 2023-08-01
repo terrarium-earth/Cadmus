@@ -1,13 +1,15 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.teamresourceful.bytecodecs.base.ByteCodec;
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimListenHandler;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -30,19 +32,13 @@ public record ServerboundListenToChunksPacket(
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ServerboundListenToChunksPacket> {
-        @Override
-        public void encode(ServerboundListenToChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeResourceLocation(packet.dimension.location());
-            buf.writeBoolean(packet.subscribe);
-        }
-
-        @Override
-        public ServerboundListenToChunksPacket decode(FriendlyByteBuf buf) {
-            return new ServerboundListenToChunksPacket(
-                ResourceKey.create(Registries.DIMENSION, buf.readResourceLocation()),
-                buf.readBoolean()
-            );
+    private static class Handler extends CodecPacketHandler<ServerboundListenToChunksPacket> {
+        public Handler() {
+            super(ObjectByteCodec.create(
+                ExtraByteCodecs.DIMENSION.fieldOf(ServerboundListenToChunksPacket::dimension),
+                ByteCodec.BOOLEAN.fieldOf(ServerboundListenToChunksPacket::subscribe),
+                ServerboundListenToChunksPacket::new
+            ));
         }
 
         @Override

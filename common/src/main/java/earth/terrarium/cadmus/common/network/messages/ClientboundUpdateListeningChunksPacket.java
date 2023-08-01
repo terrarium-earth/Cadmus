@@ -1,24 +1,27 @@
 package earth.terrarium.cadmus.common.network.messages;
 
+import com.teamresourceful.bytecodecs.base.ByteCodec;
+import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
+import com.teamresourceful.bytecodecs.defaults.MapCodec;
+import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
+import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
 import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.ClientClaims;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
+import java.util.Map;
+
 public record ClientboundUpdateListeningChunksPacket(
     ResourceKey<Level> dimension,
     Component displayName, int color,
-    Object2BooleanMap<ChunkPos> claims // true if claimed, false if unclaimed
+    Map<ChunkPos, Boolean> claims // true if claimed, false if unclaimed
 ) implements Packet<ClientboundUpdateListeningChunksPacket> {
 
     public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "update_listening_chunks");
@@ -34,30 +37,21 @@ public record ClientboundUpdateListeningChunksPacket(
         return HANDLER;
     }
 
-    private static class Handler implements PacketHandler<ClientboundUpdateListeningChunksPacket> {
-        @Override
-        public void encode(ClientboundUpdateListeningChunksPacket packet, FriendlyByteBuf buf) {
-            buf.writeResourceLocation(packet.dimension.location());
-            buf.writeComponent(packet.displayName);
-            buf.writeInt(packet.color);
-            buf.writeVarInt(packet.claims.size());
-            packet.claims.forEach((chunkPos, isClaimed) -> {
-                buf.writeChunkPos(chunkPos);
-                buf.writeBoolean(isClaimed);
-            });
-        }
+    private static class Handler extends CodecPacketHandler<ClientboundUpdateListeningChunksPacket> {
 
-        @Override
-        public ClientboundUpdateListeningChunksPacket decode(FriendlyByteBuf buf) {
-            ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, buf.readResourceLocation());
-            Component displayName = buf.readComponent();
-            int color = buf.readInt();
-            int size = buf.readVarInt();
-            Object2BooleanMap<ChunkPos> claims = new Object2BooleanOpenHashMap<>(size);
-            for (int i = 0; i < size; i++) {
-                claims.put(buf.readChunkPos(), buf.readBoolean());
-            }
-            return new ClientboundUpdateListeningChunksPacket(dimension, displayName, color, claims);
+        private static final ByteCodec<Component> COMPONENT_CODEC = ObjectByteCodec.create(
+            ByteCodec.STRING.fieldOf(Component.Serializer::toJson),
+            Component.Serializer::fromJson
+        );
+
+        public Handler() {
+            super(ObjectByteCodec.create(
+                ExtraByteCodecs.DIMENSION.fieldOf(ClientboundUpdateListeningChunksPacket::dimension),
+                COMPONENT_CODEC.fieldOf(ClientboundUpdateListeningChunksPacket::displayName),
+                ByteCodec.VAR_INT.fieldOf(ClientboundUpdateListeningChunksPacket::color),
+                new MapCodec<>(ExtraByteCodecs.CHUNK_POS, ByteCodec.BOOLEAN).fieldOf(ClientboundUpdateListeningChunksPacket::claims),
+                ClientboundUpdateListeningChunksPacket::new
+            ));
         }
 
         @Override
