@@ -1,3 +1,6 @@
+# -----{ 1.0.0 }-----
+- Initial Release
+
 # -----{ 0.0.6 }-----
 - Add new admin commands for claiming and unclaiming others' claims.
 - Add admin list command to display all teams and their respective IDs.
