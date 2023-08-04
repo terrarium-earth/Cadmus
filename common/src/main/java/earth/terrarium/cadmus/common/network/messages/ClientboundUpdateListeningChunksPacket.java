@@ -39,15 +39,10 @@ public record ClientboundUpdateListeningChunksPacket(
 
     private static class Handler extends CodecPacketHandler<ClientboundUpdateListeningChunksPacket> {
 
-        private static final ByteCodec<Component> COMPONENT_CODEC = ObjectByteCodec.create(
-            ByteCodec.STRING.fieldOf(Component.Serializer::toJson),
-            Component.Serializer::fromJson
-        );
-
         public Handler() {
             super(ObjectByteCodec.create(
                 ExtraByteCodecs.DIMENSION.fieldOf(ClientboundUpdateListeningChunksPacket::dimension),
-                COMPONENT_CODEC.fieldOf(ClientboundUpdateListeningChunksPacket::displayName),
+                ExtraByteCodecs.COMPONENT.fieldOf(ClientboundUpdateListeningChunksPacket::displayName),
                 ByteCodec.VAR_INT.fieldOf(ClientboundUpdateListeningChunksPacket::color),
                 new MapCodec<>(ExtraByteCodecs.CHUNK_POS, ByteCodec.BOOLEAN).fieldOf(ClientboundUpdateListeningChunksPacket::claims),
                 ClientboundUpdateListeningChunksPacket::new
