@@ -15,7 +15,10 @@ import java.util.Map;
  * Data that should only have one save instance, the overworld save data.
  */
 public class CadmusDataHandler extends SaveHandler {
+
     private final Map<String, IntIntPair> maxClaimsById = new HashMap<>();
+    private final Map<String, ClaimSettings> settings = new HashMap<>();
+    private ClaimSettings defaultSettings = ClaimSettings.ofFalse();
 
     @Override
     public void loadData(CompoundTag tag) {
@@ -27,6 +30,11 @@ public class CadmusDataHandler extends SaveHandler {
             maxClaimsById.put(id, IntIntPair.of(maxClaims, maxChunkLoaded));
         });
 
+        CompoundTag settings = tag.getCompound("settings");
+        settings.getAllKeys().forEach(id -> this.settings.put(id, ClaimSettings.read(settings.getCompound(id))));
+
+
+
         String teamProvider = tag.getString("team_provider");
         if (!teamProvider.isEmpty()) {
             TeamProviderApi.API.setSelected(new ResourceLocation(teamProvider));
@@ -35,6 +43,10 @@ public class CadmusDataHandler extends SaveHandler {
         String maxClaimProvider = tag.getString("max_claim_provider");
         if (!maxClaimProvider.isEmpty()) {
             MaxClaimProviderApi.API.setSelected(new ResourceLocation(maxClaimProvider));
+        }
+
+        if (tag.contains("defaultSettings")) {
+            defaultSettings = ClaimSettings.read(tag.getCompound("defaultSettings"));
         }
     }
 
@@ -49,6 +61,10 @@ public class CadmusDataHandler extends SaveHandler {
         });
         tag.put("max_claims", maxClaimsTag);
 
+        CompoundTag settings = new CompoundTag();
+        this.settings.forEach((id, claimSettings) -> settings.put(id, claimSettings.write(new CompoundTag())));
+        tag.put("settings", settings);
+
         ResourceLocation selectedId = TeamProviderApi.API.getSelectedId();
         if (selectedId != null) {
             tag.putString("team_provider", selectedId.toString());
@@ -58,6 +74,8 @@ public class CadmusDataHandler extends SaveHandler {
         if (maxClaimSelectedId != null) {
             tag.putString("max_claim_provider", maxClaimSelectedId.toString());
         }
+
+        tag.put("defaultSettings", defaultSettings.write(new CompoundTag()));
     }
 
     public static CadmusDataHandler read(MinecraftServer server) {
@@ -67,6 +85,15 @@ public class CadmusDataHandler extends SaveHandler {
     public static Map<String, IntIntPair> getMaxTeamClaims(MinecraftServer server) {
         return read(server).maxClaimsById;
     }
+
+    public static ClaimSettings getClaimSettings(MinecraftServer server, String id) {
+        return read(server).settings.computeIfAbsent(id, ignored -> ClaimSettings.ofUndefined());
+    }
+
+    public static ClaimSettings getDefaultClaimSettings(MinecraftServer server) {
+        return read(server).defaultSettings;
+    }
+
 
     @Override
     public boolean isDirty() {

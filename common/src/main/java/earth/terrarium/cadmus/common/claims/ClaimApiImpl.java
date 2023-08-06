@@ -24,10 +24,10 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
+import org.apache.commons.lang3.function.ToBooleanBiFunction;
 
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.BiFunction;
 
 public class ClaimApiImpl implements ClaimApi {
     @Override
@@ -51,6 +51,7 @@ public class ClaimApiImpl implements ClaimApi {
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_BREAK),
+            ClaimSettings::canBreak,
             (id, server) -> TeamProviderApi.API.getSelected().canBreakBlock(id, server, pos, player));
     }
 
@@ -63,6 +64,7 @@ public class ClaimApiImpl implements ClaimApi {
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_PLACE),
+            ClaimSettings::canPlace,
             (id, server) -> TeamProviderApi.API.getSelected().canPlaceBlock(id, server, pos, player));
     }
 
@@ -85,6 +87,7 @@ public class ClaimApiImpl implements ClaimApi {
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_EXPLOSIONS),
+            ClaimSettings::canExplode,
             (id, server) -> TeamProviderApi.API.getSelected().canExplodeBlock(id, server, pos, explosion, player));
     }
 
@@ -111,6 +114,7 @@ public class ClaimApiImpl implements ClaimApi {
                 }
                 return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_INTERACTIONS);
             },
+            ClaimSettings::canInteractWithBlocks,
             (id, server) -> TeamProviderApi.API.getSelected().canInteractWithBlock(id, server, pos, type, player));
     }
 
@@ -123,6 +127,7 @@ public class ClaimApiImpl implements ClaimApi {
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
+            ClaimSettings::canInteractWithEntities,
             (id, server) -> TeamProviderApi.API.getSelected().canInteractWithEntity(id, server, entity, player));
     }
 
@@ -152,6 +157,7 @@ public class ClaimApiImpl implements ClaimApi {
                 }
                 return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
             },
+            ClaimSettings::canDamageEntities,
             (id, server) -> TeamProviderApi.API.getSelected().canDamageEntity(id, server, entity, player));
     }
 
@@ -195,13 +201,21 @@ public class ClaimApiImpl implements ClaimApi {
         return canEntityGrief(level, picker);
     }
 
-    private boolean canAccess(Level level, BlockPos pos, UUID player, String
-        permission, GameRules.Key<GameRules.BooleanValue> rule, BiFunction<String, MinecraftServer, Boolean> checkFlags, BiFunction<String, MinecraftServer, Boolean> checkTeamPermission) {
+    private boolean canAccess(
+        Level level, BlockPos pos, UUID player,
+        String permission,
+        GameRules.Key<GameRules.BooleanValue> rule,
+        ToBooleanBiFunction<String, MinecraftServer> checkFlags,
+        ToBooleanBiFunction<ClaimSettings, ClaimSettings> checkSettings,
+        ToBooleanBiFunction<String, MinecraftServer> checkTeamPermission
+    ) {
         if (!(level instanceof ServerLevel serverLevel)) return true;
+        MinecraftServer server = serverLevel.getServer();
 
-        var claim = ClaimHandler.getClaim(serverLevel, new ChunkPos(pos));
+        ChunkPos chunkPos = new ChunkPos(pos);
+        var claim = ClaimHandler.getClaim(serverLevel, chunkPos);
         if (claim == null) return true;
-        if (ModUtils.isAdmin(claim.getFirst()) && !checkFlags.apply(claim.getFirst(), serverLevel.getServer())) {
+        if (ModUtils.isAdmin(claim.getFirst()) && !checkFlags.applyAsBoolean(claim.getFirst(), server)) {
             return false;
         }
 
@@ -211,8 +225,14 @@ public class ClaimApiImpl implements ClaimApi {
             return true;
         }
 
+        ClaimSettings settings = CadmusDataHandler.getClaimSettings(server, claim.getFirst());
+        ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(server);
+        if (settings != null && checkSettings.applyAsBoolean(settings, defaultSettings)) {
+            return true;
+        }
+
         if (!isClaimed(level, pos)) return true;
 
-        return checkTeamPermission.apply(claim.getFirst(), serverLevel.getServer());
+        return checkTeamPermission.applyAsBoolean(claim.getFirst(), server);
     }
 }

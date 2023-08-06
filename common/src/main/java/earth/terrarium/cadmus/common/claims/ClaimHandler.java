@@ -3,7 +3,10 @@ package earth.terrarium.cadmus.common.claims;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import earth.terrarium.cadmus.Cadmus;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -29,17 +32,37 @@ public class ClaimHandler extends SaveHandler {
         this.listenHandler = new ClaimListenHandler(dimension);
     }
 
+    private void loadLegacyTeam(String id, CompoundTag tag) {
+        Map<ChunkPos, ClaimType> claimData = new HashMap<>();
+        tag.getAllKeys().forEach(chunkPos -> {
+            ChunkPos pos = new ChunkPos(Long.parseLong(chunkPos));
+            ClaimType type = ClaimType.values()[tag.getByte(chunkPos)];
+            claimData.put(pos, type);
+        });
+        claimsById.put(id, claimData);
+    }
+
+    private void loadTeam(String id, long[] values) {
+        Map<ChunkPos, ClaimType> claimData = new HashMap<>();
+        for (long value : values) {
+            int x = BlockPos.getX(value);
+            int z = BlockPos.getZ(value);
+            int type = BlockPos.getY(value);
+            claimData.put(new ChunkPos(x, z), ClaimType.values()[type]);
+        }
+        claimsById.put(id, claimData);
+    }
+
     @Override
     public void loadData(CompoundTag tag) {
         tag.getAllKeys().forEach(id -> {
-            CompoundTag teamTag = tag.getCompound(id);
-            Map<ChunkPos, ClaimType> claimData = new HashMap<>();
-            teamTag.getAllKeys().forEach(chunkPos -> {
-                ChunkPos pos = new ChunkPos(Long.parseLong(chunkPos));
-                ClaimType type = ClaimType.values()[teamTag.getByte(chunkPos)];
-                claimData.put(pos, type);
-            });
-            claimsById.put(id, claimData);
+            if (id.startsWith(PLAYER_PREFIX) || id.startsWith(TEAM_PREFIX) || id.startsWith(ADMIN_PREFIX)) {
+                if (tag.getTagType(id) == Tag.TAG_LONG_ARRAY) {
+                    loadTeam(id, tag.getLongArray(id));
+                } else {
+                    loadLegacyTeam(id, tag.getCompound(id));
+                }
+            }
         });
 
         updateInternal();
@@ -48,9 +71,15 @@ public class ClaimHandler extends SaveHandler {
     @Override
     public void saveData(CompoundTag tag) {
         claimsById.forEach((id, claimData) -> {
-            CompoundTag teamTag = new CompoundTag();
-            claimData.forEach((pos, type) -> teamTag.putByte(String.valueOf(pos.toLong()), (byte) type.ordinal()));
-            tag.put(id, teamTag);
+            long[] values = new long[claimData.size()];
+            int i = 0;
+            for (Map.Entry<ChunkPos, ClaimType> entry : claimData.entrySet()) {
+                ChunkPos pos = entry.getKey();
+                ClaimType type = entry.getValue();
+                values[i] = BlockPos.asLong(pos.x, type.ordinal(), pos.z);
+                i++;
+            }
+            tag.put(id, new LongArrayTag(values));
         });
     }
 
