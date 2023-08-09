@@ -121,4 +121,8 @@ public class ModUtils {
     public static boolean isPlayer(String id) {
         return id.charAt(0) == 'p';
     }
+
+    public static boolean isTeam(String id) {
+        return id.charAt(0) == 't';
+    }
 }

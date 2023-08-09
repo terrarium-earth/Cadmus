@@ -3,14 +3,29 @@ package earth.terrarium.cadmus.common.claims;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import net.minecraft.nbt.CompoundTag;
 
-public record ClaimSettings(
-    TriState canBreak,
-    TriState canPlace,
-    TriState canExplode,
-    TriState canInteractWithBlocks,
-    TriState canInteractWithEntities,
-    TriState canDamageEntities
-) {
+public final class ClaimSettings {
+    private TriState canBreak;
+    private TriState canPlace;
+    private TriState canExplode;
+    private TriState canInteractWithBlocks;
+    private TriState canInteractWithEntities;
+    private TriState canDamageEntities;
+
+    public ClaimSettings(
+        TriState canBreak,
+        TriState canPlace,
+        TriState canExplode,
+        TriState canInteractWithBlocks,
+        TriState canInteractWithEntities,
+        TriState canDamageEntities
+    ) {
+        this.canBreak = canBreak;
+        this.canPlace = canPlace;
+        this.canExplode = canExplode;
+        this.canInteractWithBlocks = canInteractWithBlocks;
+        this.canInteractWithEntities = canInteractWithEntities;
+        this.canDamageEntities = canDamageEntities;
+    }
 
     public static ClaimSettings ofFalse() {
         return new ClaimSettings(TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE);
@@ -19,6 +34,7 @@ public record ClaimSettings(
     public static ClaimSettings ofUndefined() {
         return new ClaimSettings(TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED);
     }
+
     public boolean canBreak(ClaimSettings defaultSettings) {
         if (canBreak.isDefined()) return canBreak.isTrue();
         return defaultSettings.canBreak().isTrue();
@@ -46,7 +62,7 @@ public record ClaimSettings(
 
     public boolean canDamageEntities(ClaimSettings defaultSettings) {
         if (canDamageEntities.isDefined()) return canDamageEntities.isTrue();
-        return defaultSettings.canDamageEntities().isTrue();
+        return defaultSettings.setCanDamageEntities().isTrue();
     }
 
     public CompoundTag write(CompoundTag tag) {
@@ -74,4 +90,28 @@ public record ClaimSettings(
         if (!tag.contains(key)) return TriState.UNDEFINED;
         return TriState.values()[tag.getByte(key)];
     }
+
+    public TriState canBreak() {return canBreak;}
+
+    public void setCanBreak(TriState canBreak) {this.canBreak = canBreak;}
+
+    public TriState canPlace() {return canPlace;}
+
+    public void setCanPlace(TriState canPlace) {this.canPlace = canPlace;}
+
+    public TriState canExplode() {return canExplode;}
+
+    public void setCanExplode(TriState canExplode) {this.canExplode = canExplode;}
+
+    public TriState canInteractWithBlocks() {return canInteractWithBlocks;}
+
+    public void setCanInteractWithBlocks(TriState canInteractWithBlocks) {this.canInteractWithBlocks = canInteractWithBlocks;}
+
+    public TriState canInteractWithEntities() {return canInteractWithEntities;}
+
+    public void setCanInteractWithEntities(TriState canInteractWithEntities) {this.canInteractWithEntities = canInteractWithEntities;}
+
+    public TriState setCanDamageEntities() {return canDamageEntities;}
+
+    public void setDamagingEntities(TriState canDamageEntities) {this.canDamageEntities = canDamageEntities;}
 }

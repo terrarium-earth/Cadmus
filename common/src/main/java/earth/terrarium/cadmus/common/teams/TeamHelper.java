@@ -65,7 +65,7 @@ public class TeamHelper {
         return TeamProviderApi.API.getSelected().getTeamColor(teamId(id), server);
     }
 
-    private static String teamId(String id) {
+    public static String teamId(String id) {
         return id.substring(2);
     }
 }

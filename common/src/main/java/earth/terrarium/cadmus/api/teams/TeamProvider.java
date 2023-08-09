@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,5 +149,17 @@ public interface TeamProvider {
      */
     default void onTeamRemoved(MinecraftServer server, String id) {
         MaxClaimProviderApi.API.getSelected().removeTeam(ClaimHandler.TEAM_PREFIX + id, server);
+    }
+
+    /**
+     * Checks if the player can modify the settings of the team
+     *
+     * @param id     the id of the team
+     * @param player the player
+     * @return true if the player can modify the settings of the team, false otherwise
+     * @apiNote this is only used if the member is a verifiable team member
+     */
+    default boolean canModifySettings(String id, Player player) {
+        return false;
     }
 }
