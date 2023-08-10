@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
-import earth.terrarium.cadmus.common.claims.ClaimSettings;
 import earth.terrarium.cadmus.common.commands.claims.CommandHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -45,8 +44,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canBreak = defaultSettings.canBreak(defaultSettings);
+                    boolean canBreak = CadmusDataHandler.getDefaultClaimSettings(player.server).canBreak().isTrue();
                     player.displayClientMessage(getCurrentComponent("canBreak", canBreak), false);
                 });
                 return 1;
@@ -68,8 +66,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canPlace = defaultSettings.canPlace(defaultSettings);
+                    boolean canPlace = CadmusDataHandler.getDefaultClaimSettings(player.server).canPlace().isTrue();
                     player.displayClientMessage(getCurrentComponent("canPlace", canPlace), false);
                 });
                 return 1;
@@ -91,8 +88,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canExplode = defaultSettings.canExplode(defaultSettings);
+                    boolean canExplode = CadmusDataHandler.getDefaultClaimSettings(player.server).canExplode().isTrue();
                     player.displayClientMessage(getCurrentComponent("canExplode", canExplode), false);
                 });
                 return 1;
@@ -114,8 +110,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canInteractWithBlocks = defaultSettings.canInteractWithBlocks(defaultSettings);
+                    boolean canInteractWithBlocks = CadmusDataHandler.getDefaultClaimSettings(player.server).canInteractWithBlocks().isTrue();
                     player.displayClientMessage(getCurrentComponent("canInteractWithBlocks", canInteractWithBlocks), false);
                 });
                 return 1;
@@ -137,8 +132,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canInteractWithEntities = defaultSettings.canInteractWithEntities(defaultSettings);
+                    boolean canInteractWithEntities = CadmusDataHandler.getDefaultClaimSettings(player.server).canInteractWithEntities().isTrue();
                     player.displayClientMessage(getCurrentComponent("canInteractWithEntities", canInteractWithEntities), false);
                 });
                 return 1;
@@ -152,7 +146,7 @@ public class AdminDefaultSettingsCommand {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
                         boolean canDamageEntities = BoolArgumentType.getBool(context, "value");
-                        CadmusDataHandler.getDefaultClaimSettings(player.server).setDamagingEntities(TriState.of(canDamageEntities));
+                        CadmusDataHandler.getDefaultClaimSettings(player.server).setCanDamageEntities(TriState.of(canDamageEntities));
                         player.displayClientMessage(setCurrentComponent("canDamageEntities", canDamageEntities), false);
                     });
                     return 1;
@@ -160,8 +154,7 @@ public class AdminDefaultSettingsCommand {
             .executes(context -> {
                 ServerPlayer player = context.getSource().getPlayerOrException();
                 CommandHelper.runAction(() -> {
-                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
-                    boolean canDamageEntities = defaultSettings.canDamageEntities(defaultSettings);
+                    boolean canDamageEntities = CadmusDataHandler.getDefaultClaimSettings(player.server).canDamageEntities().isTrue();
                     player.displayClientMessage(getCurrentComponent("canDamageEntities", canDamageEntities), false);
                 });
                 return 1;

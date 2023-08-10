@@ -68,6 +68,8 @@
   "command.cadmus.exception.claim_does_not_exist": "This claim does not exist.",
   "command.cadmus.exception.not_allowed_to_manage_setting": "You are not allowed to manage this setting.",
 
+  "argument.tri_state.invalid": "Invalid tri-state value. Valid values are: true, false, default.",
+
   "text.cadmus.settings.current": "Setting %s is currently set to: \"%s\"",
   "text.cadmus.settings.set": "Setting %s is now set to: \"%s\"",
 

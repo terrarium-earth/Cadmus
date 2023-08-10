@@ -4,12 +4,16 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.common.commands.ModCommands;
+import earth.terrarium.cadmus.common.commands.arguments.TriStateArgument;
 import earth.terrarium.cadmus.compat.fabric.cpa.CommonProtectionApiCompat;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.*;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 
 public class CadmusFabric implements ModInitializer {
@@ -23,6 +27,9 @@ public class CadmusFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register(ModCommands::register);
         ServerLifecycleEvents.SERVER_STARTED.register(Cadmus::serverStarted);
         registerChunkProtectionEvents();
+        ArgumentTypeRegistry.registerArgumentType(new ResourceLocation(Cadmus.MOD_ID, "tri_state"),
+            TriStateArgument.class,
+            SingletonArgumentInfo.contextFree(TriStateArgument::triState));
     }
 
     private static void registerChunkProtectionEvents() {

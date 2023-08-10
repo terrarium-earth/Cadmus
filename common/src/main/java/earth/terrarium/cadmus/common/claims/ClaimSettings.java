@@ -62,7 +62,7 @@ public final class ClaimSettings {
 
     public boolean canDamageEntities(ClaimSettings defaultSettings) {
         if (canDamageEntities.isDefined()) return canDamageEntities.isTrue();
-        return defaultSettings.setCanDamageEntities().isTrue();
+        return defaultSettings.canDamageEntities().isTrue();
     }
 
     public CompoundTag write(CompoundTag tag) {
@@ -111,7 +111,7 @@ public final class ClaimSettings {
 
     public void setCanInteractWithEntities(TriState canInteractWithEntities) {this.canInteractWithEntities = canInteractWithEntities;}
 
-    public TriState setCanDamageEntities() {return canDamageEntities;}
+    public TriState canDamageEntities() {return canDamageEntities;}
 
-    public void setDamagingEntities(TriState canDamageEntities) {this.canDamageEntities = canDamageEntities;}
+    public void setCanDamageEntities(TriState canDamageEntities) {this.canDamageEntities = canDamageEntities;}
 }
