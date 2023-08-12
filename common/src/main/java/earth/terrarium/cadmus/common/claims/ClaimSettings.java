@@ -91,27 +91,51 @@ public final class ClaimSettings {
         return TriState.values()[tag.getByte(key)];
     }
 
-    public TriState canBreak() {return canBreak;}
+    public TriState canBreak() {
+        return canBreak;
+    }
 
-    public void setCanBreak(TriState canBreak) {this.canBreak = canBreak;}
+    public void setCanBreak(TriState canBreak) {
+        this.canBreak = canBreak;
+    }
 
-    public TriState canPlace() {return canPlace;}
+    public TriState canPlace() {
+        return canPlace;
+    }
 
-    public void setCanPlace(TriState canPlace) {this.canPlace = canPlace;}
+    public void setCanPlace(TriState canPlace) {
+        this.canPlace = canPlace;
+    }
 
-    public TriState canExplode() {return canExplode;}
+    public TriState canExplode() {
+        return canExplode;
+    }
 
-    public void setCanExplode(TriState canExplode) {this.canExplode = canExplode;}
+    public void setCanExplode(TriState canExplode) {
+        this.canExplode = canExplode;
+    }
 
-    public TriState canInteractWithBlocks() {return canInteractWithBlocks;}
+    public TriState canInteractWithBlocks() {
+        return canInteractWithBlocks;
+    }
 
-    public void setCanInteractWithBlocks(TriState canInteractWithBlocks) {this.canInteractWithBlocks = canInteractWithBlocks;}
+    public void setCanInteractWithBlocks(TriState canInteractWithBlocks) {
+        this.canInteractWithBlocks = canInteractWithBlocks;
+    }
 
-    public TriState canInteractWithEntities() {return canInteractWithEntities;}
+    public TriState canInteractWithEntities() {
+        return canInteractWithEntities;
+    }
 
-    public void setCanInteractWithEntities(TriState canInteractWithEntities) {this.canInteractWithEntities = canInteractWithEntities;}
+    public void setCanInteractWithEntities(TriState canInteractWithEntities) {
+        this.canInteractWithEntities = canInteractWithEntities;
+    }
 
-    public TriState canDamageEntities() {return canDamageEntities;}
+    public TriState canDamageEntities() {
+        return canDamageEntities;
+    }
 
-    public void setCanDamageEntities(TriState canDamageEntities) {this.canDamageEntities = canDamageEntities;}
+    public void setCanDamageEntities(TriState canDamageEntities) {
+        this.canDamageEntities = canDamageEntities;
+    }
 }

@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.commands.claims;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -26,6 +27,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ClaimSettingsCommand {
     public static final SuggestionProvider<CommandSourceStack> TRI_STATE_SUGGESTION_PROVIDER = (context, builder) ->
@@ -260,7 +262,7 @@ public class ClaimSettingsCommand {
     }
 
     private static TriState getInputState(String input) throws CommandRuntimeException {
-        return switch (input.toLowerCase()) {
+        return switch (input.toLowerCase(Locale.ROOT)) {
             case "true" -> TriState.TRUE;
             case "false" -> TriState.FALSE;
             case "default" -> TriState.UNDEFINED;
