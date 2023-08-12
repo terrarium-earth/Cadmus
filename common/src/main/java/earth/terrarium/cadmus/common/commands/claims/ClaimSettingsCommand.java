@@ -1,27 +1,35 @@
 package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimSettings;
-import earth.terrarium.cadmus.common.commands.arguments.TriStateArgument;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
+import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 
+import java.util.List;
+
 public class ClaimSettingsCommand {
+    public static final SuggestionProvider<CommandSourceStack> TRI_STATE_SUGGESTION_PROVIDER = (context, builder) ->
+        SharedSuggestionProvider.suggest((List.of("true", "false", "default")), builder);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("claim")
@@ -37,7 +45,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canBreak() {
         return Commands.literal("canBreak")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -51,7 +60,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canBreak = TriStateArgument.getTriState(context, "value");
+                        TriState canBreak = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanBreak(canBreak);
                         player.displayClientMessage(setCurrentComponent("canBreak", canBreak), false);
                     });
@@ -72,7 +81,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canPlace() {
         return Commands.literal("canPlace")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -86,7 +96,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canPlace = TriStateArgument.getTriState(context, "value");
+                        TriState canPlace = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanPlace(canPlace);
                         player.displayClientMessage(setCurrentComponent("canPlace", canPlace), false);
                     });
@@ -107,7 +117,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canExplode() {
         return Commands.literal("canExplode")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -121,7 +132,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canExplode = TriStateArgument.getTriState(context, "value");
+                        TriState canExplode = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanExplode(canExplode);
                         player.displayClientMessage(setCurrentComponent("canExplode", canExplode), false);
                     });
@@ -142,7 +153,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canInteractWithBlocks() {
         return Commands.literal("canInteractWithBlocks")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -156,7 +168,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canInteractWithBlocks = TriStateArgument.getTriState(context, "value");
+                        TriState canInteractWithBlocks = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanInteractWithBlocks(canInteractWithBlocks);
                         player.displayClientMessage(setCurrentComponent("canInteractWithBlocks", canInteractWithBlocks), false);
                     });
@@ -177,7 +189,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canInteractWithEntities() {
         return Commands.literal("canInteractWithEntities")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -191,7 +204,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canInteractWithEntities = TriStateArgument.getTriState(context, "value");
+                        TriState canInteractWithEntities = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanInteractWithEntities(canInteractWithEntities);
                         player.displayClientMessage(setCurrentComponent("canInteractWithEntities", canInteractWithEntities), false);
                     });
@@ -212,7 +225,8 @@ public class ClaimSettingsCommand {
 
     private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canDamageEntities() {
         return Commands.literal("canDamageEntities")
-            .then(Commands.argument("value", TriStateArgument.triState())
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
@@ -226,7 +240,7 @@ public class ClaimSettingsCommand {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
-                        TriState canDamageEntities = TriStateArgument.getTriState(context, "value");
+                        TriState canDamageEntities = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanDamageEntities(canDamageEntities);
                         player.displayClientMessage(setCurrentComponent("canDamageEntities", canDamageEntities), false);
                     });
@@ -243,6 +257,15 @@ public class ClaimSettingsCommand {
                 });
                 return 1;
             });
+    }
+
+    private static TriState getInputState(String input) throws CommandRuntimeException {
+        return switch (input.toLowerCase()) {
+            case "true" -> TriState.TRUE;
+            case "false" -> TriState.FALSE;
+            case "default" -> TriState.UNDEFINED;
+            default -> throw new CommandRuntimeException(ConstantComponents.INVALID_STATE);
+        };
     }
 
     private static Component getCurrentComponent(String command, Object value) {

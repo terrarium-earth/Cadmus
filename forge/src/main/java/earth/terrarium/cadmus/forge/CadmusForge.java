@@ -7,10 +7,7 @@ import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.ModCommands;
-import earth.terrarium.cadmus.common.commands.arguments.TriStateArgument;
 import earth.terrarium.cadmus.common.util.ModUtils;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -47,9 +44,6 @@ public class CadmusForge {
         bus.addListener(CadmusForge::onEnterSection);
         bus.addListener(CadmusForge::onRightClick);
         registerChunkProtectionEvents(bus);
-        ArgumentTypeInfos.registerByClass(
-            TriStateArgument.class,
-            SingletonArgumentInfo.contextFree(TriStateArgument::triState));
     }
 
     private static void registerChunkProtectionEvents(IEventBus bus) {
