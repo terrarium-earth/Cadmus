@@ -34,7 +34,6 @@ public class CadmusDataHandler extends SaveHandler {
         settings.getAllKeys().forEach(id -> this.settings.put(id, ClaimSettings.read(settings.getCompound(id))));
 
 
-
         String teamProvider = tag.getString("team_provider");
         if (!teamProvider.isEmpty()) {
             TeamProviderApi.API.setSelected(new ResourceLocation(teamProvider));

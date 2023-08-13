@@ -25,4 +25,6 @@ public class ConstantComponents {
     public static final Component PLAYER = CommonUtils.serverTranslatable("text.cadmus.info.player");
     public static final Component ADMIN = CommonUtils.serverTranslatable("text.cadmus.info.admin");
     public static final Component UNKNOWN = CommonUtils.serverTranslatable("text.cadmus.info.unknown");
+
+    public static final Component INVALID_STATE = CommonUtils.serverTranslatable("command.cadmus.settings.invalid_state");
 }

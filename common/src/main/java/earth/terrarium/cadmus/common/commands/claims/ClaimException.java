@@ -13,6 +13,7 @@ public class ClaimException extends Exception {
     public static final ClaimException CLAIM_HAS_NO_FLAGS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.claim_has_no_flags"));
     public static final ClaimException CLAIM_ALREADY_EXISTS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.claim_already_exists"));
     public static final ClaimException CLAIM_DOES_NOT_EXIST = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.claim_does_not_exist"));
+    public static final ClaimException NOT_ALLOWED_TO_MANAGE_SETTINGS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.not_allowed_to_manage_setting"));
 
     private final Component message;
 

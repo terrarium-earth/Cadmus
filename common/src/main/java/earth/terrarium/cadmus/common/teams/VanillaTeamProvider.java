@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
@@ -102,5 +103,10 @@ public class VanillaTeamProvider implements TeamProvider {
     public void onTeamRemoved(MinecraftServer server, PlayerTeam playerTeam) {
         TeamProvider.super.onTeamRemoved(server, playerTeam.getName());
         server.getAllLevels().forEach(l -> ClaimHandler.clear(l, ClaimHandler.TEAM_PREFIX + playerTeam.getName()));
+    }
+
+    @Override
+    public boolean canModifySettings(String id, Player player) {
+        return true;
     }
 }
