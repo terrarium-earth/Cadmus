@@ -14,27 +14,22 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public class ModGameRules {
-    public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_CLAIMED_CHUNKS = registerIfPrometheusNotInstalled("maxClaimedChunks", GameRules.Category.MISC, createIntRule(1089));
-    public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_CHUNK_LOADED = registerIfPrometheusNotInstalled("maxChunkLoaded", GameRules.Category.MISC, createIntRule(64));
+    public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_CLAIMED_CHUNKS = register("maxClaimedChunks", GameRules.Category.MISC, createIntRule(1089));
+    public static final GameRules.Key<GameRules.IntegerValue> RULE_MAX_CHUNK_LOADED = register("maxChunkLoaded", GameRules.Category.MISC, createIntRule(64));
 
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_BREAKING = registerIfPrometheusNotInstalled("doClaimedBlockBreaking", GameRules.Category.MISC, createBooleanRule(false));
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_PLACING = registerIfPrometheusNotInstalled("doClaimedBlockPlacing", GameRules.Category.MISC, createBooleanRule(false));
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_EXPLOSIONS = registerIfPrometheusNotInstalled("doClaimedBlockExplosions", GameRules.Category.MISC, createBooleanRule(false));
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_INTERACTIONS = registerIfPrometheusNotInstalled("doClaimedBlockInteractions", GameRules.Category.MISC, createBooleanRule(false));
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_ENTITY_INTERACTIONS = registerIfPrometheusNotInstalled("doClaimedEntityInteractions", GameRules.Category.MISC, createBooleanRule(false));
-    public static final GameRules.Key<GameRules.BooleanValue> RULE_CLAIMED_DAMAGE_ENTITIES = registerIfPrometheusNotInstalled("doClaimedDamageEntities", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_BREAKING = register("doClaimedBlockBreaking", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_PLACING = register("doClaimedBlockPlacing", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_EXPLOSIONS = register("doClaimedBlockExplosions", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_BLOCK_INTERACTIONS = register("doClaimedBlockInteractions", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_DO_CLAIMED_ENTITY_INTERACTIONS = register("doClaimedEntityInteractions", GameRules.Category.MISC, createBooleanRule(false));
+    public static final GameRules.Key<GameRules.BooleanValue> RULE_CLAIMED_DAMAGE_ENTITIES = register("doClaimedDamageEntities", GameRules.Category.MISC, createBooleanRule(false));
     public static final GameRules.Key<GameRules.BooleanValue> RULE_CLAIMED_MOB_GRIEFING = register("claimedMobGriefing", GameRules.Category.MISC, createBooleanRule(false));
     public static final GameRules.Key<GameRules.BooleanValue> RULE_CAN_PICKUP_CLAIMED_ITEMS = register("canPickupClaimedItems", GameRules.Category.MISC, createBooleanRule(false));
 
     public static final GameRules.Key<GameRules.BooleanValue> DO_COMBINED_CLAIM_LIMIT = registerIfPrometheusInstalled("doCombinedClaimLimit", GameRules.Category.MISC, createBooleanRule(false, (server, rule) ->
-        // recalculate max claims for all teams
         CadmusDataHandler.getMaxTeamClaims(server).keySet().forEach(id -> MaxClaimProviderApi.API.getSelected().calculate(id, server))));
 
     public static void init() {
-    }
-
-    public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusNotInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
-        return ModInfoUtils.isModLoaded("prometheus") ? null : register(name, category, type);
     }
 
     public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
