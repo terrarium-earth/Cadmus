@@ -15,18 +15,24 @@ import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.util.AdminUtils;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Block;
 
 public class Cadmus {
     public static final String MOD_ID = "cadmus";
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(MOD_ID, "default");
 
     public static int FORCE_LOADED_CHUNK_COUNT = 0;
+    public static final TagKey<Block> ALLOWS_CLAIM_INTERACTIONS = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "allows_claim_interactions"));
+    public static final TagKey<EntityType<?>> ALLOWS_CLAIM_INTERACTIONS_ENTITIES = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(MOD_ID, "allows_claim_interactions"));
 
     public static void init() {
         NetworkHandler.init();

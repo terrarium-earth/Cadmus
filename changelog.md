@@ -1,2 +1,5 @@
 - Add claim settings and default server claim settings
-- Fix water buckets not being dispensed on fabric
+- Optimize how claims are saved
+- Fix water buckets not being dispensed on fabric (#13)
+- Fix unable to open claim map with Prometheus installed (#19)
+- Add `allows_claim_interactions` tag for blocks and entities (#15)

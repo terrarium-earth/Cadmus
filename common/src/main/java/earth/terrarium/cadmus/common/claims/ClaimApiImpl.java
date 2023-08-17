@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
@@ -98,6 +99,9 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
+        if (level.getBlockState(pos).is(Cadmus.ALLOWS_CLAIM_INTERACTIONS)) {
+            return true;
+        }
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS,
             (id, server) -> {
                 Block block = level.getBlockState(pos).getBlock();
@@ -125,6 +129,9 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
+        if (entity.getType().is(Cadmus.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) {
+            return true;
+        }
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
             ClaimSettings::canInteractWithEntities,
