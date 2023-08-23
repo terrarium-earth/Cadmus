@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -116,6 +117,12 @@ public class ClaimHandler extends SaveHandler {
         }
         data.claimsById.remove(id);
         data.updateInternal();
+    }
+
+    public static void clearAll(ServerLevel level) {
+        var data = read(level);
+        var teams = new HashSet<>(data.claimsById.keySet());
+        teams.forEach(id -> clear(level, id));
     }
 
     @Nullable

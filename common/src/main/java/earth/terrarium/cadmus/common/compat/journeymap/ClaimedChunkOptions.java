@@ -12,6 +12,6 @@ public class ClaimedChunkOptions {
         category,
         "showClaimedChunks",
         "Show Claimed Chunks",
-        false
+        true
     );
 }

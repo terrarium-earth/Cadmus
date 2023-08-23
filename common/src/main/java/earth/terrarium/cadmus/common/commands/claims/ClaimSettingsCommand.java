@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class ClaimSettingsCommand {
+    // I'm gonna claim the entire TRI STATE AREA
     public static final SuggestionProvider<CommandSourceStack> TRI_STATE_SUGGESTION_PROVIDER = (context, builder) ->
         SharedSuggestionProvider.suggest((List.of("true", "false", "default")), builder);
 

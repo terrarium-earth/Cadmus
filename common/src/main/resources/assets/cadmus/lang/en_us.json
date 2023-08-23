@@ -15,6 +15,7 @@
   "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: x: %s, z: %s",
   "text.cadmus.unclaiming.unclaimed_chunk_at": "Unclaimed chunk at: x: %s, z: %s",
   "text.cadmus.clear": "Cleared all claims for %s",
+  "text.cadmus.clear_all": "Cleared all claims",
   "text.cadmus.info.unclaimed": "Unclaimed",
   "text.cadmus.info.claimed_by": "Claimed by: %s (%s)",
   "text.cadmus.info.chunk_loaded_by": "Chunk loaded by: %s (%s)",

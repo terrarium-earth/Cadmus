@@ -60,6 +60,12 @@ public class AdminCommands {
                             CommandHelper.runAction(() -> claim(player, player.chunkPosition(), id, false));
                             return 1;
                         })))
+                .then(Commands.literal("clearall")
+                    .executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        CommandHelper.runAction(() -> clearAll(player));
+                        return 1;
+                    }))
                 .then(Commands.literal("unclaim")
                     .then(Commands.argument("id", StringArgumentType.string())
                         .suggests(TEAM_SUGGESTION_PROVIDER)
@@ -76,7 +82,12 @@ public class AdminCommands {
                             String id = StringArgumentType.getString(context, "id");
                             CommandHelper.runAction(() -> unclaim(player, player.chunkPosition(), id));
                             return 1;
-                        })))
+                        }))
+                    .executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        CommandHelper.runAction(() -> unclaim(player, player.chunkPosition()));
+                        return 1;
+                    }))
                 .then(Commands.literal("list")
                     .executes(context -> {
                         ServerPlayer player = context.getSource().getPlayerOrException();
@@ -93,6 +104,11 @@ public class AdminCommands {
         player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.clear", name.getString()), false);
     }
 
+    public static void clearAll(ServerPlayer player) {
+        player.server.getAllLevels().forEach(ClaimHandler::clearAll);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.clear_all"), false);
+    }
+
     public static void claim(ServerPlayer player, ChunkPos pos, String id, boolean chunkloaded) throws ClaimException {
         Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData != null) {
@@ -105,6 +121,13 @@ public class AdminCommands {
         } else {
             player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.claimed_chunk_at", pos.x, pos.z), false);
         }
+    }
+
+    public static void unclaim(ServerPlayer player, ChunkPos pos) throws ClaimException {
+        Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
+        if (claimData == null) throw ClaimException.CHUNK_NOT_CLAIMED;
+        ModUtils.unclaim(claimData.getFirst(), player.serverLevel(), pos);
+        player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 
     public static void unclaim(ServerPlayer player, ChunkPos pos, String id) throws ClaimException {

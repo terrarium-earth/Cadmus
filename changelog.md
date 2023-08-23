@@ -1,5 +1,3 @@
-- Add claim settings and default server claim settings
-- Optimize how claims are saved
-- Fix water buckets not being dispensed on fabric (#13)
-- Fix unable to open claim map with Prometheus installed (#19)
-- Add `allows_claim_interactions` tag for blocks and entities (#15)
+- Add `/cadmus admin clearall` command to clear all claims on the server.
+- `/cadmus admin unclaim` id parameter is now optional. It will claim the current position if no id is provided.
+- JourneyMap integration is now enabled by default.
