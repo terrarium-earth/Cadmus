@@ -18,8 +18,12 @@ val common: Configuration by configurations.creating {
 dependencies {
     val minecraftVersion: String by project
     val forgeVersion: String by project
+    val reiVersion: String by project
 
     forge(group = "net.minecraftforge", name = "forge", version = "$minecraftVersion-$forgeVersion")
+
+    modCompileOnly(group = "me.shedaniel", name = "RoughlyEnoughItems-api-forge", version = reiVersion)
+    modLocalRuntime(group = "me.shedaniel", name = "RoughlyEnoughItems-forge", version = reiVersion)
 
     common(project(":common", configuration = "namedElements")) {
         isTransitive = false
