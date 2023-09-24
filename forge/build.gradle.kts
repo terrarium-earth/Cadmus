@@ -15,6 +15,13 @@ val common: Configuration by configurations.creating {
     configurations["developmentForge"].extendsFrom(this)
 }
 
+repositories {
+    maven {
+        name = "tterrag maven"
+        url = uri("https://maven.tterrag.com/")
+    }
+}
+
 dependencies {
     val minecraftVersion: String by project
     val forgeVersion: String by project
