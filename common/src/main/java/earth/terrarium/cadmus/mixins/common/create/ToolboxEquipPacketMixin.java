@@ -18,7 +18,7 @@ public class ToolboxEquipPacketMixin {
     @Shadow private BlockPos toolboxPos;
 
     @Inject(method = "lambda$handle$1", at = @At("HEAD"), cancellable = true)
-    public void onHandle(Context context, CallbackInfo ci) {
+    private void onHandle(Context context, CallbackInfo ci) {
         ServerPlayer player = context.getSender();
         if (player == null) return;
         Level level = player.getCommandSenderWorld();
