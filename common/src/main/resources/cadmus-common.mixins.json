@@ -18,6 +18,7 @@
     "common.chunkprotection.WaterlilyBlockMixin",
     "common.create.ContraptionInteractionPacketMixin",
     "common.create.ControlsInputPacketMixin",
+    "common.create.PotatoProjectileEntityMixin",
     "common.create.SuperGlueRemovalPacketMixin",
     "common.create.SuperGlueSelectionPacketMixin",
     "common.create.ToolboxDisposeAllPacketMixin",
