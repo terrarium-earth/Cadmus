@@ -1,3 +1,0 @@
-- Add `/cadmus admin clearall` command to clear all claims on the server.
-- `/cadmus admin unclaim` id parameter is now optional. It will claim the current position if no id is provided.
-- JourneyMap integration is now enabled by default.

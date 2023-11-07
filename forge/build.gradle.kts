@@ -31,6 +31,9 @@ dependencies {
     shadowCommon(project(path = ":common", configuration = "transformProductionForge")) {
         isTransitive = false
     }
+
+    forgeRuntimeLibrary("com.teamresourceful:yabn:1.0.3")
+    forgeRuntimeLibrary("com.teamresourceful:bytecodecs:1.0.2")
 }
 
 tasks.processResources {

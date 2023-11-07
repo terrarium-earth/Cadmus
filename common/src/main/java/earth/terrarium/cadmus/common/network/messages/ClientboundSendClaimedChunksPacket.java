@@ -3,7 +3,6 @@ package earth.terrarium.cadmus.common.network.messages;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
-import com.teamresourceful.bytecodecs.defaults.EnumCodec;
 import com.teamresourceful.bytecodecs.defaults.MapCodec;
 import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
 import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
@@ -56,7 +55,7 @@ public record ClientboundSendClaimedChunksPacket(Map<ChunkPos, Pair<String, Clai
             super(ObjectByteCodec.create(
                 CHUNK_POS_CLAIM_CODEC.fieldOf(ClientboundSendClaimedChunksPacket::claims),
                 ByteCodec.STRING.fieldOf(ClientboundSendClaimedChunksPacket::id),
-                new EnumCodec<>(ChatFormatting.class).fieldOf(ClientboundSendClaimedChunksPacket::color),
+                ByteCodec.ofEnum(ChatFormatting.class).fieldOf(ClientboundSendClaimedChunksPacket::color),
                 ByteCodec.STRING.optionalFieldOf(ClientboundSendClaimedChunksPacket::displayName),
                 new MapCodec<>(ByteCodec.STRING, ExtraByteCodecs.COMPONENT).fieldOf(ClientboundSendClaimedChunksPacket::teamDisplayNames),
                 ByteCodec.VAR_INT.fieldOf(ClientboundSendClaimedChunksPacket::claimedCount),
