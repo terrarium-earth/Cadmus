@@ -37,8 +37,8 @@
     "cadmus-common.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
-    "minecraft": ">=1.20",
-    "resourcefullib": ">=2.1.1"
+    "fabric-api": "*",
+    "minecraft": ">=1.20.2",
+    "resourcefullib": ">=2.2.1"
   }
 }

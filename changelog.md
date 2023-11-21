@@ -1,0 +1,2 @@
+- Update to 1.20.2
+- Fix chunkloading not being applied when you chunk load your already claimed chunk without first unclaiming it.

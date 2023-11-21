@@ -85,13 +85,13 @@ public class ClaimHandler extends SaveHandler {
     }
 
     public static ClaimHandler read(ServerLevel level) {
-        return read(level.getDataStorage(), () -> new ClaimHandler(level.dimension()), "cadmus_claims");
+        return read(level.getDataStorage(), HandlerType.create(() -> new ClaimHandler(level.dimension())), "cadmus_claims");
     }
 
     public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {
         var data = read(level);
         // Remove any claims that are already claimed by another team
-        claimData.keySet().removeAll(data.claims.keySet());
+        claimData.keySet().removeIf(pos -> data.claims.containsKey(pos) && !data.claims.get(pos).getFirst().equals(id));
 
         data.listenHandler.addClaims(level, id, claimData.keySet());
 

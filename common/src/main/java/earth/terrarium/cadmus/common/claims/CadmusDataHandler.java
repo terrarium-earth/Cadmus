@@ -78,7 +78,7 @@ public class CadmusDataHandler extends SaveHandler {
     }
 
     public static CadmusDataHandler read(MinecraftServer server) {
-        return read(server.overworld().getDataStorage(), CadmusDataHandler::new, "cadmus_data");
+        return read(server.overworld().getDataStorage(), HandlerType.create(CadmusDataHandler::new), "cadmus_data");
     }
 
     public static Map<String, IntIntPair> getMaxTeamClaims(MinecraftServer server) {
