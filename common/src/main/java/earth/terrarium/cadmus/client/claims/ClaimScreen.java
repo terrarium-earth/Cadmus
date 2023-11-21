@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.client.claims;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
@@ -19,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -39,14 +39,6 @@ public class ClaimScreen extends BaseCursorScreen {
 
     public static final int MAP_SIZE = 200;
     public static final ResourceLocation CONTAINER_BACKGROUND = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/map.png");
-    private static final WidgetSprites TRASH_BUTTON_SPRITES = new WidgetSprites(
-        new ResourceLocation(Cadmus.MOD_ID, "claimmap/trash_button"),
-        new ResourceLocation(Cadmus.MOD_ID, "claimmap/trash_button_highlighted")
-    );
-    private static final WidgetSprites X_BUTTON_SPRITES = new WidgetSprites(
-        new ResourceLocation(Cadmus.MOD_ID, "claimmap/x_button"),
-        new ResourceLocation(Cadmus.MOD_ID, "claimmap/x_button_highlighted")
-    );
     public static final ResourceLocation MAP_ICONS = new ResourceLocation("textures/map/map_icons.png");
     public static final int ORANGE = 0xfff59a22;
     public static final int AQUA = 0xff55ffff;
@@ -174,8 +166,8 @@ public class ClaimScreen extends BaseCursorScreen {
         int x = (this.width - 216) / 2;
         int y = (this.height - 237) / 2;
 
-        this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11,
-            TRASH_BUTTON_SPRITES,
+        this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11, 216, 0, 11,
+            CONTAINER_BACKGROUND,
             button -> {
                 if (Screen.hasShiftDown()) {
                     clearAll();
@@ -186,20 +178,15 @@ public class ClaimScreen extends BaseCursorScreen {
             }
         )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
 
-        this.addRenderableWidget(new ImageButton(x + 216 - 11 - 7, y + 6, 11, 11,
-            X_BUTTON_SPRITES,
+        this.addRenderableWidget(new ImageButton(x + 216 - 11 - 7, y + 6, 11, 11, 227, 0, 11,
+            CONTAINER_BACKGROUND,
             button -> this.onClose()
         )).setTooltip(Tooltip.create(ConstantComponents.CLOSE));
     }
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.renderBackground(graphics);
         renderBackgroundTexture(graphics);
         if (this.mapRenderer == null) {
             graphics.drawCenteredString(font, ConstantComponents.LOADING, (int) (width / 2f), (int) (height / 2f), 0xFFFFFF);
@@ -214,13 +201,14 @@ public class ClaimScreen extends BaseCursorScreen {
                 this.renderPlayerAvatar(player, graphics);
             }
         }
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     private void renderBackgroundTexture(GuiGraphics graphics) {
         graphics.fill((width - MAP_SIZE) / 2, (height - MAP_SIZE) / 2, (width + MAP_SIZE) / 2, (height + MAP_SIZE) / 2, 0xff000000);
         int left = (this.width - 216) / 2;
         int top = (this.height - 237) / 2 + 1;
-//        RenderSystem.enableBlend();
+        RenderSystem.enableBlend();
         graphics.blit(CONTAINER_BACKGROUND, left, top, 0, 0, 216, 237);
         graphics.drawString(font, ConstantComponents.TITLE, (int) ((this.width - font.width(ConstantComponents.TITLE)) / 2f), top + 7, 0x404040, false);
     }

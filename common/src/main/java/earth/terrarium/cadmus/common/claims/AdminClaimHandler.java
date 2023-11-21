@@ -42,7 +42,7 @@ public class AdminClaimHandler extends SaveHandler {
     }
 
     public static AdminClaimHandler read(MinecraftServer server) {
-        return read(server.overworld().getDataStorage(), HandlerType.create(AdminClaimHandler::new), "cadmus_admin_claims");
+        return read(server.overworld().getDataStorage(), AdminClaimHandler::new, "cadmus_admin_claims");
     }
 
     public static void create(MinecraftServer server, String id, Map<String, Flag<?>> claim) {
