@@ -63,6 +63,7 @@
   "command.cadmus.exception.already_claimed_chunk": "You've already claimed this chunk.",
   "command.cadmus.exception.maxed_out_claims": "You've maxed out your claims.",
   "command.cadmus.exception.chunk_not_claimed": "This chunk is not claimed.",
+  "command.cadmus.exception.cant_unclaim_admin": "You can't unclaim an admin claim.",
   "command.cadmus.exception.dont_own_chunk": "You don't own this chunk.",
   "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
   "command.cadmus.exception.claim_already_exists": "This claim already exists.",
