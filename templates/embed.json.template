@@ -7,16 +7,15 @@
                     "type": 2,
                     "label": "Fabric",
                     "style": 5,
-                    "url": "${fabric_link}"
+                    "url": "https://modrinth.com/mod/cadmus/version/${fabric_link}"
                 },
                 {
                     "type": 2,
                     "label": "Forge",
                     "style": 5,
-                    "url": "${forge_link}"
+                    "url": "https://modrinth.com/mod/cadmus/version/${forge_link}"
                 }
             ]
-
         }
     ],
     "embeds": [
@@ -41,7 +40,7 @@
                 "icon_url": "https://i.imgur.com/3hVj8nM.png"
             },
             "thumbnail": {
-                "url": "https://cdn.modrinth.com/data/pJmCFF0p/e89faefc522d601db2a5fd70136f37ef7ce18569.png"
+                "url": "https://cdn.modrinth.com/data/fEWKxVzh/5d5fcff12c939097701a1c57d8c437845fc3c0f9.png"
             }
         }
     ],

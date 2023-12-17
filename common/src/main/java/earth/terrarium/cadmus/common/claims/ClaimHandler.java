@@ -91,7 +91,7 @@ public class ClaimHandler extends SaveHandler {
     public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {
         var data = read(level);
         // Remove any claims that are already claimed by another team
-        claimData.keySet().removeAll(data.claims.keySet());
+        claimData.keySet().removeIf(pos -> data.claims.containsKey(pos) && !data.claims.get(pos).getFirst().equals(id));
 
         data.listenHandler.addClaims(level, id, claimData.keySet());
 

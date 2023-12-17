@@ -9,6 +9,7 @@ public class ClaimException extends Exception {
     public static final ClaimException ALREADY_CLAIMED_CHUNK = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.already_claimed_chunk"));
     public static final ClaimException MAXED_OUT_CLAIMS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.maxed_out_claims"));
     public static final ClaimException CHUNK_NOT_CLAIMED = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.chunk_not_claimed"));
+    public static final ClaimException CANT_UNLCLAIM_ADMIN = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.cant_unclaim_admin"));
     public static final ClaimException DONT_OWN_CHUNK = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.dont_own_chunk"));
     public static final ClaimException CLAIM_HAS_NO_FLAGS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.claim_has_no_flags"));
     public static final ClaimException CLAIM_ALREADY_EXISTS = new ClaimException(CommonUtils.serverTranslatable("command.cadmus.exception.claim_already_exists"));

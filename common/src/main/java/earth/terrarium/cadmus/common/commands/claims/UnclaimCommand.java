@@ -46,6 +46,7 @@ public class UnclaimCommand {
         if (claimData == null) throw ClaimException.CHUNK_NOT_CLAIMED;
         boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
         if (!isMember) throw ClaimException.DONT_OWN_CHUNK;
+        if (ModUtils.isAdmin(claimData.getFirst())) throw ClaimException.CANT_UNLCLAIM_ADMIN;
         ModUtils.tryClaim(player.serverLevel(), player, Map.of(), Map.of(pos, ClaimType.CLAIMED));
         player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
