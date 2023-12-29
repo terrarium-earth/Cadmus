@@ -25,6 +25,12 @@ public class PrometheusIntegration {
         api.addAutoComplete(CadmusAutoCompletes.BLOCK_INTERACTIONS);
         api.addAutoComplete(CadmusAutoCompletes.ENTITY_INTERACTIONS);
         api.addAutoComplete(CadmusAutoCompletes.ENTITY_DAMAGE);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_BLOCK_BREAKING);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_BLOCK_PLACING);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_BLOCK_EXPLOSIONS);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_BLOCK_INTERACTIONS);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_ENTITY_INTERACTIONS);
+        api.addAutoComplete(CadmusAutoCompletes.PERSONAL_ENTITY_DAMAGE);
 
         OptionDisplayApi.API.register(CadmusOptions.SERIALIZER.id(), CadmusOptionsDisplay::create);
     }
