@@ -52,7 +52,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
@@ -88,7 +88,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
@@ -124,7 +124,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
@@ -160,7 +160,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
@@ -196,7 +196,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
@@ -232,7 +232,7 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)) {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)) {
                             throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
                         }
 
