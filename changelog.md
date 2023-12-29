@@ -1,2 +1,1 @@
-- Fix being able to unclaim admin chunks with `/unclaim` command
-- Fix chunkloading not being applied when you chunk load your already claimed chunk without first unclaiming it.
+- Fixed /claim settings tied to same Prometheus permissions as bypassing claims. #26
