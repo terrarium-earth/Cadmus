@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin {
     @Inject(method = "place", at = @At("HEAD"), cancellable = true)
-    private void place(BlockPlaceContext blockPlaceContext, CallbackInfoReturnable<InteractionResult> cir) {
-        if (!ClaimApi.API.canPlaceBlock(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), blockPlaceContext.getPlayer())) {
+    private void cadmus$place(BlockPlaceContext blockPlaceContext, CallbackInfoReturnable<InteractionResult> cir) {
+        if (!ClaimApi.API.canPlaceBlock(blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), blockPlaceContext.getPlayer())) { // TODO fix nullable player
             cir.setReturnValue(InteractionResult.FAIL);
         }
     }

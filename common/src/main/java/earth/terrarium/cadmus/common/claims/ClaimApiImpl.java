@@ -26,6 +26,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -57,7 +58,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canBreakBlock(Level level, BlockPos pos, Player player) {
+    public boolean canBreakBlock(Level level, BlockPos pos, @NotNull Player player) {
         return canBreakBlock(level, pos, player.getUUID());
     }
 
@@ -70,7 +71,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canPlaceBlock(Level level, BlockPos pos, Player player) {
+    public boolean canPlaceBlock(Level level, BlockPos pos, @NotNull Player player) {
         return canPlaceBlock(level, pos, player.getUUID());
     }
 
@@ -93,7 +94,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, Player player) {
+    public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, @NotNull Player player) {
         return canExplodeBlock(level, pos, explosion, player.getUUID());
     }
 
@@ -123,7 +124,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, Player player) {
+    public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, @NotNull Player player) {
         return canInteractWithBlock(level, pos, type, player.getUUID());
     }
 
@@ -139,7 +140,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canInteractWithEntity(Level level, Entity entity, Player player) {
+    public boolean canInteractWithEntity(Level level, Entity entity, @NotNull Player player) {
         return canInteractWithEntity(level, entity, player.getUUID());
     }
 
@@ -169,17 +170,17 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canDamageEntity(Level level, Entity entity, Player player) {
+    public boolean canDamageEntity(Level level, Entity entity, @NotNull Player player) {
         return canDamageEntity(level, entity, player.getUUID());
     }
 
     @Override
-    public boolean canEntityGrief(Level level, Entity entity) {
+    public boolean canEntityGrief(Level level, @NotNull Entity entity) {
         return canEntityGrief(level, entity.blockPosition(), entity);
     }
 
     @Override
-    public boolean canEntityGrief(Level level, BlockPos pos, Entity entity) {
+    public boolean canEntityGrief(Level level, BlockPos pos, @NotNull Entity entity) {
         if (!level.isClientSide()) {
             var claim = ClaimHandler.getClaim((ServerLevel) level, new ChunkPos(pos));
             if (claim == null) return true;
@@ -191,7 +192,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, Entity picker) {
+    public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, @NotNull Entity picker) {
         if (!level.isClientSide()) {
             if (!AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ITEM_PICKUP)) {
                 return false;
