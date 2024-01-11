@@ -8,8 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Data that should only have one save instance, the overworld save data.
@@ -18,6 +17,7 @@ public class CadmusDataHandler extends SaveHandler {
 
     private final Map<String, IntIntPair> maxClaimsById = new HashMap<>();
     private final Map<String, ClaimSettings> settings = new HashMap<>();
+    private final Set<UUID> bypassPlayers = new HashSet<>();
     private ClaimSettings defaultSettings = ClaimSettings.ofFalse();
 
     @Override
@@ -33,6 +33,8 @@ public class CadmusDataHandler extends SaveHandler {
         CompoundTag settings = tag.getCompound("settings");
         settings.getAllKeys().forEach(id -> this.settings.put(id, ClaimSettings.read(settings.getCompound(id))));
 
+        CompoundTag bypassTag = tag.getCompound("bypass");
+        bypassTag.getAllKeys().forEach(uuid -> bypassPlayers.add(UUID.fromString(uuid)));
 
         String teamProvider = tag.getString("team_provider");
         if (!teamProvider.isEmpty()) {
@@ -64,6 +66,10 @@ public class CadmusDataHandler extends SaveHandler {
         this.settings.forEach((id, claimSettings) -> settings.put(id, claimSettings.write(new CompoundTag())));
         tag.put("settings", settings);
 
+        CompoundTag bypassTag = new CompoundTag();
+        bypassPlayers.forEach(uuid -> bypassTag.put(uuid.toString(), new CompoundTag()));
+        tag.put("bypass", bypassTag);
+
         ResourceLocation selectedId = TeamProviderApi.API.getSelectedId();
         if (selectedId != null) {
             tag.putString("team_provider", selectedId.toString());
@@ -75,6 +81,19 @@ public class CadmusDataHandler extends SaveHandler {
         }
 
         tag.put("defaultSettings", defaultSettings.write(new CompoundTag()));
+    }
+
+    public static boolean canBypass(MinecraftServer server, UUID player) {
+        return read(server).bypassPlayers.contains(player);
+    }
+
+    public static void toggleBypass(MinecraftServer server, UUID player) {
+        var data = read(server);
+        if (data.bypassPlayers.contains(player)) {
+            data.bypassPlayers.remove(player);
+        } else {
+            data.bypassPlayers.add(player);
+        }
     }
 
     public static CadmusDataHandler read(MinecraftServer server) {

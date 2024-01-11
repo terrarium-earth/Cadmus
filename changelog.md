@@ -1,1 +1,3 @@
 - Add claiming and unclaiming to claim API 
+- Prevent Armor Stand interaction in claimed chunks (#35)
+- Add bypass command (/cadmus admin bypass) for admins to bypass claim protections

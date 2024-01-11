@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.commands.claims.ClaimException;
@@ -32,6 +33,12 @@ public class AdminCommands {
         dispatcher.register(Commands.literal("cadmus")
             .requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
             .then(Commands.literal("admin")
+                .then(Commands.literal("bypass")
+                    .executes(context -> {
+                        ServerPlayer player = context.getSource().getPlayerOrException();
+                        CommandHelper.runAction(() -> bypass(player));
+                        return 1;
+                    }))
                 .then(Commands.literal("clear")
                     .then(Commands.argument("id", StringArgumentType.string())
                         .suggests(TEAM_SUGGESTION_PROVIDER)
@@ -95,6 +102,15 @@ public class AdminCommands {
                         return 1;
                     }))
             ));
+    }
+
+    public static void bypass(ServerPlayer player) {
+        CadmusDataHandler.toggleBypass(player.server, player.getUUID());
+        if (CadmusDataHandler.canBypass(player.server, player.getUUID())) {
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.bypass.enable", player.getGameProfile().getName()), false);
+        } else {
+            player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.bypass.disable", player.getGameProfile().getName()), false);
+        }
     }
 
     public static void clear(ServerPlayer player, String id) {
