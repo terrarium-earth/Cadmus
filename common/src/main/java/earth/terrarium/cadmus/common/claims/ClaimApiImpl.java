@@ -248,6 +248,8 @@ public class ClaimApiImpl implements ClaimApi {
         if (!(level instanceof ServerLevel serverLevel)) return true;
         MinecraftServer server = serverLevel.getServer();
 
+        if (CadmusDataHandler.canBypass(server, player)) return true;
+
         ChunkPos chunkPos = new ChunkPos(pos);
         var claim = ClaimHandler.getClaim(serverLevel, chunkPos);
         if (claim == null) return true;
