@@ -4,18 +4,16 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
+import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-
-import java.util.Map;
 
 public class ClaimCommand {
 
@@ -43,10 +41,10 @@ public class ClaimCommand {
             boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_ALREADY_CLAIMED;
         }
-        var claim = Map.of(pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
-        if (!ModUtils.tryClaim(player.serverLevel(), player, claim, Map.of())) {
+        if (!ClaimApi.API.canClaim(player.serverLevel(), pos, chunkloaded, player)) {
             throw ClaimException.MAXED_OUT_CLAIMS;
         }
+        ClaimApi.API.claim(player.serverLevel(), pos, chunkloaded, player);
         if (chunkloaded) {
             player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {

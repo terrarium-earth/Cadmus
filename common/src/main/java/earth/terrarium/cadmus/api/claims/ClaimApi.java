@@ -1,7 +1,10 @@
 package earth.terrarium.cadmus.api.claims;
 
 import earth.terrarium.cadmus.api.ApiHelper;
+import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -14,6 +17,74 @@ import java.util.UUID;
 
 public interface ClaimApi {
     ClaimApi API = ApiHelper.load(ClaimApi.class);
+
+    /**
+     * Checks if the player can claim the chunk.
+     *
+     * @param level     The level to check.
+     * @param pos       The chunk position to check.
+     * @param id        The id of the claimer.
+     * @param chunkLoad If the chunk should be chunk loaded.
+     * @param player    The player to check.
+     * @return True if the player has enough claims to claim the chunk, false otherwise.
+     */
+    boolean canClaim(ServerLevel level, ChunkPos pos, String id, boolean chunkLoad, UUID player);
+
+    /**
+     * Checks if the player can claim the chunk.
+     *
+     * @param level     The level to check.
+     * @param pos       The chunk position to check.
+     * @param chunkLoad If the chunk should be chunk loaded.
+     * @param player    The player to check.
+     * @return True if the player has enough claims to claim the chunk, false otherwise.
+     */
+    default boolean canClaim(ServerLevel level, ChunkPos pos, boolean chunkLoad, @NotNull ServerPlayer player) {
+        return this.canClaim(level, pos, TeamHelper.getTeamId(player.server, player.getUUID()), chunkLoad, player.getUUID());
+    }
+
+    /**
+     * Claims the chunk.
+     *
+     * @param level     The level to claim.
+     * @param pos       The chunk position to claim.
+     * @param id        The id of the claimer.
+     * @param chunkLoad If the chunk should be chunk loaded.
+     */
+    void claim(ServerLevel level, ChunkPos pos, String id, boolean chunkLoad);
+
+    /**
+     * Claims the chunk.
+     *
+     * @param level     The level to claim.
+     * @param pos       The chunk position to claim.
+     * @param chunkLoad If the chunk should be chunk loaded.
+     * @param player    The player to claim the chunk.
+     */
+    default void claim(ServerLevel level, ChunkPos pos, boolean chunkLoad, @NotNull ServerPlayer player) {
+        this.claim(level, pos, TeamHelper.getTeamId(player.server, player.getUUID()), chunkLoad);
+    }
+
+    /**
+     * Unclaims the chunk.
+     *
+     * @param level The level to unclaim.
+     * @param pos   The chunk position to unclaim.
+     * @param id    The id of the claimer.
+     */
+    void unclaim(ServerLevel level, ChunkPos pos, String id);
+
+    /**
+     * Unclaims the chunk.
+     *
+     * @param level  The level to unclaim.
+     * @param pos    The chunk position to unclaim.
+     * @param player The player to unclaim the chunk.
+     */
+    default void unclaim(ServerLevel level, ChunkPos pos, @NotNull ServerPlayer player) {
+        this.unclaim(level, pos, TeamHelper.getTeamId(player.server, player.getUUID()));
+    }
+
 
     /**
      * Checks if the chunk is claimed.
@@ -96,8 +167,8 @@ public interface ClaimApi {
     /**
      * Checks if the block can be exploded by the player.
      *
-     * @param level The level to check.
-     * @param pos   The block position to check.
+     * @param level  The level to check.
+     * @param pos    The block position to check.
      * @param player The player to check.
      * @return True if the block can be exploded by the player, false otherwise.
      */
@@ -106,8 +177,8 @@ public interface ClaimApi {
     /**
      * Checks if the block can be exploded by the player.
      *
-     * @param level The level to check.
-     * @param pos   The block position to check.
+     * @param level  The level to check.
+     * @param pos    The block position to check.
      * @param player The player to check.
      * @return True if the block can be exploded by the player, false otherwise.
      */
@@ -116,9 +187,9 @@ public interface ClaimApi {
     /**
      * Checks if a player can interact with the block.
      *
-     * @param level The level to check.
-     * @param pos   The block position to check.
-     * @param type  The interaction type to check.
+     * @param level  The level to check.
+     * @param pos    The block position to check.
+     * @param type   The interaction type to check.
      * @param player The player to check.
      * @return True if the player can interact with the block, false otherwise.
      */
@@ -127,9 +198,9 @@ public interface ClaimApi {
     /**
      * Checks if a player can interact with the block.
      *
-     * @param level The level to check.
-     * @param pos   The block position to check.
-     * @param type  The interaction type to check.
+     * @param level  The level to check.
+     * @param pos    The block position to check.
+     * @param type   The interaction type to check.
      * @param player The player to check.
      * @return True if the player can interact with the block, false otherwise.
      */
@@ -197,9 +268,9 @@ public interface ClaimApi {
     /**
      * Checks if the entity can pickup the item.
      *
-     * @param level The level to check.
-     * @param pos   The block position to check.
-     * @param item  The item to check.
+     * @param level  The level to check.
+     * @param pos    The block position to check.
+     * @param item   The item to check.
      * @param picker The entity to check.
      * @return True if the entity can pickup the item, false otherwise.
      */

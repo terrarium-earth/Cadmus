@@ -18,6 +18,7 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -61,6 +62,7 @@ public class ClaimScreen extends BaseCursorScreen {
     private ClaimTool tool = ClaimTool.NONE;
     private int claimedCount;
     private int chunkLoadedCount;
+    private Button clearButton;
 
     public ClaimScreen(Map<ChunkPos, Pair<String, ClaimType>> claims, @Nullable String id, ChatFormatting color, Component displayName, Map<String, Component> teamDisplayNames, int claimedCount, int chunkLoadedCount, int maxClaims, int maxChunkLoaded, int viewDistance) {
         super(Component.empty());
@@ -142,12 +144,12 @@ public class ClaimScreen extends BaseCursorScreen {
         Map<ChunkPos, ClaimType> addedChunks = teamClaims.entrySet()
             .stream()
             .filter(entry -> !startClaims.containsKey(entry.getKey()) || startClaims.get(entry.getKey()).getSecond() != entry.getValue())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Map<ChunkPos, ClaimType> removedChunks = startClaims.entrySet()
             .stream()
             .filter(entry -> !teamClaims.containsKey(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getSecond()));
+            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().getSecond()));
 
         // don't send if nothing has changed
         if (addedChunks.isEmpty() && removedChunks.isEmpty()) return;
@@ -166,7 +168,7 @@ public class ClaimScreen extends BaseCursorScreen {
         int x = (this.width - 216) / 2;
         int y = (this.height - 237) / 2;
 
-        this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11, 216, 0, 11,
+        this.clearButton = this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11, 216, 0, 11,
             CONTAINER_BACKGROUND,
             button -> {
                 if (Screen.hasShiftDown()) {
@@ -176,7 +178,7 @@ public class ClaimScreen extends BaseCursorScreen {
                 }
                 CadmusClient.openClaimMap();
             }
-        )).setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
+        ));
 
         this.addRenderableWidget(new ImageButton(x + 216 - 11 - 7, y + 6, 11, 11, 227, 0, 11,
             CONTAINER_BACKGROUND,
@@ -201,6 +203,10 @@ public class ClaimScreen extends BaseCursorScreen {
                 this.renderPlayerAvatar(player, graphics);
             }
         }
+
+        this.clearButton.setTooltip(Tooltip.create(hasShiftDown() ?
+            ConstantComponents.CLEAR_ALL_CLAIMED_CHUNKS :
+            ConstantComponents.CLEAR_CLAIMED_CHUNKS));
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 

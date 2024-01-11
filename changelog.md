@@ -1,1 +1,1 @@
-- Fixed /claim settings tied to same Prometheus permissions as bypassing claims. #26
+- Add claiming and unclaiming to claim API 

@@ -1,10 +1,7 @@
 package earth.terrarium.cadmus.common.util;
 
-import com.teamresourceful.resourcefullib.common.lib.Constants;
-import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
-import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
@@ -16,9 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.ChunkPos;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public class ModUtils {
     public static void displayTeamName(ServerPlayer player, ChunkPos pos) {
@@ -53,61 +48,6 @@ public class ModUtils {
             ChatFormatting color = isMember ? teamColor : ChatFormatting.DARK_RED;
             player.displayClientMessage(displayName.copy().withStyle(color), true);
         }
-    }
-
-    public static boolean tryClaim(ServerLevel level, ServerPlayer player, Map<ChunkPos, ClaimType> addedChunks, Map<ChunkPos, ClaimType> removedChunks) {
-        String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-        // Check if the player is claiming more chunks than allowed
-        var teamClaims = ClaimHandler.getTeamClaims(level, id);
-        int maxClaims = MaxClaimProviderApi.API.getSelected().getMaxClaims(id, player.getServer(), player);
-        if (!addedChunks.isEmpty() && (teamClaims == null ? 0 : teamClaims.values().size()) + addedChunks.size() - removedChunks.size() > maxClaims) {
-            Constants.LOGGER.warn("Player {} tried to claim more chunks than allowed! ({} > {})", player.getName().getString(), teamClaims == null ? 0 : teamClaims.values().size() + addedChunks.size() - removedChunks.size(), maxClaims);
-            return false;
-        }
-
-        // Check if the player is claiming more chunk loaded chunks than allowed
-        int maxChunkLoaded = MaxClaimProviderApi.API.getSelected().getMaxChunkLoaded(id, player.getServer(), player);
-        int currentChunkLoaded = 0;
-        int addedChunkLoaded = addedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
-        int removedChunkLoaded = removedChunks.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
-        if (teamClaims != null) {
-            currentChunkLoaded = teamClaims.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
-        }
-        if (currentChunkLoaded + addedChunkLoaded - removedChunkLoaded > maxChunkLoaded) {
-            Constants.LOGGER.warn("Player {} tried to claim more chunk loaded chunks than allowed! ({} > {})", player.getName().getString(), currentChunkLoaded + addedChunkLoaded - removedChunkLoaded, maxChunkLoaded);
-            return false;
-        }
-
-        claim(id, level, addedChunks);
-        unclaim(id, level, removedChunks.keySet());
-        return true;
-    }
-
-    public static void claim(String id, ServerLevel level, ChunkPos pos, ClaimType type) {
-        claim(id, level, Map.of(pos, type));
-    }
-
-    public static void claim(String id, ServerLevel level, Map<ChunkPos, ClaimType> chunks) {
-        ClaimHandler.updateChunkLoaded(level, id, false);
-
-        ClaimHandler.addClaims(level, id, chunks);
-
-        ClaimHandler.updateChunkLoaded(level, id, true);
-        level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
-    }
-
-    public static void unclaim(String id, ServerLevel level, ChunkPos chunk) {
-        unclaim(id, level, Set.of(chunk));
-    }
-
-    public static void unclaim(String id, ServerLevel level, Set<ChunkPos> chunks) {
-        ClaimHandler.updateChunkLoaded(level, id, false);
-
-        ClaimHandler.removeClaims(level, id, chunks);
-
-        ClaimHandler.updateChunkLoaded(level, id, true);
-        level.players().forEach(player -> displayTeamName(player, player.chunkPosition()));
     }
 
     public static GameProfileCache getProfileCache(MinecraftServer server) {

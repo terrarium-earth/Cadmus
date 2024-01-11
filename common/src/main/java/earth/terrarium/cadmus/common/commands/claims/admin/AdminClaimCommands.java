@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
+import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.admin.flags.ComponentFlag;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -14,7 +15,6 @@ import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.claims.ClaimException;
 import earth.terrarium.cadmus.common.commands.claims.CommandHelper;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -121,7 +121,7 @@ public class AdminClaimCommands {
             boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
             throw isMember ? ClaimException.ALREADY_CLAIMED_CHUNK : ClaimException.CHUNK_ALREADY_CLAIMED;
         }
-        ModUtils.claim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), pos, chunkloaded ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
+        ClaimApi.API.claim(player.serverLevel(), pos, ClaimHandler.ADMIN_PREFIX + id, chunkloaded);
         if (chunkloaded) {
             player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.claiming.chunk_loaded_chunk_at", pos.x, pos.z), false);
         } else {
@@ -132,7 +132,7 @@ public class AdminClaimCommands {
     public static void unclaim(ServerPlayer player, String id, ChunkPos pos) throws ClaimException {
         Pair<String, ClaimType> claimData = ClaimHandler.getClaim(player.serverLevel(), pos);
         if (claimData == null) throw ClaimException.CHUNK_NOT_CLAIMED;
-        ModUtils.unclaim(ClaimHandler.ADMIN_PREFIX + id, player.serverLevel(), pos);
+        ClaimApi.API.unclaim(player.serverLevel(), pos, ClaimHandler.ADMIN_PREFIX + id);
         player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 }

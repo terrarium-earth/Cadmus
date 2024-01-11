@@ -8,8 +8,8 @@ import com.teamresourceful.resourcefullib.common.networking.base.Packet;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
 import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimType;
-import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,8 +45,14 @@ public record ServerboundUpdateClaimedChunksPacket(Map<ChunkPos, ClaimType> adde
         @Override
         public PacketContext handle(ServerboundUpdateClaimedChunksPacket message) {
             return (player, level) -> {
-                if (message.addedChunks().isEmpty() && message.removedChunks().isEmpty()) return;
-                ModUtils.tryClaim((ServerLevel) level, (ServerPlayer) player, message.addedChunks(), message.removedChunks());
+                message.addedChunks.forEach((pos, type) -> {
+                    if (ClaimApi.API.canClaim((ServerLevel) level, pos, type == ClaimType.CHUNK_LOADED, (ServerPlayer) player)) {
+                        ClaimApi.API.claim((ServerLevel) level, pos, type == ClaimType.CHUNK_LOADED, (ServerPlayer) player);
+                    }
+                });
+
+                message.removedChunks.forEach((pos, type) ->
+                    ClaimApi.API.unclaim((ServerLevel) level, pos, (ServerPlayer) player));
             };
         }
     }

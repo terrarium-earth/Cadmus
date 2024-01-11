@@ -5,6 +5,7 @@
   "gui.cadmus.claim_map.loading": "Loading...",
   "gui.cadmus.claim_map.close": "Close",
   "tooltip.cadmus.claim_map.clear_claimed_chunks": "Clear Claimed Chunks",
+  "tooltip.cadmus.claim_map.clear_all_claimed_chunks": "Clear All Claimed Chunks",
   "tooltip.cadmus.claim_map.chunk_loaded": "Chunk Loaded",
   "tooltip.cadmus.claim_map.admin_claim": "Admin Claim",
   "message.cadmus.wilderness": "§2Wilderness",

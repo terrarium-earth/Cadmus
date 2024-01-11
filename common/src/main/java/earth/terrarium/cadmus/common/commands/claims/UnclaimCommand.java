@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.commands.claims;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
+import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
@@ -14,8 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-
-import java.util.Map;
 
 public class UnclaimCommand {
 
@@ -47,7 +46,7 @@ public class UnclaimCommand {
         boolean isMember = TeamHelper.isMember(claimData.getFirst(), player.server, player.getUUID());
         if (!isMember) throw ClaimException.DONT_OWN_CHUNK;
         if (ModUtils.isAdmin(claimData.getFirst())) throw ClaimException.CANT_UNLCLAIM_ADMIN;
-        ModUtils.tryClaim(player.serverLevel(), player, Map.of(), Map.of(pos, ClaimType.CLAIMED));
+        ClaimApi.API.unclaim(player.serverLevel(), pos, player);
         player.displayClientMessage(CommonUtils.serverTranslatable("text.cadmus.unclaiming.unclaimed_chunk_at", pos.x, pos.z), false);
     }
 
