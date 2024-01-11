@@ -50,6 +50,7 @@ public class CadmusForge {
         bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockPlace);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockBreak);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onBlockInteract);
+        bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityInteractSpecific);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onEntityInteract);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onAttackBlock);
         bus.addListener(EventPriority.LOWEST, CadmusForge::onAttackEntity);
@@ -97,6 +98,12 @@ public class CadmusForge {
 
     private static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
         if (!ClaimApi.API.canInteractWithBlock(event.getEntity().level(), event.getPos(), InteractionType.USE, event.getEntity())) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (!ClaimApi.API.canInteractWithEntity(event.getEntity().level(), event.getTarget(), event.getEntity())) {
             event.setCanceled(true);
         }
     }
