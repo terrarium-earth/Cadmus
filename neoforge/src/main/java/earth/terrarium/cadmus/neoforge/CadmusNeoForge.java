@@ -4,12 +4,15 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
+import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
+import earth.terrarium.cadmus.common.claims.ClaimSettings;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.commands.ModCommands;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.neoforged.bus.api.Event;
@@ -87,12 +90,20 @@ public class CadmusNeoForge {
     }
 
     private static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getEntity() instanceof Player player) {
+        if (event.getEntity() instanceof ServerPlayer player) {
             if (!ClaimApi.API.canPlaceBlock(player.level(), event.getPos(), player)) {
                 event.setCanceled(true);
             }
-        } else if (event.getEntity() != null && !ClaimApi.API.canEntityGrief(event.getEntity().level(), event.getPos(), event.getEntity())) {
-            event.setCanceled(true);
+        } else if (event.getLevel() instanceof ServerLevel level) {
+            if (ClaimApi.API.isClaimed(level, event.getPos())) {
+                var claim = ClaimHandler.getClaim(level, new ChunkPos(event.getPos()));
+                if (claim == null) return;
+                ClaimSettings settings = CadmusDataHandler.getClaimSettings(level.getServer(), claim.getFirst());
+                ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(level.getServer());
+                if (!settings.canNonPlayersPlace(defaultSettings)) {
+                    event.setCanceled(true);
+                }
+            }
         }
     }
 
