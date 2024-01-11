@@ -42,6 +42,7 @@ public class ClaimSettingsCommand {
                 .then(canInteractWithBlocks())
                 .then(canInteractWithEntities())
                 .then(canDamageEntities())
+                .then(canNonPlayersPlace())
             ));
     }
 
@@ -261,6 +262,42 @@ public class ClaimSettingsCommand {
             });
     }
 
+    private static ArgumentBuilder<CommandSourceStack, LiteralArgumentBuilder<CommandSourceStack>> canNonPlayersPlace() {
+        return Commands.literal("canNonPlayersPlace")
+            .then(Commands.argument("value", StringArgumentType.string())
+                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    CommandHelper.runAction(() -> {
+                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
+                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
+                        }
+
+                        String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
+
+                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(TeamHelper.teamId(id), player)) {
+                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
+                        }
+
+                        TriState canNonPlayersPlace = getInputState(StringArgumentType.getString(context, "value"));
+                        CadmusDataHandler.getClaimSettings(player.server, id).setCanNonPlayersPlace(canNonPlayersPlace);
+                        player.displayClientMessage(setCurrentComponent("canNonPlayersPlace", canNonPlayersPlace), false);
+                    });
+                    return 1;
+                }))
+            .executes(context -> {
+                ServerPlayer player = context.getSource().getPlayerOrException();
+                CommandHelper.runAction(() -> {
+                    String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
+                    ClaimSettings settings = CadmusDataHandler.getClaimSettings(player.server, id);
+                    ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.server);
+                    boolean canNonPlayersPlace = settings.canNonPlayersPlace(defaultSettings);
+                    player.displayClientMessage(getCurrentComponent("canNonPlayersPlace", canNonPlayersPlace), false);
+                });
+                return 1;
+            });
+    }
+
     private static TriState getInputState(String input) throws CommandRuntimeException {
         return switch (input.toLowerCase(Locale.ROOT)) {
             case "true" -> TriState.TRUE;
@@ -280,6 +317,7 @@ public class ClaimSettingsCommand {
     }
 
     private static boolean checkPrometheusPermissions(ServerPlayer player, String permission, GameRules.Key<GameRules.BooleanValue> rule) {
+        if (player.hasPermissions(2)) return true;
         if (ModInfoUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(player, permission)) {
             return true;
         } else {

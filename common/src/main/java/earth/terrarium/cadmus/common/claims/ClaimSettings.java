@@ -10,6 +10,7 @@ public final class ClaimSettings {
     private TriState canInteractWithBlocks;
     private TriState canInteractWithEntities;
     private TriState canDamageEntities;
+    private TriState canNonPlayersPlace;
 
     public ClaimSettings(
         TriState canBreak,
@@ -17,7 +18,8 @@ public final class ClaimSettings {
         TriState canExplode,
         TriState canInteractWithBlocks,
         TriState canInteractWithEntities,
-        TriState canDamageEntities
+        TriState canDamageEntities,
+        TriState canNonPlayersPlace
     ) {
         this.canBreak = canBreak;
         this.canPlace = canPlace;
@@ -25,14 +27,15 @@ public final class ClaimSettings {
         this.canInteractWithBlocks = canInteractWithBlocks;
         this.canInteractWithEntities = canInteractWithEntities;
         this.canDamageEntities = canDamageEntities;
+        this.canNonPlayersPlace = canNonPlayersPlace;
     }
 
     public static ClaimSettings ofFalse() {
-        return new ClaimSettings(TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE);
+        return new ClaimSettings(TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE, TriState.FALSE);
     }
 
     public static ClaimSettings ofUndefined() {
-        return new ClaimSettings(TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED);
+        return new ClaimSettings(TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED, TriState.UNDEFINED);
     }
 
     public boolean canBreak(ClaimSettings defaultSettings) {
@@ -65,6 +68,11 @@ public final class ClaimSettings {
         return defaultSettings.canDamageEntities().isTrue();
     }
 
+    public boolean canNonPlayersPlace(ClaimSettings defaultSettings) {
+        if (canNonPlayersPlace.isDefined()) return canNonPlayersPlace.isTrue();
+        return defaultSettings.canNonPlayersPlace().isTrue();
+    }
+
     public CompoundTag write(CompoundTag tag) {
         tag.putByte("canBreak", (byte) canBreak.ordinal());
         tag.putByte("canPlace", (byte) canPlace.ordinal());
@@ -72,6 +80,7 @@ public final class ClaimSettings {
         tag.putByte("canInteractWithBlocks", (byte) canInteractWithBlocks.ordinal());
         tag.putByte("canInteractWithEntities", (byte) canInteractWithEntities.ordinal());
         tag.putByte("canDamageEntities", (byte) canDamageEntities.ordinal());
+        tag.putByte("canNonPlayersPlace", (byte) canNonPlayersPlace.ordinal());
         return tag;
     }
 
@@ -82,7 +91,8 @@ public final class ClaimSettings {
             getTriState(tag, "canExplode"),
             getTriState(tag, "canInteractWithBlocks"),
             getTriState(tag, "canInteractWithEntities"),
-            getTriState(tag, "canDamageEntities")
+            getTriState(tag, "canDamageEntities"),
+            getTriState(tag, "canNonPlayersPlace")
         );
     }
 
@@ -137,5 +147,13 @@ public final class ClaimSettings {
 
     public void setCanDamageEntities(TriState canDamageEntities) {
         this.canDamageEntities = canDamageEntities;
+    }
+
+    public TriState canNonPlayersPlace() {
+        return canNonPlayersPlace;
+    }
+
+    public void setCanNonPlayersPlace(TriState canNonPlayersPlace) {
+        this.canNonPlayersPlace = canNonPlayersPlace;
     }
 }

@@ -19,13 +19,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class EntityMixin {
     @Inject(method = "mayInteract", at = @At("HEAD"), cancellable = true)
     private void cadmus$mayInteract(Level level, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        var entity = (Object) (this);
+        var entity = (Entity) (Object) (this);
         if (entity instanceof Player player) {
             if (!ClaimApi.API.canInteractWithBlock(level, pos, InteractionType.WORLD, player)) {
                 cir.setReturnValue(false);
             }
         } else {
-            if (!ClaimApi.API.canEntityGrief(level, pos, (Entity) (Object) this)) {
+            if (!ClaimApi.API.canEntityGrief(level, pos, entity)) {
                 cir.setReturnValue(false);
             }
         }

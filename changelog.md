@@ -1,3 +1,6 @@
-- Add claiming and unclaiming to claim API 
+- Added claiming and unclaiming to claim API 
 - Prevent Armor Stand interaction in claimed chunks (#35)
-- Add bypass command (/cadmus admin bypass) for admins to bypass claim protections
+- Added bypass command (/cadmus admin bypass) for admins to bypass claim protections
+- Claim settings can now be modified by operators without having the required permissions
+- Fixed fabric crash where placing blocks without a player, such as with shulker boxes in a dispenser or modded block placers would crash the game.
+- Added a claim setting "canNonPlayersPlace" for allowing non-players like modded block placers to place blocks in a claim
