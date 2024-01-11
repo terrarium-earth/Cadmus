@@ -1,7 +1,11 @@
 package earth.terrarium.cadmus.mixins.fabric.common.chunkprotection;
 
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -9,6 +13,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ArmorStand.class)
 public abstract class ArmorStandMixin {
+    // Prevent armor stands from being interacted with in protected chunks
+    @Inject(method = "interactAt", at = @At("HEAD"), cancellable = true)
+    private void cadmus$interactAt(Player player, Vec3 vec, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        ArmorStand armorStand = (ArmorStand) (Object) this;
+        if (!ClaimApi.API.canInteractWithEntity(armorStand.level(), armorStand, player)) {
+            cir.setReturnValue(InteractionResult.PASS);
+        }
+    }
+
     // Prevent armor stands from being affected by explosions in protected chunks
     @Inject(method = "ignoreExplosion", at = @At("HEAD"), cancellable = true)
     private void cadmus$ignoreExplosion(CallbackInfoReturnable<Boolean> cir) {
