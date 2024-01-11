@@ -18,7 +18,6 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -30,7 +29,7 @@ public class Cadmus {
     public static final String MOD_ID = "cadmus";
     public static final ResourceLocation DEFAULT_ID = new ResourceLocation(MOD_ID, "default");
 
-    public static int FORCE_LOADED_CHUNK_COUNT = 0;
+    public static int FORCE_LOADED_CHUNK_COUNT;
     public static final TagKey<Block> ALLOWS_CLAIM_INTERACTIONS = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "allows_claim_interactions"));
     public static final TagKey<EntityType<?>> ALLOWS_CLAIM_INTERACTIONS_ENTITIES = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(MOD_ID, "allows_claim_interactions"));
 
@@ -62,23 +61,16 @@ public class Cadmus {
 
     public static void serverStarted(MinecraftServer server) {
         // Set chunk loaded chunks
+        Cadmus.FORCE_LOADED_CHUNK_COUNT = 0;
         server.getAllLevels().forEach(level ->
             ClaimHandler.getAllTeamClaims(level).forEach((id, data) ->
                 data.forEach((pos, type) -> {
                     if (type == ClaimType.CHUNK_LOADED) {
-                        updateChunkForced(level, pos, true);
+                        Cadmus.FORCE_LOADED_CHUNK_COUNT++;
+                        level.getChunkSource().updateChunkForced(pos, true);
                     }
                 })));
         // Initialize the data handler
         CadmusDataHandler.read(server);
-    }
-
-    public static void updateChunkForced(ServerLevel level, ChunkPos chunkPos, boolean add) {
-        if (add) {
-            Cadmus.FORCE_LOADED_CHUNK_COUNT++;
-        } else {
-            Cadmus.FORCE_LOADED_CHUNK_COUNT--;
-        }
-        level.getChunkSource().updateChunkForced(chunkPos, add);
     }
 }

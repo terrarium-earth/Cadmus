@@ -5,6 +5,7 @@ import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
@@ -28,10 +29,37 @@ import net.minecraft.world.level.block.*;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 public class ClaimApiImpl implements ClaimApi {
+    @Override
+    public boolean canClaim(ServerLevel level, ChunkPos pos, String id, boolean chunkLoad, UUID player) {
+        Map<ChunkPos, ClaimType> currentClaims = ClaimHandler.getTeamClaims(level, id);
+        if (currentClaims == null) return true;
+        int maxClaims = MaxClaimProviderApi.API.getSelected().getMaxClaims(id, level, player);
+        if (currentClaims.size() >= maxClaims) return false;
+        if (chunkLoad) {
+            int currentChunkLoaded = currentClaims.values().stream().filter(claim -> claim == ClaimType.CHUNK_LOADED).toArray().length;
+            int maxChunkLoaded = MaxClaimProviderApi.API.getSelected().getMaxChunkLoaded(id, level, player);
+            return currentChunkLoaded < maxChunkLoaded;
+        }
+        return true;
+    }
+
+    @Override
+    public void claim(ServerLevel level, ChunkPos pos, String id, boolean chunkLoad) {
+        ClaimHandler.claim(level, id, pos, chunkLoad ? ClaimType.CHUNK_LOADED : ClaimType.CLAIMED);
+        level.players().forEach(player -> ModUtils.displayTeamName(player, player.chunkPosition()));
+    }
+
+    @Override
+    public void unclaim(ServerLevel level, ChunkPos pos, String id) {
+        ClaimHandler.unclaim(level, id, pos);
+        level.players().forEach(player -> ModUtils.displayTeamName(player, player.chunkPosition()));
+    }
+
     @Override
     public boolean isClaimed(Level level, ChunkPos pos) {
         if (!level.isClientSide()) {

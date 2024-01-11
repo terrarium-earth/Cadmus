@@ -88,26 +88,34 @@ public class ClaimHandler extends SaveHandler {
         return read(level.getDataStorage(), HandlerType.create(() -> new ClaimHandler(level.dimension())), "cadmus_claims");
     }
 
-    public static void addClaims(ServerLevel level, String id, Map<ChunkPos, ClaimType> claimData) {
+    public static void claim(ServerLevel level, String id, ChunkPos pos, ClaimType type) {
         var data = read(level);
-        // Remove any claims that are already claimed by another team
-        claimData.keySet().removeIf(pos -> data.claims.containsKey(pos) && !data.claims.get(pos).getFirst().equals(id));
+        if (data.claims.containsKey(pos) && !data.claims.get(pos).getFirst().equals(id)) return;
+        if (type == ClaimType.CHUNK_LOADED) {
+            level.getChunkSource().updateChunkForced(pos, true);
+            Cadmus.FORCE_LOADED_CHUNK_COUNT++;
+        }
 
-        data.listenHandler.addClaims(level, id, claimData.keySet());
-
-        claimData.forEach((pos, type) -> data.claims.put(pos, Pair.of(id, type)));
+        data.listenHandler.addClaims(level, id, Set.of(pos));
+        data.claims.put(pos, Pair.of(id, type));
         var currentClaims = data.claimsById.getOrDefault(id, new HashMap<>());
-        currentClaims.putAll(claimData);
+        currentClaims.put(pos, type);
         data.claimsById.put(id, currentClaims);
     }
 
-    public static void removeClaims(ServerLevel level, String id, Set<ChunkPos> claimData) {
+    public static void unclaim(ServerLevel level, String id, ChunkPos pos) {
         var data = read(level);
-        data.listenHandler.removeClaims(level, id, claimData);
-        claimData.forEach(pos -> {
-            data.claims.remove(pos);
-            data.claimsById.get(id).remove(pos);
-        });
+        var claim = data.claims.get(pos);
+        if (claim == null) return;
+        if (!claim.getFirst().equals(id)) return;
+        if (claim.getSecond() == ClaimType.CHUNK_LOADED) {
+            level.getChunkSource().updateChunkForced(pos, false);
+            Cadmus.FORCE_LOADED_CHUNK_COUNT--;
+        }
+
+        data.listenHandler.removeClaims(level, id, Set.of(pos));
+        data.claims.remove(pos);
+        data.claimsById.get(id).remove(pos);
     }
 
     public static void clear(ServerLevel level, String id) {
@@ -137,16 +145,6 @@ public class ClaimHandler extends SaveHandler {
 
     public static Map<String, Map<ChunkPos, ClaimType>> getAllTeamClaims(ServerLevel level) {
         return read(level).claimsById;
-    }
-
-    public static void updateChunkLoaded(ServerLevel level, String id, boolean setLoaded) {
-        var claimData = getTeamClaims(level, id);
-        if (claimData == null) return;
-        claimData.forEach((pos, type) -> {
-            if (type == ClaimType.CHUNK_LOADED) {
-                Cadmus.updateChunkForced(level, pos, setLoaded);
-            }
-        });
     }
 
     public static ClaimListenHandler getListener(ServerLevel level) {
