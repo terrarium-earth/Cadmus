@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.neoforge;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
+import earth.terrarium.cadmus.client.neoforge.CadmusClientNeoForge;
 import earth.terrarium.cadmus.common.claims.AdminClaimHandler;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -19,6 +20,7 @@ import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.EntityEvent;
@@ -38,15 +40,16 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 @Mod(Cadmus.MOD_ID)
 public class CadmusNeoForge {
-    public CadmusNeoForge() {
+    public CadmusNeoForge(IEventBus bus) {
         Cadmus.init();
-
-        IEventBus bus = NeoForge.EVENT_BUS;
-        bus.addListener(CadmusNeoForge::onRegisterCommands);
-        bus.addListener(CadmusNeoForge::onServerStarted);
-        bus.addListener(CadmusNeoForge::onEnterSection);
-        bus.addListener(CadmusNeoForge::onRightClick);
+        NeoForge.EVENT_BUS.addListener(CadmusNeoForge::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(CadmusNeoForge::onServerStarted);
+        NeoForge.EVENT_BUS.addListener(CadmusNeoForge::onEnterSection);
+        NeoForge.EVENT_BUS.addListener(CadmusNeoForge::onRightClick);
         registerChunkProtectionEvents(bus);
+        if (FMLEnvironment.dist.isClient()) {
+            CadmusClientNeoForge.init(bus);
+        }
     }
 
     private static void registerChunkProtectionEvents(IEventBus bus) {

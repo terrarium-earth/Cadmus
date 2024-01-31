@@ -14,5 +14,5 @@ dependencies {
     val journeymapVersion: String by project
 
     modCompileOnly(group = "info.journeymap", name = "journeymap-api", version = journeymapVersion)
-    modCompileOnly(group = "tech.thatgravyboat", name = "commonats", version = "1.0")
+    modCompileOnly(group = "tech.thatgravyboat", name = "commonats", version = "2.0")
 }

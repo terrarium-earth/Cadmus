@@ -8,7 +8,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -17,14 +16,15 @@ import net.neoforged.neoforge.event.TickEvent;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CadmusClientNeoForge {
 
+    public static void init(IEventBus bus) {
+        NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onClientTick);
+        NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onRegisterClientCommands);
+        bus.addListener(CadmusClientNeoForge::onRegisterKeyBindings);
+    }
+
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(CadmusClient::init);
-        NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onClientTick);
-        NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onRegisterClientCommands);
-
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-        bus.addListener(CadmusClientNeoForge::onRegisterKeyBindings);
     }
 
     public static void onClientTick(TickEvent.ClientTickEvent event) {

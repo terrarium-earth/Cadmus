@@ -28,7 +28,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -195,11 +194,6 @@ public class ClaimScreen extends BaseCursorScreen {
     }
 
     @Override
-    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         renderBackgroundTexture(graphics);
@@ -220,14 +214,13 @@ public class ClaimScreen extends BaseCursorScreen {
         this.clearButton.setTooltip(Tooltip.create(hasShiftDown() ?
             ConstantComponents.CLEAR_ALL_CLAIMED_CHUNKS :
             ConstantComponents.CLEAR_CLAIMED_CHUNKS));
-        super.render(graphics, mouseX, mouseY, partialTick);
+        this.clearButton.setTooltipDelay(-1);
     }
 
     private void renderBackgroundTexture(GuiGraphics graphics) {
         graphics.fill((width - MAP_SIZE) / 2, (height - MAP_SIZE) / 2, (width + MAP_SIZE) / 2, (height + MAP_SIZE) / 2, 0xff000000);
         int left = (this.width - 216) / 2;
         int top = (this.height - 237) / 2 + 1;
-//        RenderSystem.enableBlend();
         graphics.blit(CONTAINER_BACKGROUND, left, top, 0, 0, 216, 237);
         graphics.drawString(font, ConstantComponents.TITLE, (int) ((this.width - font.width(ConstantComponents.TITLE)) / 2f), top + 7, 0x404040, false);
     }

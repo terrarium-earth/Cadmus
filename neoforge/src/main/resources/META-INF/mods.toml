@@ -22,21 +22,21 @@ config = "cadmus.mixins.json"
 
 [[dependencies.cadmus]]
 modId = "neoforge"
-mandatory = true
-versionRange = "[20.2,)"
+type="required"
+versionRange = "[20.4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cadmus]]
 modId = "minecraft"
-mandatory = true
-versionRange = "[1.20.2,)"
+type="required"
+versionRange = "[1.20.4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cadmus]]
 modId = "resourcefullib"
-mandatory = true
-versionRange = "[2.2.1,)"
+type="required"
+versionRange = "[2.4.6,)"
 ordering = "NONE"
 side = "BOTH"

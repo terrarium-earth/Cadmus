@@ -38,7 +38,7 @@
   ],
   "depends": {
     "fabric-api": "*",
-    "minecraft": ">=1.20.2",
-    "resourcefullib": ">=2.2.1"
+    "minecraft": ">=1.20.4",
+    "resourcefullib": ">=2.4.6"
   }
 }

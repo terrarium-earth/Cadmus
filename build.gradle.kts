@@ -38,15 +38,9 @@ subprojects {
     }
 
     repositories {
-        maven(url = "https://maven.resourcefulbees.com/repository/maven-public/")
+        mavenCentral()
+        maven(url = "https://maven.teamresourceful.com/repository/maven-public/")
         maven(url = "https://maven.neoforged.net/releases/")
-        maven {
-            url = uri("https://jitpack.io")
-            content {
-                includeGroup("com.github.LlamaLad7")
-                includeGroup("com.github.llamalad7.mixinextras")
-            }
-        }
     }
 
     dependencies {
@@ -63,27 +57,21 @@ subprojects {
 
             officialMojangMappings()
 
-            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.20.1", version = parchmentVersion))
+            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.20.3", version = parchmentVersion))
         })
 
-        compileOnly(group = "com.teamresourceful", name = "yabn", version = "1.0.3")
         "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = resourcefulLibVersion)
-        implementation("annotationProcessor"(group = "com.github.llamalad7.mixinextras", name = "mixinextras-common", version = mixinExtrasVersion))
         if (isCommon) {
-            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20", version = prometheusVersion) {
+            implementation("annotationProcessor"(group = "io.github.llamalad7", name = "mixinextras-common", version = mixinExtrasVersion))
+            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
                 isTransitive = false
             }
 
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
-            "annotationProcessor"(group = "com.github.llamalad7.mixinextras", name = "mixinextras-$modLoader", version = mixinExtrasVersion).apply {
-                implementation(this)
-                "include"(this)
-            }
-//            "modLocalRuntime"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20", version = prometheusVersion)
-
-//            "modRuntimeOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
+            "modLocalRuntime"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion)
+            "modLocalRuntime"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
         }
@@ -150,7 +138,7 @@ subprojects {
         }
         repositories {
             maven {
-                setUrl("https://maven.resourcefulbees.com/repository/terrarium/")
+                setUrl("https://maven.teamresourceful.com/repository/terrarium/")
                 credentials {
                     username = System.getenv("MAVEN_USER")
                     password = System.getenv("MAVEN_PASS")
