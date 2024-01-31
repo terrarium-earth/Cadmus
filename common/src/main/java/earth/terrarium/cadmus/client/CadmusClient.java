@@ -17,7 +17,7 @@ public class CadmusClient {
         ConstantComponents.ODYSSEY_CATEGORY.getString());
 
     public static void init() {
-        if (ModInfoUtils.isModLoaded("prometheus")) {
+        if (PrometheusIntegration.prometheusLoaded()) {
             PrometheusIntegration.registerClient();
         }
     }

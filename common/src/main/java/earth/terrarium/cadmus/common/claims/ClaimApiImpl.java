@@ -257,9 +257,9 @@ public class ClaimApiImpl implements ClaimApi {
             return false;
         }
 
-        if (ModInfoUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
+        if (PrometheusIntegration.prometheusLoaded() && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
             return true;
-        } else if (!ModInfoUtils.isModLoaded("prometheus") && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
+        } else if (!PrometheusIntegration.prometheusLoaded() && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
             return true;
         }
 

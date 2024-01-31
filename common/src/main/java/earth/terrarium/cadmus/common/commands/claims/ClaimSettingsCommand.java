@@ -4,10 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
-import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimSettings;
@@ -17,7 +18,6 @@ import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -53,16 +53,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING);
                         TriState canBreak = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanBreak(canBreak);
                         player.displayClientMessage(setCurrentComponent("canBreak", canBreak), false);
@@ -89,16 +81,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(TeamHelper.teamId(id), player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING);
                         TriState canPlace = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanPlace(canPlace);
                         player.displayClientMessage(setCurrentComponent("canPlace", canPlace), false);
@@ -125,16 +109,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS);
                         TriState canExplode = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanExplode(canExplode);
                         player.displayClientMessage(setCurrentComponent("canExplode", canExplode), false);
@@ -161,16 +137,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS);
                         TriState canInteractWithBlocks = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanInteractWithBlocks(canInteractWithBlocks);
                         player.displayClientMessage(setCurrentComponent("canInteractWithBlocks", canInteractWithBlocks), false);
@@ -197,16 +165,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS);
                         TriState canInteractWithEntities = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanInteractWithEntities(canInteractWithEntities);
                         player.displayClientMessage(setCurrentComponent("canInteractWithEntities", canInteractWithEntities), false);
@@ -233,16 +193,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES);
                         TriState canDamageEntities = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanDamageEntities(canDamageEntities);
                         player.displayClientMessage(setCurrentComponent("canDamageEntities", canDamageEntities), false);
@@ -269,16 +221,8 @@ public class ClaimSettingsCommand {
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayerOrException();
                     CommandHelper.runAction(() -> {
-                        if (!checkPrometheusPermissions(player, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
                         String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
-
-                        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(TeamHelper.teamId(id), player)) {
-                            throw ClaimException.NOT_ALLOWED_TO_MANAGE_SETTINGS;
-                        }
-
+                        checkPermissions(player, id, CadmusAutoCompletes.PERSONAL_BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING);
                         TriState canNonPlayersPlace = getInputState(StringArgumentType.getString(context, "value"));
                         CadmusDataHandler.getClaimSettings(player.server, id).setCanNonPlayersPlace(canNonPlayersPlace);
                         player.displayClientMessage(setCurrentComponent("canNonPlayersPlace", canNonPlayersPlace), false);
@@ -298,12 +242,12 @@ public class ClaimSettingsCommand {
             });
     }
 
-    private static TriState getInputState(String input) throws CommandRuntimeException {
+    private static TriState getInputState(String input) throws CommandSyntaxException {
         return switch (input.toLowerCase(Locale.ROOT)) {
             case "true" -> TriState.TRUE;
             case "false" -> TriState.FALSE;
             case "default" -> TriState.UNDEFINED;
-            default -> throw new CommandRuntimeException(ConstantComponents.INVALID_STATE);
+            default -> throw new SimpleCommandExceptionType(ConstantComponents.INVALID_STATE).create();
         };
     }
 
@@ -316,12 +260,17 @@ public class ClaimSettingsCommand {
         return CommonUtils.serverTranslatable("text.cadmus.settings.set", command, text);
     }
 
-    private static boolean checkPrometheusPermissions(ServerPlayer player, String permission, GameRules.Key<GameRules.BooleanValue> rule) {
-        if (player.hasPermissions(2)) return true;
-        if (ModInfoUtils.isModLoaded("prometheus") && PrometheusIntegration.hasPermission(player, permission)) {
-            return true;
-        } else {
-            return !ModInfoUtils.isModLoaded("prometheus") && ModGameRules.getOrCreateBooleanGameRule(player.serverLevel(), rule);
+    private static void checkPermissions(ServerPlayer player, String id, String permission, GameRules.Key<GameRules.BooleanValue> rule) throws ClaimException {
+        if (player.hasPermissions(2)) return;
+
+        if (ModUtils.isTeam(id) && !TeamProviderApi.API.getSelected().canModifySettings(id, player)) {
+            throw ClaimException.NOT_ALLOWED_TO_MANAGE_TEAM_SETTINGS;
+        }
+
+        if (PrometheusIntegration.prometheusLoaded()) {
+            if (!PrometheusIntegration.hasPermission(player, permission)) {
+                throw ClaimException.NO_PERMISSION_SETTINGS;
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ subprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
         maven(url = "https://maven.teamresourceful.com/repository/maven-public/")
         maven(url = "https://maven.neoforged.net/releases/")
     }

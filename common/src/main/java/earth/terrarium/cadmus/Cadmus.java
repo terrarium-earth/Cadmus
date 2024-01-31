@@ -43,7 +43,7 @@ public class Cadmus {
             TeamProviderApi.API.setSelected(DEFAULT_ID);
         }
 
-        if (ModInfoUtils.isModLoaded("prometheus")) {
+        if (PrometheusIntegration.prometheusLoaded()) {
             PrometheusIntegration.register();
         } else {
             MaxClaimProviderApi.API.setSelected(DEFAULT_ID);
