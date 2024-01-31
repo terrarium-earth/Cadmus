@@ -53,23 +53,23 @@ public class CadmusNeoForge {
     }
 
     private static void registerChunkProtectionEvents(IEventBus bus) {
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockPlace);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockBreak);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockInteract);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityInteractSpecific);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityInteract);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onAttackBlock);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onAttackEntity);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onFillBucket);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onExplode);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onFarmLandTrample);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityMobGriefing);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onLivingDestroyBlock);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onItemPickup);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityStruckByLightning);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onProjectileImpact);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onLivingAttack);
-        bus.addListener(EventPriority.LOWEST, CadmusNeoForge::onPistonPush);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockPlace);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockBreak);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onBlockInteract);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityInteractSpecific);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityInteract);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onAttackBlock);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onAttackEntity);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onFillBucket);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onExplode);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onFarmLandTrample);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityMobGriefing);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onLivingDestroyBlock);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onItemPickup);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onEntityStruckByLightning);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onProjectileImpact);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onLivingAttack);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, CadmusNeoForge::onPistonPush);
     }
 
     private static void onRegisterCommands(RegisterCommandsEvent event) {

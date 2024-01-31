@@ -3,10 +3,10 @@ package earth.terrarium.cadmus.common.network.messages;
 import com.mojang.datafixers.util.Pair;
 import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
-import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
-import com.teamresourceful.resourcefullib.common.networking.base.Packet;
-import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
-import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
+import com.teamresourceful.resourcefullib.common.network.Packet;
+import com.teamresourceful.resourcefullib.common.network.base.PacketType;
+import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketType;
+import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
@@ -19,47 +19,49 @@ import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public record ServerboundRequestClaimedChunksPacket(
     int renderDistance) implements Packet<ServerboundRequestClaimedChunksPacket> {
 
-    public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "request_claimed_chunks");
-    public static final Handler HANDLER = new Handler();
+    public static final ServerboundPacketType<ServerboundRequestClaimedChunksPacket> TYPE = new Type();
 
     @Override
-    public ResourceLocation getID() {
-        return ID;
+    public PacketType<ServerboundRequestClaimedChunksPacket> type() {
+        return TYPE;
     }
 
-    @Override
-    public PacketHandler<ServerboundRequestClaimedChunksPacket> getHandler() {
-        return HANDLER;
-    }
+    private static class Type extends CodecPacketType<ServerboundRequestClaimedChunksPacket> implements ServerboundPacketType<ServerboundRequestClaimedChunksPacket> {
 
-    private static class Handler extends CodecPacketHandler<ServerboundRequestClaimedChunksPacket> {
-        public Handler() {
-            super(ObjectByteCodec.create(
-                ByteCodec.VAR_INT.fieldOf(ServerboundRequestClaimedChunksPacket::renderDistance),
-                ServerboundRequestClaimedChunksPacket::new
-            ));
+        public Type() {
+            super(
+                ServerboundRequestClaimedChunksPacket.class,
+                new ResourceLocation(Cadmus.MOD_ID, "request_claimed_chunks"),
+                ObjectByteCodec.create(
+                    ByteCodec.VAR_INT.fieldOf(ServerboundRequestClaimedChunksPacket::renderDistance),
+                    ServerboundRequestClaimedChunksPacket::new
+                )
+            );
         }
 
         @Override
-        public PacketContext handle(ServerboundRequestClaimedChunksPacket message) {
-            return (player, level) -> {
+        public Consumer<Player> handle(ServerboundRequestClaimedChunksPacket packet) {
+            return player -> {
+                ServerLevel level = (ServerLevel) player.level();
                 var start = player.chunkPosition();
                 int viewDistance = Math.min(((ServerLevel) level).getServer().getPlayerList().getViewDistance(), 32);
-                int renderDistance = Math.min(message.renderDistance, viewDistance);
+                int renderDistance = Math.min(packet.renderDistance, viewDistance);
 
                 String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
 
                 // Get all claims within the render distance
-                var claimData = ClaimHandler.getAllTeamClaims((ServerLevel) level);
+                var claimData = ClaimHandler.getAllTeamClaims(level);
                 Map<ChunkPos, Pair<String, ClaimType>> claims = new HashMap<>();
                 if (claimData != null) {
                     claimData.forEach((teamId, teamClaims) ->

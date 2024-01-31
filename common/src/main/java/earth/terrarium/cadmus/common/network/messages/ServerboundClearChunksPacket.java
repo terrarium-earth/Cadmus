@@ -2,47 +2,50 @@ package earth.terrarium.cadmus.common.network.messages;
 
 import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
-import com.teamresourceful.resourcefullib.common.networking.base.CodecPacketHandler;
-import com.teamresourceful.resourcefullib.common.networking.base.Packet;
-import com.teamresourceful.resourcefullib.common.networking.base.PacketContext;
-import com.teamresourceful.resourcefullib.common.networking.base.PacketHandler;
+import com.teamresourceful.resourcefullib.common.network.Packet;
+import com.teamresourceful.resourcefullib.common.network.base.PacketType;
+import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketType;
+import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.function.Consumer;
 
 public record ServerboundClearChunksPacket(boolean allDimensions) implements Packet<ServerboundClearChunksPacket> {
 
-    public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, "clear_chunks");
-    public static final Handler HANDLER = new Handler();
+    public static final ServerboundPacketType<ServerboundClearChunksPacket> TYPE = new Type();
 
     @Override
-    public ResourceLocation getID() {
-        return ID;
+    public PacketType<ServerboundClearChunksPacket> type() {
+        return TYPE;
     }
 
-    @Override
-    public PacketHandler<ServerboundClearChunksPacket> getHandler() {
-        return HANDLER;
-    }
+    private static class Type extends CodecPacketType<ServerboundClearChunksPacket> implements ServerboundPacketType<ServerboundClearChunksPacket> {
 
-    private static class Handler extends CodecPacketHandler<ServerboundClearChunksPacket> {
-        public Handler() {
-            super(ObjectByteCodec.create(
-                ByteCodec.BOOLEAN.fieldOf(ServerboundClearChunksPacket::allDimensions),
-                ServerboundClearChunksPacket::new
-            ));
+        public Type() {
+            super(
+                ServerboundClearChunksPacket.class,
+                new ResourceLocation(Cadmus.MOD_ID, "clear_chunks"),
+                ObjectByteCodec.create(
+                    ByteCodec.BOOLEAN.fieldOf(ServerboundClearChunksPacket::allDimensions),
+                    ServerboundClearChunksPacket::new
+                )
+            );
         }
 
         @Override
-        public PacketContext handle(ServerboundClearChunksPacket message) {
-            return (player, level) -> {
+        public Consumer<Player> handle(ServerboundClearChunksPacket message) {
+            return player -> {
+                ServerLevel level = (ServerLevel) player.level();
                 String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
                 if (!message.allDimensions) {
-                    ClaimHandler.clear((ServerLevel) level, id);
+                    ClaimHandler.clear(level, id);
                 } else {
-                    ((ServerLevel) level).getServer().getAllLevels().forEach(l -> ClaimHandler.clear(l, id));
+                    level.getServer().getAllLevels().forEach(l -> ClaimHandler.clear(l, id));
                 }
             };
         }

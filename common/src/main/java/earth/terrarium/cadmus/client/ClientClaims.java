@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.client;
 
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.messages.ServerboundListenToChunksPacket;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
@@ -39,7 +40,7 @@ public final class ClientClaims {
         }
     }
 
-    public void update(Component displayName, int color, Map<ChunkPos, Boolean> claims) {
+    public void update(Component displayName, int color, Object2BooleanMap<ChunkPos> claims) {
         Entry entry = new Entry(displayName, color);
         claims.forEach((chunkPos, isClaimed) -> {
             if (isClaimed) {

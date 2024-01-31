@@ -26,12 +26,12 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -95,12 +95,13 @@ public class ClaimScreen extends BaseCursorScreen {
         this.maxChunkLoaded = maxChunkLoaded;
     }
 
-    public static void createFromPacket(Player player, ClientboundSendClaimedChunksPacket message) {
+    public static void createFromPacket(ClientboundSendClaimedChunksPacket message) {
         Minecraft.getInstance().setScreen(new ClaimScreen(
             message.claims(),
             message.id(),
             message.color(),
-            message.displayName().map(Component::nullToEmpty).orElse(player.getDisplayName()),
+            message.displayName().map(Component::nullToEmpty)
+                .orElse(Objects.requireNonNull(Minecraft.getInstance().player).getDisplayName()),
             message.teamDisplayNames(),
             message.claimedCount(),
             message.chunkLoadedCount(),
