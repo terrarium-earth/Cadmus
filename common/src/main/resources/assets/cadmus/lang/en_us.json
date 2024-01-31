@@ -62,6 +62,19 @@
   "cadmus.options.cadmus_options.max_claims": "Max Claims",
   "cadmus.options.cadmus_options.max_loaded_chunks": "Max Chunk Loaded",
 
+  "cadmus.block_breaking.permission":  "Block Breaking",
+  "cadmus.block_placing.permission": "Block Placing",
+  "cadmus.block_explosions.permission":  "Block Explosions",
+  "cadmus.block_interactions.permission": "Block Interactions",
+  "cadmus.entity_interactions.permission":  "Entity Interactions",
+  "cadmus.entity_damage.permission": "Entity Damage",
+  "cadmus.personal.block_breaking.permission":  "Personal Block Breaking",
+  "cadmus.personal.block_placing.permission": "Personal Block Placing",
+  "cadmus.personal.block_explosions.permission":  "Personal Block Explosions",
+  "cadmus.personal.block_interactions.permission": "Personal Block Interactions",
+  "cadmus.personal.entity_interactions.permission":  "Personal Entity Interactions",
+  "cadmus.personal.entity_damage.permission": "Personal Entity Damage",
+
   "command.cadmus.exception.chunk_already_claimed": "Chunk is already claimed.",
   "command.cadmus.exception.already_claimed_chunk": "You've already claimed this chunk.",
   "command.cadmus.exception.maxed_out_claims": "You've maxed out your claims.",
@@ -71,7 +84,8 @@
   "command.cadmus.exception.claim_has_no_flags": "Claim has no flags.",
   "command.cadmus.exception.claim_already_exists": "This claim already exists.",
   "command.cadmus.exception.claim_does_not_exist": "This claim does not exist.",
-  "command.cadmus.exception.not_allowed_to_manage_setting": "You are not allowed to manage this setting.",
+  "command.cadmus.exception.not_allowed_to_manage_team_setting": "You do not have permission on your team to manage this setting.",
+  "command.cadmus.exception.no_permission_settings": "Your role does not have permission to manage settings.",
 
   "command.cadmus.settings.invalid_state": "Invalid tri-state value. Valid values are: true, false, default.",
 

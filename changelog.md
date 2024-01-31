@@ -1,6 +1,3 @@
-- Added claiming and unclaiming to claim API 
-- Prevent Armor Stand interaction in claimed chunks (#35)
-- Added bypass command (/cadmus admin bypass) for admins to bypass claim protections
-- Claim settings can now be modified by operators without having the required permissions
-- Fixed fabric crash where placing blocks without a player, such as with shulker boxes in a dispenser or modded block placers would crash the game.
-- Added a claim setting "canNonPlayersPlace" for allowing non-players like modded block placers to place blocks in a claim
+- Added better claim settings errors. It'll now tell you if you don't have permission
+on your team or if your role doesn't have the permission.
+- Claim settings permissions are now enabled by default for Prometheus.

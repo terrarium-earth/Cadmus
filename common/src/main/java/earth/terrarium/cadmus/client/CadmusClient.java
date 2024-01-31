@@ -1,7 +1,6 @@
 package earth.terrarium.cadmus.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.client.claims.ClaimScreen;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
@@ -17,7 +16,7 @@ public class CadmusClient {
         ConstantComponents.ODYSSEY_CATEGORY.getString());
 
     public static void init() {
-        if (ModInfoUtils.isModLoaded("prometheus")) {
+        if (PrometheusIntegration.prometheusLoaded()) {
             PrometheusIntegration.registerClient();
         }
     }

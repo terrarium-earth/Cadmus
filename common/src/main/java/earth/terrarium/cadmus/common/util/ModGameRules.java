@@ -1,9 +1,9 @@
 package earth.terrarium.cadmus.common.util;
 
-import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
+import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.mixins.common.GameRulesAccessor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
@@ -29,11 +29,10 @@ public class ModGameRules {
     public static final GameRules.Key<GameRules.BooleanValue> DO_COMBINED_CLAIM_LIMIT = registerIfPrometheusInstalled("doCombinedClaimLimit", GameRules.Category.MISC, createBooleanRule(false, (server, rule) ->
         CadmusDataHandler.getMaxTeamClaims(server).keySet().forEach(id -> MaxClaimProviderApi.API.getSelected().calculate(id, server))));
 
-    public static void init() {
-    }
+    public static void init() {} // NO-OP
 
     public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
-        return ModInfoUtils.isModLoaded("prometheus") ? register(name, category, type) : null;
+        return PrometheusIntegration.prometheusLoaded() ? register(name, category, type) : null;
     }
 
     @ExpectPlatform
