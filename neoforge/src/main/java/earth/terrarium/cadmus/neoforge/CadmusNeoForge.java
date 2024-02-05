@@ -48,7 +48,7 @@ public class CadmusNeoForge {
         NeoForge.EVENT_BUS.addListener(CadmusNeoForge::onRightClick);
         registerChunkProtectionEvents(bus);
         if (FMLEnvironment.dist.isClient()) {
-            CadmusClientNeoForge.init(bus);
+            CadmusClientNeoForge.init();
         }
     }
 

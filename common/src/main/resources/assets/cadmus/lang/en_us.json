@@ -10,7 +10,7 @@
   "tooltip.cadmus.claim_map.admin_claim": "Admin Claim",
   "message.cadmus.wilderness": "§2Wilderness",
   "key.cadmus.open_claim_map": "Open Claim Map",
-  "key.categories.project_odyssey": "Odyssey",
+  "key.categories.project_odyssey": "Project Odyssey",
 
   "text.cadmus.claiming.claimed_chunk_at": "Claimed chunk at: x: %s, z: %s",
   "text.cadmus.claiming.chunk_loaded_chunk_at": "Chunk loaded chunk at: x: %s, z: %s",
