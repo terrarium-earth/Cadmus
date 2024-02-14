@@ -16,8 +16,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
@@ -185,12 +188,14 @@ public class ClaimApiImpl implements ClaimApi {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.PVP);
                 }
 
-                if (entity.getType().getCategory() == MobCategory.MISC) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
-                } else if (entity.getType().getCategory().isFriendly()) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
+                if (entity instanceof LivingEntity) {
+                    if (entity instanceof Enemy) {
+                        return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
+                    } else {
+                        return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
+                    }
                 } else {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
                 }
             },
             ClaimSettings::canDamageEntities,
