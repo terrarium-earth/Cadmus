@@ -1,6 +1,8 @@
 package earth.terrarium.cadmus.common.claims;
 
 import com.mojang.datafixers.util.Pair;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.platform.Platform;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.InteractionType;
@@ -14,17 +16,18 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
 
@@ -132,16 +135,17 @@ public class ClaimApiImpl implements ClaimApi {
         }
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS,
             (id, server) -> {
-                Block block = level.getBlockState(pos).getBlock();
-                if (block instanceof DoorBlock || block instanceof TrapDoorBlock) {
+                BlockState state = level.getBlockState(pos);
+                Block block = state.getBlock();
+                if (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS)) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_DOORS);
                 }
 
-                if (block instanceof AbstractChestBlock<?>) {
+                if (block instanceof AbstractChestBlock<?> || state.is(Cadmus.FABRIC_CHESTS) || state.is(Cadmus.FORGE_CHESTS)) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_CHESTS);
                 }
 
-                if (block instanceof LeverBlock || block instanceof ButtonBlock || block instanceof PressurePlateBlock) {
+                if (state.is(BlockTags.PRESSURE_PLATES) || state.is(BlockTags.BUTTONS) || block instanceof LeverBlock || state.is(Cadmus.FABRIC_LEVER) || state.is(Cadmus.FORGE_LEVER)) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_REDSTONE);
                 }
                 return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_INTERACTIONS);
@@ -173,24 +177,22 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
+        if (entity.getType().is(Cadmus.ALLOWS_CLAIM_DAMAGE_ENTITIES)) {
+            return true;
+        }
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES,
             (id, server) -> {
-                if (entity.getType().getCategory() == MobCategory.CREATURE
-                    || entity.getType().getCategory() == MobCategory.AMBIENT
-                    || entity.getType().getCategory() == MobCategory.AXOLOTLS
-                    || entity.getType().getCategory() == MobCategory.UNDERGROUND_WATER_CREATURE
-                    || entity.getType().getCategory() == MobCategory.WATER_AMBIENT
-                    || entity instanceof Animal) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
-                }
-
-                if (entity.getType().getCategory() == MobCategory.MONSTER || entity instanceof Monster) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
-                }
                 if (entity instanceof Player) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.PVP);
                 }
-                return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
+
+                if (entity.getType().getCategory() == MobCategory.MISC) {
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
+                } else if (entity.getType().getCategory().isFriendly()) {
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
+                } else {
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
+                }
             },
             ClaimSettings::canDamageEntities,
             (id, server) -> TeamProviderApi.API.getSelected().canDamageEntity(id, server, entity, player));
@@ -208,6 +210,9 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canEntityGrief(Level level, BlockPos pos, @NotNull Entity entity) {
+        if (entity.getType().is(Cadmus.CAN_GRIEF_ENTITIES)) {
+            return true;
+        }
         if (!level.isClientSide()) {
             var claim = ClaimHandler.getClaim((ServerLevel) level, new ChunkPos(pos));
             if (claim == null) return true;
@@ -220,6 +225,9 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, @NotNull Entity picker) {
+        if (item.getItem().is(Cadmus.ALLOWS_CLAIM_PICKUP)) {
+            return true;
+        }
         if (!level.isClientSide()) {
             if (!AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ITEM_PICKUP)) {
                 return false;
