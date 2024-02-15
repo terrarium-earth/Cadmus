@@ -9,16 +9,16 @@ import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.util.ModEntityTags;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
@@ -26,9 +26,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AbstractChestBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.ToBooleanBiFunction;
 import org.jetbrains.annotations.NotNull;
@@ -132,24 +129,13 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
-        if (level.getBlockState(pos).is(Cadmus.ALLOWS_CLAIM_INTERACTIONS)) {
-            return true;
-        }
+        if (level.getBlockState(pos).is(Cadmus.ALLOWS_CLAIM_INTERACTIONS)) return true;
         return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS,
             (id, server) -> {
                 BlockState state = level.getBlockState(pos);
-                Block block = state.getBlock();
-                if (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS)) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_DOORS);
-                }
-
-                if (block instanceof AbstractChestBlock<?> || state.is(Cadmus.FABRIC_CHESTS) || state.is(Cadmus.FORGE_CHESTS)) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_CHESTS);
-                }
-
-                if (state.is(BlockTags.PRESSURE_PLATES) || state.is(BlockTags.BUTTONS) || block instanceof LeverBlock || state.is(Cadmus.FABRIC_LEVER) || state.is(Cadmus.FORGE_LEVER)) {
-                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_REDSTONE);
-                }
+                if (state.is(Cadmus.DOOR_LIKE)) return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_DOORS);
+                if (state.is(Cadmus.INTERACTABLE_STORAGE)) return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_CHESTS);
+                if (state.is(Cadmus.REDSTONE)) return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_REDSTONE);
                 return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_INTERACTIONS);
             },
             ClaimSettings::canInteractWithBlocks,
@@ -163,9 +149,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
-        if (entity.getType().is(Cadmus.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) {
-            return true;
-        }
+        if (entity.getType().is(ModEntityTags.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) return true;
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
             ClaimSettings::canInteractWithEntities,
@@ -179,22 +163,20 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
-        if (entity.getType().is(Cadmus.ALLOWS_CLAIM_DAMAGE_ENTITIES)) {
-            return true;
-        }
+        if (entity.getType().is(ModEntityTags.ALLOWS_CLAIM_DAMAGE_ENTITIES)) return true;
         return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES,
             (id, server) -> {
                 if (entity instanceof Player) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.PVP);
                 }
 
-                if (entity instanceof LivingEntity) {
-                    if (entity instanceof Enemy) {
-                        return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
-                    } else {
+                if (entity instanceof Enemy || entity.getType().is(ModEntityTags.MONSTERS)) {
+                    return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.MONSTER_DAMAGE);
+                } else {
+                    if (entity instanceof Mob || entity.getType().is(ModEntityTags.CREATURES)) {
                         return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.CREATURE_DAMAGE);
                     }
-                } else {
+
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_DAMAGE);
                 }
             },
@@ -214,9 +196,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canEntityGrief(Level level, BlockPos pos, @NotNull Entity entity) {
-        if (entity.getType().is(Cadmus.CAN_GRIEF_ENTITIES)) {
-            return true;
-        }
+        if (entity.getType().is(ModEntityTags.CAN_GRIEF_ENTITIES)) return true;
         if (!level.isClientSide()) {
             var claim = ClaimHandler.getClaim((ServerLevel) level, new ChunkPos(pos));
             if (claim == null) return true;
@@ -229,9 +209,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPickupItem(Level level, BlockPos pos, ItemEntity item, @NotNull Entity picker) {
-        if (item.getItem().is(Cadmus.ALLOWS_CLAIM_PICKUP)) {
-            return true;
-        }
+        if (item.getItem().is(Cadmus.ALLOWS_CLAIM_PICKUP)) return true;
         if (!level.isClientSide()) {
             if (!AdminClaimHandler.getBooleanFlag((ServerLevel) level, new ChunkPos(pos), ModFlags.ITEM_PICKUP)) {
                 return false;

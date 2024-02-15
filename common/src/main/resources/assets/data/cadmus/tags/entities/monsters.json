@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:skeletons",
+    "#minecraft:zombies",
+    {
+      "id": "#c:creepers",
+      "required": false
+    },
+    {
+      "id": "#forge:creepers",
+      "required": false
+    }
+  ]
+}
