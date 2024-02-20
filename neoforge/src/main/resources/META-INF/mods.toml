@@ -13,7 +13,7 @@ logoFile = "icon.png"
 authors = "Alex Nijjar, ThatGravyBoat"
 credits = ""
 description = "A land claiming mod that allows users to claim land to protect your home from thieves, bandits and monsters, and admins to claim land with region flags and advanced protection!"
-displayTest="IGNORE_ALL_VERSION"
+displayTest = "IGNORE_ALL_VERSION"
 
 [[mixins]]
 config = "cadmus-common.mixins.json"
@@ -22,21 +22,21 @@ config = "cadmus.mixins.json"
 
 [[dependencies.cadmus]]
 modId = "neoforge"
-type="required"
+type = "required"
 versionRange = "[20.4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cadmus]]
 modId = "minecraft"
-type="required"
+type = "required"
 versionRange = "[1.20.4,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.cadmus]]
 modId = "resourcefullib"
-type="required"
+type = "required"
 versionRange = "[2.4.6,)"
 ordering = "NONE"
 side = "BOTH"

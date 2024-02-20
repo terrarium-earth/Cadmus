@@ -1,0 +1,15 @@
+{
+  "values": [
+    "#minecraft:buttons",
+    "#minecraft:pressure_plates",
+    "minecraft:lever",
+    {
+      "id": "#c:levers",
+      "required": false
+    },
+    {
+      "id": "#forge:levers",
+      "required": false
+    }
+  ]
+}
