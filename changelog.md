@@ -1,1 +1,1 @@
-- Fixed duplicate keybind registration on NeoForge (#38)
+- Added entity and block interaction tags (#42).
