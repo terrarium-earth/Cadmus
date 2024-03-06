@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 public record ComponentFlag(Component value) implements Flag<Component> {
@@ -25,7 +26,8 @@ public record ComponentFlag(Component value) implements Flag<Component> {
 
     @Override
     public Flag<Component> create(String value) {
-        return new ComponentFlag(Component.Serializer.fromJson(value));
+        var component = Component.Serializer.fromJson(value);
+        return new ComponentFlag(component == null ? CommonComponents.EMPTY : component);
     }
 
     @Override
