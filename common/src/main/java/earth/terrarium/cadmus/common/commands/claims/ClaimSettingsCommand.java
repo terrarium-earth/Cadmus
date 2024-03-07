@@ -9,11 +9,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.cadmus.common.claims.ClaimSettings;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.teams.TeamHelper;
 import earth.terrarium.cadmus.common.util.ModGameRules;
@@ -267,8 +268,8 @@ public class ClaimSettingsCommand {
             throw ClaimException.NOT_ALLOWED_TO_MANAGE_TEAM_SETTINGS;
         }
 
-        if (PrometheusIntegration.prometheusLoaded()) {
-            if (!PrometheusIntegration.hasPermission(player, permission)) {
+        if (Cadmus.IS_PROMETHEUS_LOADED) {
+            if (!PrometheusCompat.hasPermission(player, permission)) {
                 throw ClaimException.NO_PERMISSION_SETTINGS;
             }
         }

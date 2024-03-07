@@ -1,4 +1,4 @@
-package earth.terrarium.cadmus.common.compat.prometheus.roles;
+package earth.terrarium.cadmus.common.compat.prometheus;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

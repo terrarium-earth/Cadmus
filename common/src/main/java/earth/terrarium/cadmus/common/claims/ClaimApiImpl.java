@@ -8,7 +8,7 @@ import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusAutoCompletes;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.util.ModEntityTags;
 import earth.terrarium.cadmus.common.util.ModGameRules;
 import earth.terrarium.cadmus.common.util.ModUtils;
@@ -244,9 +244,9 @@ public class ClaimApiImpl implements ClaimApi {
             return false;
         }
 
-        if (PrometheusIntegration.prometheusLoaded() && PrometheusIntegration.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
+        if (Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
             return true;
-        } else if (!PrometheusIntegration.prometheusLoaded() && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
+        } else if (!Cadmus.IS_PROMETHEUS_LOADED && ModGameRules.getOrCreateBooleanGameRule(level, rule)) {
             return true;
         }
 

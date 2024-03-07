@@ -25,8 +25,8 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
         int maxChunkLoaded = 0;
 
         for (GameProfile profile : members) {
-            int maxClaimsSetting = PrometheusIntegration.getMaxClaims(server.overworld(), profile.getId());
-            int maxChunkLoadedSetting = PrometheusIntegration.getMaxChunkLoaded(server.overworld(), profile.getId());
+            int maxClaimsSetting = PrometheusCompat.getMaxClaims(server.overworld(), profile.getId());
+            int maxChunkLoadedSetting = PrometheusCompat.getMaxChunkLoaded(server.overworld(), profile.getId());
             if (combinedClaimLimit) {
                 // Sum the max claims of all members on the team
                 maxClaims += maxClaimsSetting;
@@ -54,7 +54,7 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
     @Override
     public int getMaxClaims(String id, ServerLevel level, UUID player) {
         var maxClaims = CadmusDataHandler.getMaxTeamClaims(level.getServer()).get(id);
-        return maxClaims == null ? PrometheusIntegration.getMaxClaims(level, player) : maxClaims.firstInt();
+        return maxClaims == null ? PrometheusCompat.getMaxClaims(level, player) : maxClaims.firstInt();
     }
 
     @Override
@@ -65,6 +65,6 @@ public class PrometheusMaxClaimProvider implements MaxClaimProvider {
     @Override
     public int getMaxChunkLoaded(String id, ServerLevel level, UUID player) {
         var maxChunkLoaded = CadmusDataHandler.getMaxTeamClaims(level.getServer()).get(id);
-        return maxChunkLoaded == null ? PrometheusIntegration.getMaxChunkLoaded(level, player) : maxChunkLoaded.secondInt();
+        return maxChunkLoaded == null ? PrometheusCompat.getMaxChunkLoaded(level, player) : maxChunkLoaded.secondInt();
     }
 }

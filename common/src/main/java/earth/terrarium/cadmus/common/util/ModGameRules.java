@@ -1,9 +1,9 @@
 package earth.terrarium.cadmus.common.util;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
 import earth.terrarium.cadmus.mixins.common.GameRulesAccessor;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.GameRules;
@@ -32,7 +32,7 @@ public class ModGameRules {
     public static void init() {} // NO-OP
 
     public static <T extends GameRules.Value<T>> GameRules.Key<T> registerIfPrometheusInstalled(String name, GameRules.Category category, GameRules.Type<T> type) {
-        return PrometheusIntegration.prometheusLoaded() ? register(name, category, type) : null;
+        return Cadmus.IS_PROMETHEUS_LOADED ? register(name, category, type) : null;
     }
 
     @ExpectPlatform

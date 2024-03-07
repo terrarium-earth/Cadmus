@@ -9,7 +9,7 @@ import earth.terrarium.cadmus.common.claims.ClaimHandler;
 import earth.terrarium.cadmus.common.claims.ClaimType;
 import earth.terrarium.cadmus.common.claims.admin.ModFlags;
 import earth.terrarium.cadmus.common.claims.maxclaims.CadmusMaxClaimProvider;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusIntegration;
+import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.util.AdminUtils;
@@ -38,6 +38,8 @@ public class Cadmus {
     public static final TagKey<Block> REDSTONE = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "redstone"));
     public static final TagKey<Block> DOOR_LIKE = TagKey.create(Registries.BLOCK, new ResourceLocation(MOD_ID, "door_like"));
 
+    public static final boolean IS_PROMETHEUS_LOADED = ModInfoUtils.isModLoaded("prometheus");
+
     public static void init() {
         NetworkHandler.init();
         TeamProviderApi.API.register(DEFAULT_ID, new VanillaTeamProvider());
@@ -48,8 +50,8 @@ public class Cadmus {
             TeamProviderApi.API.setSelected(DEFAULT_ID);
         }
 
-        if (PrometheusIntegration.prometheusLoaded()) {
-            PrometheusIntegration.register();
+        if (IS_PROMETHEUS_LOADED) {
+            PrometheusCompat.init();
         } else {
             MaxClaimProviderApi.API.setSelected(DEFAULT_ID);
         }
