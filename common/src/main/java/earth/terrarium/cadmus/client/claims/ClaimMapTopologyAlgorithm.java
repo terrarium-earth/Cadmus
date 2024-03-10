@@ -172,6 +172,7 @@ public class ClaimMapTopologyAlgorithm {
         int offset = 0;
         int y = pos.getY();
         BlockPos.MutableBlockPos mutablePos = pos.mutable();
+        int attempts = 0;
 
         while (!(!level.getBlockState(mutablePos).isAir() && (level.getBlockState(mutablePos.above()).isAir() || level.getBlockState(mutablePos.below()).isAir()))) {
             if (offset <= 0) {
@@ -180,6 +181,10 @@ public class ClaimMapTopologyAlgorithm {
                 offset = -offset;
             }
             mutablePos.setY(offset + y);
+            attempts++;
+            if (attempts > 500) {
+                return y;
+            }
         }
         return mutablePos.getY();
     }
