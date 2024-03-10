@@ -89,6 +89,8 @@
 
   "command.cadmus.settings.invalid_state": "Invalid tri-state value. Valid values are: true, false, default.",
 
+  "text.cadmus.settings.current.all": "Current Claim Settings:",
+  "text.cadmus.settings.current.list": "• %s : %s",
   "text.cadmus.settings.current": "Setting %s is currently set to: \"%s\"",
   "text.cadmus.settings.set": "Setting %s is now set to: \"%s\"",
 

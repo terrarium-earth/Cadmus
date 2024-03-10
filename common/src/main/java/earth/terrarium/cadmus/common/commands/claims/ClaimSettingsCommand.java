@@ -22,6 +22,7 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
@@ -44,6 +45,29 @@ public class ClaimSettingsCommand {
                 .then(canInteractWithEntities())
                 .then(canDamageEntities())
                 .then(canNonPlayersPlace())
+                .executes(context -> {
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    CommandHelper.runAction(() -> {
+                        String id = TeamHelper.getTeamId(player.getServer(), player.getUUID());
+                        ClaimSettings settings = CadmusDataHandler.getClaimSettings(player.getServer(), id);
+                        ClaimSettings defaultSettings = CadmusDataHandler.getDefaultClaimSettings(player.getServer());
+                        List<Component> settingsText = List.of(
+                            getCurrentListComponent("canBreak", settings.canBreak(defaultSettings)),
+                            getCurrentListComponent("canPlace", settings.canPlace(defaultSettings)),
+                            getCurrentListComponent("canExplode", settings.canExplode(defaultSettings)),
+                            getCurrentListComponent("canInteractWithBlocks", settings.canInteractWithBlocks(defaultSettings)),
+                            getCurrentListComponent("canInteractWithEntities", settings.canInteractWithEntities(defaultSettings)),
+                            getCurrentListComponent("canDamageEntities", settings.canDamageEntities(defaultSettings)),
+                            getCurrentListComponent("canNonPlayersPlace", settings.canNonPlayersPlace(defaultSettings))
+                        );
+                        Component text = Component.empty()
+                                .append(CommonUtils.serverTranslatable("text.cadmus.settings.current.all"))
+                                .append(CommonComponents.NEW_LINE)
+                                .append(CommonComponents.joinLines(settingsText));
+                        player.sendSystemMessage(text, false);
+                    });
+                    return 1;
+                })
             ));
     }
 
@@ -254,6 +278,10 @@ public class ClaimSettingsCommand {
 
     private static Component getCurrentComponent(String command, Object value) {
         return CommonUtils.serverTranslatable("text.cadmus.settings.current", command, value);
+    }
+
+    private static Component getCurrentListComponent(String command, Object value) {
+        return CommonUtils.serverTranslatable("text.cadmus.settings.current.list", command, value);
     }
 
     private static Component setCurrentComponent(String command, TriState value) {
