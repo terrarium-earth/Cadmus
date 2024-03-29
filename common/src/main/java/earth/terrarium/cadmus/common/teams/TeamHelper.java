@@ -9,7 +9,7 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,16 +33,17 @@ public class TeamHelper {
         return TeamProviderApi.API.getSelected().getTeamMembers(teamId(id), server);
     }
 
-    @Nullable
-    public static Component getTeamName(String id, MinecraftServer server) {
+    public static @NotNull Component getTeamName(String id, MinecraftServer server) {
+        Component name;
         if (ModUtils.isAdmin(id)) {
-            return AdminClaimHandler.getFlag(server, teamId(id), ModFlags.DISPLAY_NAME);
-        }
-        if (ModUtils.isPlayer(id)) {
+            name = AdminClaimHandler.getFlag(server, teamId(id), ModFlags.DISPLAY_NAME);
+        } else if (ModUtils.isPlayer(id)) {
             var profile = ModUtils.getProfileCache(server).get(UUID.fromString(teamId(id)));
-            return profile.map(p -> Component.literal(p.getName())).orElse(null);
+            name = profile.map(p -> Component.literal(p.getName())).orElse(Component.literal(id));
+        } else {
+            name = TeamProviderApi.API.getSelected().getTeamName(teamId(id), server);
         }
-        return TeamProviderApi.API.getSelected().getTeamName(teamId(id), server);
+        return name == null ? Component.literal(id) : name;
     }
 
     public static String getTeamId(MinecraftServer server, UUID player) {
