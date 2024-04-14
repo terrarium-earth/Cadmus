@@ -1,4 +1,4 @@
-# Ad Astra
+# Cadmus
 
 To add this library to your project, do the following:
 
@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    "modImplementation"(group = "earth.terrarium.cadmus", name = "cadmus-$modLoader-$minecraftVersion", version = cadmusVersion)
+    modImplementation(group = "earth.terrarium.cadmus", name = "cadmus-$modLoader-$minecraftVersion", version = cadmusVersion)
 }
 ```
 
@@ -22,6 +22,6 @@ repositories {
 }
 
 dependencies {
-    "modImplementation" group: "earth.terrarium.cadmus", name: "cadmus-$modLoader-$minecraftVersion", version: cadmusVersion
+    modImplementation group: "earth.terrarium.cadmus", name: "cadmus-$modLoader-$minecraftVersion", version: cadmusVersion
 }
 ```
