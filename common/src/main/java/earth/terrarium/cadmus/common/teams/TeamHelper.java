@@ -9,6 +9,7 @@ import earth.terrarium.cadmus.common.util.ModUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -49,6 +50,10 @@ public class TeamHelper {
     public static String getTeamId(MinecraftServer server, UUID player) {
         String id = TeamProviderApi.API.getSelected().getTeamId(server, player);
         return id == null ? ClaimHandler.PLAYER_PREFIX + player.toString() : id;
+    }
+
+    public static String getTeamId(Player player) {
+        return getTeamId(player.getServer(), player.getUUID());
     }
 
     public static boolean isMember(String id, MinecraftServer server, UUID player) {

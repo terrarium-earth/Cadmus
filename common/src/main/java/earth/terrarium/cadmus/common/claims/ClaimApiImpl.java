@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ClaimApiImpl implements ClaimApi {
+
     @Override
     public boolean canClaim(ServerLevel level, ChunkPos pos, String id, boolean chunkLoad, UUID player) {
         Map<ChunkPos, ClaimType> currentClaims = ClaimHandler.getTeamClaims(level, id);
@@ -243,6 +244,7 @@ public class ClaimApiImpl implements ClaimApi {
         if (ModUtils.isAdmin(claim.getFirst()) && !checkFlags.applyAsBoolean(claim.getFirst(), server)) {
             return false;
         }
+        if (CadmusDataHandler.isBlockAllowed(level.getServer(), claim.getFirst(), level.getBlockState(pos).getBlock())) return true;
 
         if (Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
             return true;

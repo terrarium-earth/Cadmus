@@ -86,6 +86,11 @@
   "command.cadmus.exception.claim_does_not_exist": "This claim does not exist.",
   "command.cadmus.exception.not_allowed_to_manage_team_setting": "You do not have permission on your team to manage this setting.",
   "command.cadmus.exception.no_permission_settings": "Your role does not have permission to manage settings.",
+  "command.cadmus.exception.block_not_added": "This block is not in the allowed blocks list.",
+
+  "command.cadmus.setting.add_allowed_block": "§7Added §b%s§7 to allowed blocks",
+  "command.cadmus.setting.remove_allowed_block": "§7Removed §b%s§7 from allowed blocks",
+  "command.cadmus.setting.list_allowed_blocks": "§b%s",
 
   "command.cadmus.settings.invalid_state": "Invalid tri-state value. Valid values are: true, false, default.",
 

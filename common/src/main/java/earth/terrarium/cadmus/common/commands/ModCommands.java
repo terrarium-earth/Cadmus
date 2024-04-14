@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.common.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import earth.terrarium.cadmus.common.claims.ClaimAllowedBlocksCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimInfoCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimSettingsCommand;
@@ -21,6 +22,7 @@ public class ModCommands {
         UnclaimCommand.register(dispatcher);
         ClaimInfoCommand.register(dispatcher);
         ClaimSettingsCommand.register(dispatcher);
+        ClaimAllowedBlocksCommand.register(dispatcher, ctx);
 
         AdminCommands.register(dispatcher);
         AdminClaimCommands.register(dispatcher);

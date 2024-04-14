@@ -1,1 +1,2 @@
-- Added entity and block interaction tags (#42).
+- Added `allowedBlocks` claim setting for whitelisting specific block types in claims.
+- Fixed tags not being applied.

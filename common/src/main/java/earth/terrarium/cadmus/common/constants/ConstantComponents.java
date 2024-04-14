@@ -28,4 +28,6 @@ public class ConstantComponents {
     public static final Component UNKNOWN = CommonUtils.serverTranslatable("text.cadmus.info.unknown");
 
     public static final Component INVALID_STATE = CommonUtils.serverTranslatable("command.cadmus.settings.invalid_state");
+
+    public static final Component BLOCK_NOT_ADDED = CommonUtils.serverTranslatable("command.cadmus.exception.block_not_added");
 }

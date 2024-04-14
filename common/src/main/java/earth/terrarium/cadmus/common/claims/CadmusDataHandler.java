@@ -4,9 +4,11 @@ import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
 import earth.terrarium.cadmus.api.teams.TeamProviderApi;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.block.Block;
 
 import java.util.*;
 
@@ -19,6 +21,7 @@ public class CadmusDataHandler extends SaveHandler {
     private final Map<String, ClaimSettings> settings = new HashMap<>();
     private final Set<UUID> bypassPlayers = new HashSet<>();
     private ClaimSettings defaultSettings = ClaimSettings.ofFalse();
+    private final Map<String, Set<ResourceLocation>> allowedBlocks = new HashMap<>();
 
     @Override
     public void loadData(CompoundTag tag) {
@@ -48,6 +51,17 @@ public class CadmusDataHandler extends SaveHandler {
 
         if (tag.contains("defaultSettings")) {
             defaultSettings = ClaimSettings.read(tag.getCompound("defaultSettings"));
+        }
+
+        if (tag.contains("allowedBlocks")) {
+            CompoundTag allowedBlocksTag = tag.getCompound("allowedBlocks");
+            allowedBlocksTag.getAllKeys().forEach(id -> {
+                CompoundTag blockTag = allowedBlocksTag.getCompound(id);
+                Set<ResourceLocation> blocks = new HashSet<>();
+                blockTag.getAllKeys().forEach(namespace ->
+                    blocks.add(new ResourceLocation(namespace, blockTag.getString(namespace))));
+                allowedBlocks.put(id, blocks);
+            });
         }
     }
 
@@ -81,6 +95,14 @@ public class CadmusDataHandler extends SaveHandler {
         }
 
         tag.put("defaultSettings", defaultSettings.write(new CompoundTag()));
+
+        CompoundTag allowedBlocksTag = new CompoundTag();
+        this.allowedBlocks.forEach((id, blocks) -> {
+            CompoundTag blockTag = new CompoundTag();
+            blocks.forEach(block -> blockTag.putString(block.getNamespace(), block.getPath()));
+            allowedBlocksTag.put(id, blockTag);
+        });
+        tag.put("allowedBlocks", allowedBlocksTag);
     }
 
     public static boolean canBypass(MinecraftServer server, UUID player) {
@@ -116,5 +138,24 @@ public class CadmusDataHandler extends SaveHandler {
     @Override
     public boolean isDirty() {
         return true;
+    }
+
+    public static void addAllowedBlock(MinecraftServer server, String player, Block block) {
+        var data = read(server);
+        data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).add(BuiltInRegistries.BLOCK.getKey(block));
+    }
+
+    public static void removeAllowedBlock(MinecraftServer server, String player, Block block) {
+        var data = read(server);
+        data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).remove(BuiltInRegistries.BLOCK.getKey(block));
+    }
+
+    public static boolean isBlockAllowed(MinecraftServer server, String player, Block block) {
+        var data = read(server);
+        return data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).contains(BuiltInRegistries.BLOCK.getKey(block));
+    }
+
+    public static Set<ResourceLocation> getAllowedBlocks(MinecraftServer server, String player) {
+        return read(server).allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>());
     }
 }
