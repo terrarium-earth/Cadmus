@@ -1,2 +1,5 @@
 - Added `allowedBlocks` claim setting for whitelisting specific block types in claims.
 - Fixed tags not being applied.
+- Max claims for each team are now updated instantly when using the Prometheus max claim role options
+- \[Forge] Attacking a block is now treated as a block break protection rather than a block interaction protection. This fixes as issue where the interaction protection had to also be off to break blocks.
+- \[Forge] The block interaction protection now allows right-clicking items on blocks to use the item but not interact with the block.

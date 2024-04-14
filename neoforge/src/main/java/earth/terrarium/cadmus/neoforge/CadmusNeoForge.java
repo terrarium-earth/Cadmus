@@ -112,7 +112,8 @@ public class CadmusNeoForge {
 
     private static void onBlockInteract(PlayerInteractEvent.RightClickBlock event) {
         if (!ClaimApi.API.canInteractWithBlock(event.getEntity().level(), event.getPos(), InteractionType.USE, event.getEntity())) {
-            event.setCanceled(true);
+            event.setUseItem(Event.Result.ALLOW);
+            event.setUseBlock(Event.Result.DENY);
         }
     }
 
@@ -129,7 +130,7 @@ public class CadmusNeoForge {
     }
 
     private static void onAttackBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (!ClaimApi.API.canInteractWithBlock(event.getEntity().level(), event.getPos(), InteractionType.ATTACK, event.getEntity())) {
+        if (!ClaimApi.API.canBreakBlock(event.getEntity().level(), event.getPos(), event.getEntity())) {
             event.setCanceled(true);
         }
     }

@@ -79,7 +79,7 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     public boolean canBreakBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING,
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_BREAKING, ModGameRules.RULE_DO_CLAIMED_BLOCK_BREAKING, true,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_BREAK),
             ClaimSettings::canBreak,
             (id, server) -> TeamProviderApi.API.getSelected().canBreakBlock(id, server, pos, player));
@@ -92,7 +92,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canPlaceBlock(Level level, BlockPos pos, UUID player) {
-        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING,
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_PLACING, ModGameRules.RULE_DO_CLAIMED_BLOCK_PLACING, true,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_PLACE),
             ClaimSettings::canPlace,
             (id, server) -> TeamProviderApi.API.getSelected().canPlaceBlock(id, server, pos, player));
@@ -115,7 +115,7 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion, UUID player) {
-        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS,
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_EXPLOSIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_EXPLOSIONS, false,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.BLOCK_EXPLOSIONS),
             ClaimSettings::canExplode,
             (id, server) -> TeamProviderApi.API.getSelected().canExplodeBlock(id, server, pos, explosion, player));
@@ -129,7 +129,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canInteractWithBlock(Level level, BlockPos pos, InteractionType type, UUID player) {
         if (level.getBlockState(pos).is(Cadmus.ALLOWS_CLAIM_INTERACTIONS)) return true;
-        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS,
+        return canAccess(level, pos, player, CadmusAutoCompletes.BLOCK_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_BLOCK_INTERACTIONS, true,
             (id, server) -> {
                 BlockState state = level.getBlockState(pos);
                 if (state.is(Cadmus.DOOR_LIKE)) return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.USE_DOORS);
@@ -149,7 +149,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canInteractWithEntity(Level level, Entity entity, UUID player) {
         if (entity.getType().is(ModEntityTags.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) return true;
-        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS,
+        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_INTERACTIONS, ModGameRules.RULE_DO_CLAIMED_ENTITY_INTERACTIONS, false,
             (id, server) -> AdminClaimHandler.getBooleanFlag(server, id, ModFlags.ENTITY_INTERACTIONS),
             ClaimSettings::canInteractWithEntities,
             (id, server) -> TeamProviderApi.API.getSelected().canInteractWithEntity(id, server, entity, player));
@@ -163,7 +163,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public boolean canDamageEntity(Level level, Entity entity, UUID player) {
         if (entity.getType().is(ModEntityTags.ALLOWS_CLAIM_DAMAGE_ENTITIES)) return true;
-        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES,
+        return canAccess(level, entity.blockPosition(), player, CadmusAutoCompletes.ENTITY_DAMAGE, ModGameRules.RULE_CLAIMED_DAMAGE_ENTITIES, false,
             (id, server) -> {
                 if (entity instanceof Player) {
                     return AdminClaimHandler.getBooleanFlag(server, id, ModFlags.PVP);
@@ -229,6 +229,7 @@ public class ClaimApiImpl implements ClaimApi {
         Level level, BlockPos pos, UUID player,
         String permission,
         GameRules.Key<GameRules.BooleanValue> rule,
+        boolean checkBlock,
         ToBooleanBiFunction<String, MinecraftServer> checkFlags,
         ToBooleanBiFunction<ClaimSettings, ClaimSettings> checkSettings,
         ToBooleanBiFunction<String, MinecraftServer> checkTeamPermission
@@ -244,7 +245,7 @@ public class ClaimApiImpl implements ClaimApi {
         if (ModUtils.isAdmin(claim.getFirst()) && !checkFlags.applyAsBoolean(claim.getFirst(), server)) {
             return false;
         }
-        if (CadmusDataHandler.isBlockAllowed(level.getServer(), claim.getFirst(), level.getBlockState(pos).getBlock())) return true;
+        if (checkBlock && CadmusDataHandler.isBlockAllowed(level.getServer(), claim.getFirst(), level.getBlockState(pos).getBlock())) return true;
 
         if (Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(serverLevel.getPlayerByUUID(player), permission)) {
             return true;

@@ -2,7 +2,9 @@ package earth.terrarium.cadmus.common.compat.prometheus;
 
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.api.claims.maxclaims.MaxClaimProviderApi;
+import earth.terrarium.cadmus.common.claims.CadmusDataHandler;
 import earth.terrarium.prometheus.Prometheus;
+import earth.terrarium.prometheus.api.events.ServerRolesUpdatedEvent;
 import earth.terrarium.prometheus.api.permissions.PermissionApi;
 import earth.terrarium.prometheus.api.roles.RoleApi;
 import earth.terrarium.prometheus.api.roles.options.RoleOptionsApi;
@@ -25,6 +27,10 @@ public class PrometheusCompat {
         PermissionApi.API.addDefaultPermission(CadmusAutoCompletes.PERSONAL_BLOCK_INTERACTIONS, TriState.TRUE);
         PermissionApi.API.addDefaultPermission(CadmusAutoCompletes.PERSONAL_ENTITY_INTERACTIONS, TriState.TRUE);
         PermissionApi.API.addDefaultPermission(CadmusAutoCompletes.PERSONAL_ENTITY_DAMAGE, TriState.TRUE);
+
+        ServerRolesUpdatedEvent.register(event ->
+            CadmusDataHandler.getMaxTeamClaims(event.server()).keySet().forEach(id ->
+                MaxClaimProviderApi.API.getSelected().calculate(id, event.server())));
     }
 
     public static boolean hasPermission(Player player, String permission) {

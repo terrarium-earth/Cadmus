@@ -10,16 +10,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BasePressurePlateBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(BasePressurePlateBlock.class)
 public abstract class BasePressurePlateBlockMixin {
-    @Shadow
-    protected abstract int getSignalStrength(Level level, BlockPos blockPos);
-
-    @Shadow
-    protected abstract int getPressedTime();
 
     // Prevent players from activating pressure plates in protected chunks
     @WrapWithCondition(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/BasePressurePlateBlock;checkPressed(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)V"))
