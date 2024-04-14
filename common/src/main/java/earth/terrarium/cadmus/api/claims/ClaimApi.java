@@ -11,11 +11,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
+/**
+ * This API is being heavily reworked in 1.21.
+ */
+@Deprecated
+@ApiStatus.ScheduledForRemoval(inVersion = "1.21")
 public interface ClaimApi {
+
     ClaimApi API = ApiHelper.load(ClaimApi.class);
 
     /**

@@ -2,11 +2,15 @@ package earth.terrarium.cadmus.api.claims.maxclaims;
 
 import earth.terrarium.cadmus.api.ApiHelper;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+@Deprecated(forRemoval = true)
+@ApiStatus.ScheduledForRemoval(inVersion = "1.21")
 public interface MaxClaimProviderApi {
+
     MaxClaimProviderApi API = ApiHelper.load(MaxClaimProviderApi.class);
 
     /**

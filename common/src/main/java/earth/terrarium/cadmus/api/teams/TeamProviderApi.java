@@ -2,11 +2,15 @@ package earth.terrarium.cadmus.api.teams;
 
 import earth.terrarium.cadmus.api.ApiHelper;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+@Deprecated(forRemoval = true)
+@ApiStatus.ScheduledForRemoval(inVersion = "1.21")
 public interface TeamProviderApi {
+
     TeamProviderApi API = ApiHelper.load(TeamProviderApi.class);
 
     /**
