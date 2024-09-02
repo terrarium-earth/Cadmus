@@ -33,7 +33,7 @@ public record ClientboundSyncAllTeamInfoPacket(
         public Type() {
             super(
                 ClientboundSyncAllTeamInfoPacket.class,
-                new ResourceLocation(Cadmus.MOD_ID, "sync_all_team_info"),
+                Cadmus.id("sync_all_team_info"),
                 ObjectByteCodec.create(
                     new MapCodec<>(
                         ByteCodec.UUID,

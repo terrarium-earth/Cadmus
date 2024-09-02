@@ -39,7 +39,7 @@ public record ClientboundSyncClaimsPacket(
         public Type() {
             super(
                 ClientboundSyncClaimsPacket.class,
-                new ResourceLocation(Cadmus.MOD_ID, "sync_claims"),
+                Cadmus.id("sync_claims"),
                 ObjectByteCodec.create(
                     ExtraByteCodecs.resourceKey(Registries.DIMENSION).fieldOf(ClientboundSyncClaimsPacket::dimension),
                     new MapCodec<>(ByteCodec.UUID,

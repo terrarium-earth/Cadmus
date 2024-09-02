@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.client.compat.journeymap;
 
 import earth.terrarium.cadmus.Cadmus;
-import journeymap.client.api.option.BooleanOption;
-import journeymap.client.api.option.OptionCategory;
+import journeymap.api.v2.client.option.BooleanOption;
+import journeymap.api.v2.client.option.OptionCategory;
 
 public class ClaimedChunkOptions {
 

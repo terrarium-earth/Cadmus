@@ -21,7 +21,7 @@ import org.joml.Matrix4f;
 
 public class MapWidget extends AbstractWidget implements CursorWidget, AutoCloseable {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Cadmus.MOD_ID, "claimmaptextures");
+    private static final ResourceLocation TEXTURE = Cadmus.id("claimmaptextures");
 
     private final int scale;
     private final DynamicTexture texture;
@@ -54,18 +54,20 @@ public class MapWidget extends AbstractWidget implements CursorWidget, AutoClose
 
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder builder = Tesselator.getInstance().getBuilder();
+        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         try (var pose = new CloseablePoseStack(graphics)) {
             pose.translate(this.getX(), this.getY(), 1);
 
-            Matrix4f matrix4f = pose.last().pose();
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
             int scale = ClaimMapScreen.MAP_SIZE;
-            builder.vertex(matrix4f, 0, scale, 0).uv(0, 1).endVertex();
-            builder.vertex(matrix4f, scale, scale, 0).uv(1, 1).endVertex();
-            builder.vertex(matrix4f, scale, 0, 0).uv(1, 0).endVertex();
-            builder.vertex(matrix4f, 0, 0, 0).uv(0, 0).endVertex();
-            BufferUploader.drawWithShader(builder.end());
+            builder.addVertex( 0, scale, 0).setUv(0, 1);
+            builder.addVertex( scale, scale, 0).setUv(1, 1);
+            builder.addVertex( scale, 0, 0).setUv(1, 0);
+            builder.addVertex( 0, 0, 0).setUv(0, 0);
+
+            var toDraw = builder.build();
+            if (toDraw != null) {
+                BufferUploader.drawWithShader(toDraw);
+            }
         }
     }
 

@@ -20,7 +20,7 @@
     "common.protections.EntityMixin",
     "common.protections.FireBlockMixin",
     "common.protections.FlowingFluidMixin",
-    "common.protections.FrostWalkerEnchantmentMixin",
+    "common.protections.EnchantmentEffectMixins",
     "common.protections.HangingEntityMixin",
     "common.protections.LavaFluidMixin",
     "common.protections.OnHitMixin",

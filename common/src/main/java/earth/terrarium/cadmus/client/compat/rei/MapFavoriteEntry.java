@@ -21,8 +21,8 @@ import net.minecraft.sounds.SoundEvents;
 @SuppressWarnings("UnstableApiUsage")
 public class MapFavoriteEntry extends FavoriteEntry {
 
-    public static final ResourceLocation ID = new ResourceLocation(Cadmus.MOD_ID, Cadmus.MOD_ID);
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Cadmus.MOD_ID, "textures/gui/icons/map.png");
+    public static final ResourceLocation ID = Cadmus.id(Cadmus.MOD_ID);
+    private static final ResourceLocation TEXTURE = Cadmus.id("textures/gui/icons/map.png");
 
     @Override
     public boolean isInvalid() {

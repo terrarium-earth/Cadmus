@@ -35,7 +35,7 @@ public record ClientboundSyncTeamInfo(
         public Type() {
             super(
                 ClientboundSyncTeamInfo.class,
-                new ResourceLocation(Cadmus.MOD_ID, "sync_team_info"),
+                Cadmus.id("sync_team_info"),
                 ObjectByteCodec.create(
                     ByteCodec.UUID.fieldOf(ClientboundSyncTeamInfo::id),
                     ByteCodec.STRING.fieldOf(ClientboundSyncTeamInfo::name),

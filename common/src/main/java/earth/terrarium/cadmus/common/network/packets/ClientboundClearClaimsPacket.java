@@ -29,7 +29,7 @@ public record ClientboundClearClaimsPacket(
         public Type() {
             super(
                 ClientboundClearClaimsPacket.class,
-                new ResourceLocation(Cadmus.MOD_ID, "clear_claims"),
+                Cadmus.id("clear_claims"),
                 ObjectByteCodec.create(
                     ByteCodec.UUID.fieldOf(ClientboundClearClaimsPacket::id),
                     ClientboundClearClaimsPacket::new

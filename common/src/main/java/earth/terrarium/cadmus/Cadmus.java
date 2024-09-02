@@ -16,6 +16,7 @@ import earth.terrarium.cadmus.common.teams.VanillaTeam;
 import earth.terrarium.cadmus.common.utils.AdminUtils;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
 import earth.terrarium.cadmus.common.utils.ModUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +31,10 @@ public class Cadmus {
     public static final int DEFAULT_MAX_CHUNK_LOADED_CLAIMS = 64;
 
     public static int FORCE_LOADED_CHUNK_COUNT;
+
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
 
     public static void init() {
         NetworkHandler.init();

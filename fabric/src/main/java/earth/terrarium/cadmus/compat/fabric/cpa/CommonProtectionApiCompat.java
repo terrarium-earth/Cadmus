@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class CommonProtectionApiCompat {
 
-    private static final ResourceLocation CADMUS = new ResourceLocation(Cadmus.MOD_ID, Cadmus.MOD_ID);
+    private static final ResourceLocation CADMUS = Cadmus.id(Cadmus.MOD_ID);
 
     public static void init() {
         CommonProtection.register(CADMUS, new CadmusProtectionProvider());

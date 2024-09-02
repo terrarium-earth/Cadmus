@@ -34,6 +34,7 @@ dependencies {
     modApi(group = "net.fabricmc.fabric-api", name = "fabric-api", version = "$fabricApiVersion+$minecraftVersion")
     include(modImplementation(group = "eu.pb4", name = "common-protection-api", version = commonProtectionApiVersion))
 
-    modLocalRuntime(group = "maven.modrinth", name = "xaeros-world-map", version = "1.38.1_Fabric_1.20.4")
-    modLocalRuntime(group = "maven.modrinth", name = "xaeros-minimap", version = "24.0.3_Fabric_1.20.4")
+    modLocalRuntime(group = "maven.modrinth", name = "xaeros-world-map", version = "1.39.0_Fabric_1.21")
+    modLocalRuntime(group = "maven.modrinth", name = "xaeros-minimap", version = "24.3.0_Fabric_1.21")
+
 }
