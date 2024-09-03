@@ -80,14 +80,14 @@ subprojects {
         "modCompileOnly"(group = "info.journeymap", name = "journeymap-api-$modLoader", version = journeymapVersion)
 
         if (isCommon) {
-            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20.4", version = prometheusVersion) {
+            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
                 isTransitive = false
             }
 
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
-            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-1.20.4", version = prometheusVersion)
+            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion)
             // "modLocalRuntime"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
