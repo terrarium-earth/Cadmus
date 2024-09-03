@@ -26,5 +26,5 @@ dependencies {
 
     modLocalRuntime(group = "maven.modrinth", name = "xaeros-world-map", version = "1.39.0_NeoForge_1.21")
     modLocalRuntime(group = "maven.modrinth", name = "xaeros-minimap", version = "24.3.0_NeoForge_1.21")
-    modLocalRuntime(group = "maven.modrinth", name = "journeymap", version = "1.21-6.0.0-beta.22+neoforge")
+    modImplementation(group = "maven.modrinth", name = "journeymap", version = "1.21-6.0.0-beta.22+neoforge")
 }

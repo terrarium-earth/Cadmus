@@ -8,21 +8,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.BonemealEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.PistonEvent;
 
-@Mod(Cadmus.MOD_ID)
+@EventBusSubscriber(modid = Cadmus.MOD_ID)
 final class BlockPlaceProtectionImpl {
 
-    public BlockPlaceProtectionImpl() {
-        NeoForge.EVENT_BUS.register(this);
-    }
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    private void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+    private static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
         Entity entity = event.getEntity();
         if (entity != null) {
             if (!Protections.BLOCK_PLACING.canPlaceBlock(entity, event.getPos(), event.getPlacedBlock())) {
@@ -36,7 +33,7 @@ final class BlockPlaceProtectionImpl {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    private void onPistonPush(PistonEvent.Pre event) {
+    private static void onPistonPush(PistonEvent.Pre event) {
         if (!(event.getLevel() instanceof Level level)) return;
         if (event.getPistonMoveType() == PistonEvent.PistonMoveType.RETRACT) return;
         if (!Protections.BLOCK_PLACING.canPlaceBlock(level, event.getPos(), event.getState())) {
@@ -55,7 +52,7 @@ final class BlockPlaceProtectionImpl {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    private void onBonemeal(BonemealEvent event) {
+    private static void onBonemeal(BonemealEvent event) {
         if (!Protections.BLOCK_PLACING.canPlaceBlock(event.getLevel(), event.getPos(), event.getLevel().getBlockState(event.getPos()))) {
             event.setCanceled(true);
         }

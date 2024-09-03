@@ -18,12 +18,13 @@ public abstract class ServerConfigurationPacketListenerImplMixin {
         method = "handleConfigurationFinished",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/network/Connection;resumeInboundAfterProtocolChange()V"
+            target = "Lnet/minecraft/server/players/PlayerList;placeNewPlayer(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/server/network/CommonListenerCookie;)V",
+            shift = At.Shift.AFTER
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
     // The fabric event is called too early before the player is added to the player list which cadmus needs to send packets so invoke here instead.
-    private void cadmus$handleConfigurationFinished(ServerboundFinishConfigurationPacket packet, CallbackInfo ci, @Local ServerPlayer player) {
-        Cadmus.onPlayerJoin(player);
+    private void cadmus$handleConfigurationFinished(ServerboundFinishConfigurationPacket packet, CallbackInfo ci, @Local ServerPlayer serverPlayer) {
+        Cadmus.onPlayerJoin(serverPlayer);
     }
 }

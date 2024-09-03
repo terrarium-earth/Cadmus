@@ -54,15 +54,16 @@ public class MapWidget extends AbstractWidget implements CursorWidget, AutoClose
 
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
         try (var pose = new CloseablePoseStack(graphics)) {
             pose.translate(this.getX(), this.getY(), 1);
 
             int scale = ClaimMapScreen.MAP_SIZE;
-            builder.addVertex( 0, scale, 0).setUv(0, 1);
-            builder.addVertex( scale, scale, 0).setUv(1, 1);
-            builder.addVertex( scale, 0, 0).setUv(1, 0);
-            builder.addVertex( 0, 0, 0).setUv(0, 0);
+            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            var matrix4f = pose.last().pose();
+            builder.addVertex(matrix4f, 0, scale, 0).setUv(0, 1);
+            builder.addVertex(matrix4f, scale, scale, 0).setUv(1, 1);
+            builder.addVertex(matrix4f, scale, 0, 0).setUv(1, 0);
+            builder.addVertex(matrix4f, 0, 0, 0).setUv(0, 0);
 
             var toDraw = builder.build();
             if (toDraw != null) {

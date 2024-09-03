@@ -40,7 +40,7 @@ import java.util.concurrent.CompletableFuture;
 public class ClaimMapScreen extends BaseCursorScreen {
 
     public static final ResourceLocation TEXTURE = Cadmus.id("textures/gui/map.png");
-    public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/map_icons.png");
+    public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
     public static final int TEXTURE_WIDTH = 216;
     public static final int TEXTURE_HEIGHT = 237;
     public static final int MAP_SIZE = 200;
