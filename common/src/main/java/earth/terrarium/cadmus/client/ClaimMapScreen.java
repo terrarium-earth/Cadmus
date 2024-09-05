@@ -15,6 +15,7 @@ import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.olympus.client.components.buttons.TextButton;
 import earth.terrarium.olympus.client.components.map.MapWidget;
 import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.ui.modals.DeleteConfirmModal;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,13 +31,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class ClaimMapScreen extends BaseCursorScreen {
 
@@ -45,17 +44,12 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public static final int BANNER_HEIGHT = 15;
     public static final int PADDING = 4;
     public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
-    public static final int HEIGHT = MAP_SIZE + PADDING * 3 + BANNER_HEIGHT + 20;
+    public static final int HEIGHT = MAP_SIZE + PADDING * 3 + BANNER_HEIGHT + 18;
 
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
 
     private final LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
     private final ClientLevel level = player.clientLevel;
-
-    private boolean initializedMap;
-
-    @Nullable
-    private CompletableFuture<int[][]> future;
 
     private MapWidget mapWidget;
     private UUID id;
@@ -108,15 +102,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         var frame = new FrameLayout(x, y, WIDTH, HEIGHT);
         frame.setMinDimensions(WIDTH, HEIGHT);
 
-        /*
-        frame.addChild(new ImageButton(0, 0, 11, 11, TRASH_BUTTON_SPRITES, button -> unclaimAll()), (settings) -> {
-                settings.padding(2);
-                settings.alignHorizontallyLeft();
-                settings.alignVerticallyTop();
-            })
-            .setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
-         */
-
         frame.addChild(new ImageButton(0, 0, 11, 11, UIConstants.MODAL_CLOSE, button -> onClose()), (settings) -> {
                 settings.padding(2);
                 settings.alignHorizontallyRight();
@@ -124,18 +109,28 @@ public class ClaimMapScreen extends BaseCursorScreen {
             })
             .setTooltip(Tooltip.create(ConstantComponents.CLOSE));
 
+        frame.addChild(new ImageButton(0, 0, 11, 11, UIConstants.MODAL_REFRESH, button -> {
+                refresh();
+                refreshMap();
+            }), (settings) -> {
+                settings.padding(15, 2);
+                settings.alignHorizontallyRight();
+                settings.alignVerticallyTop();
+            })
+            .setTooltip(Tooltip.create(UIConstants.REFRESH));
+
         frame.addChild(new StringWidget(ConstantComponents.MAP_TITLE, font), (settings) -> {
             settings.padding(4);
-            settings.alignHorizontallyCenter();
+            settings.alignHorizontallyLeft();
             settings.alignVerticallyTop();
         }).setColor(0xFFFFFF);
 
+        this.refresh();
         this.mapWidget = frame.addChild(MapWidget.create(MAP_SIZE), (settings) -> {
             settings.padding(0, BANNER_HEIGHT + PADDING + 1);
             settings.alignHorizontallyCenter();
             settings.alignVerticallyTop();
         });
-        this.refresh();
 
         frame.addChild(TextButton.danger(font.width(ConstantComponents.UNCLAIM_ALL) + PADDING * 2, 18, ConstantComponents.UNCLAIM_ALL, button -> unclaimAll()), (settings) -> {
             settings.padding(PADDING);
@@ -158,18 +153,20 @@ public class ClaimMapScreen extends BaseCursorScreen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        drawClaimLabels(graphics, mouseX, mouseY);
+
+        drawClaimLabels(graphics);
+        drawClaims(graphics, mouseX, mouseY);
 
         if (this.selectionStartX == 0 && this.selectionStartZ == 0) {
             drawHover(graphics, mouseX, mouseY);
         } else {
             drawSelection(graphics);
         }
-        drawClaims(graphics, mouseX, mouseY);
+
         renderPlayerAvatar(graphics);
     }
 
-    private void drawClaimLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void drawClaimLabels(GuiGraphics graphics) {
         int left = mapWidget.getX() + PADDING;
         int right = mapWidget.getX() + mapWidget.getWidth() - PADDING;
         int top = mapWidget.getY() + mapWidget.getHeight() - PADDING - font.lineHeight;
@@ -453,7 +450,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     private void unclaimAll() {
-        CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_ALL, "");
+        DeleteConfirmModal.open(ConstantComponents.UNCLAIM_MODAL_TITLE, ConstantComponents.UNCLAIM_MODAL_DESCRIPTION, ConstantComponents.UNCLAIM_MODAL_CONFIRM, () -> CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_ALL, ""));
     }
 
     private static void update() {

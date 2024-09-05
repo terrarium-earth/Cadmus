@@ -38,4 +38,8 @@ public class ConstantComponents {
     public static final Component MAX_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_claims");
     public static final Component MAX_CHUNK_LOADED_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_chunk_loaded_claims");
     public static final Component SETTINGS = Component.translatable("gui.cadmus.claim_map.settings");
+
+    public static final Component UNCLAIM_MODAL_TITLE = Component.translatable("gui.cadmus.unclaim_modal.title");
+    public static final Component UNCLAIM_MODAL_DESCRIPTION = Component.translatable("gui.cadmus.unclaim_modal.description");
+    public static final Component UNCLAIM_MODAL_CONFIRM = Component.translatable("gui.cadmus.unclaim_modal.confirm");
 }

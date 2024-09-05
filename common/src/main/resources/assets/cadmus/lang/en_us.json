@@ -118,6 +118,10 @@
   "gui.cadmus.claim_map.loading": "Loading...",
   "gui.cadmus.claim_map.settings": "Settings",
 
+  "gui.cadmus.unclaim_modal.title": "Unclaim Chunks?",
+  "gui.cadmus.unclaim_modal.description": "Are you sure you want to unclaim all your chunks? This action is irreversible.",
+  "gui.cadmus.unclaim_modal.confirm": "Unclaim",
+
   "rei.sections.project_odyssey": "Project Odyssey",
   "rei.cadmus.cadmus.tooltip": "Open Claim Map"
 }
