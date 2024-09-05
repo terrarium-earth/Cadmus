@@ -2,7 +2,6 @@ package earth.terrarium.cadmus.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.client.claimmap.ClaimMapScreen;
 import earth.terrarium.cadmus.client.compat.prometheus.PrometheusClientCompat;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
@@ -53,7 +52,7 @@ public class CadmusClient {
     public static void onEnterSection() {
         if (Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
             screen.refresh();
-            screen.calculatePixels();
+            screen.refreshMap();
         }
     }
 

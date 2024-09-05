@@ -33,9 +33,9 @@ public class ConstantComponents {
 
 
     public static final Component MAP_TITLE = Component.translatable("gui.cadmus.claim_map.title");
-    public static final Component CLEAR_CLAIMED_CHUNKS = Component.translatable("gui.cadmus.claim_map.clear_claimed_chunks");
+    public static final Component UNCLAIM_ALL = Component.translatable("gui.cadmus.claim_map.clear_claimed_chunks");
     public static final Component CLOSE = Component.translatable("gui.cadmus.claim_map.close");
     public static final Component MAX_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_claims");
     public static final Component MAX_CHUNK_LOADED_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_chunk_loaded_claims");
-    public static final Component LOADING = Component.translatable("gui.cadmus.claim_map.loading");
+    public static final Component SETTINGS = Component.translatable("gui.cadmus.claim_map.settings");
 }

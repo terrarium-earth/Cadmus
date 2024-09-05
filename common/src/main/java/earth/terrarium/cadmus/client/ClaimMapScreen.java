@@ -1,27 +1,28 @@
-package earth.terrarium.cadmus.client.claimmap;
+package earth.terrarium.cadmus.client;
 
 import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
-import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
+import earth.terrarium.olympus.client.components.buttons.TextButton;
+import earth.terrarium.olympus.client.components.map.MapWidget;
+import earth.terrarium.olympus.client.ui.UIConstants;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.CommonComponents;
@@ -39,20 +40,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class ClaimMapScreen extends BaseCursorScreen {
 
-    public static final ResourceLocation TEXTURE = Cadmus.id("textures/gui/map.png");
     public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
-    public static final int TEXTURE_WIDTH = 216;
-    public static final int TEXTURE_HEIGHT = 237;
     public static final int MAP_SIZE = 200;
-
-    private static final WidgetSprites TRASH_BUTTON_SPRITES = new WidgetSprites(
-        Cadmus.id("claimmap/trash_button"),
-        Cadmus.id("claimmap/trash_button_highlighted")
-    );
-    private static final WidgetSprites X_BUTTON_SPRITES = new WidgetSprites(
-        Cadmus.id("claimmap/x_button"),
-        Cadmus.id("claimmap/x_button_highlighted")
-    );
+    public static final int BANNER_HEIGHT = 15;
+    public static final int PADDING = 4;
+    public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
+    public static final int HEIGHT = MAP_SIZE + PADDING * 3 + BANNER_HEIGHT + 20;
 
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
 
@@ -73,8 +66,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private int maxChunkLoaded;
 
     private float chunkScale;
-    private float left;
-    private float top;
     private float pixelScale;
     private int playerChunkX;
     private int playerChunkZ;
@@ -88,18 +79,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         super(CommonComponents.EMPTY);
     }
 
-    public void calculatePixels() {
-        ChunkPos pos = player.chunkPosition();
-        int scale = getMapScale();
-        int minX = pos.getMinBlockX() - scale;
-        int minZ = pos.getMinBlockZ() - scale;
-        int maxX = pos.getMaxBlockX() + scale + 1;
-        int maxZ = pos.getMaxBlockZ() + scale + 1;
-
-        this.future = CompletableFuture.supplyAsync(() -> ClaimMapTopologyAlgorithm.setColors(minX, minZ, maxX, maxZ, player.clientLevel, player), Util.backgroundExecutor());
-        this.future.thenAccept(colors -> this.mapWidget.updateTexture(colors));
-    }
-
     public void refresh() {
         this.id = TeamApi.API.getId(this.player);
         this.teamColor = ChatFormatting.getByCode(CadmusClient.TEAM_INFO.get(id).rightChar());
@@ -110,8 +89,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
         int renderDistanceScale = this.getScaledRenderDistance();
         this.chunkScale = renderDistanceScale / 16f;
-        this.left = (this.width - MAP_SIZE) / 2f;
-        this.top = (this.height - MAP_SIZE) / 2f;
         this.pixelScale = (float) MAP_SIZE / renderDistanceScale * 16;
         this.playerChunkX = Math.round(player.chunkPosition().x - chunkScale / 2);
         this.playerChunkZ = Math.round(player.chunkPosition().z - chunkScale / 2);
@@ -119,30 +96,68 @@ public class ClaimMapScreen extends BaseCursorScreen {
         this.calculateClaims();
     }
 
+    public void refreshMap() {
+        mapWidget.refreshMap();
+    }
+
     @Override
     protected void init() {
-        int x = (this.width - TEXTURE_WIDTH) / 2;
-        int y = (this.height - TEXTURE_HEIGHT) / 2;
+        int x = (this.width - WIDTH) / 2;
+        int y = (this.height - HEIGHT) / 2;
 
-        this.addRenderableWidget(new ImageButton(x + 7, y + 6, 11, 11, TRASH_BUTTON_SPRITES, button -> unclaimAll()))
+        var frame = new FrameLayout(x, y, WIDTH, HEIGHT);
+        frame.setMinDimensions(WIDTH, HEIGHT);
+
+        /*
+        frame.addChild(new ImageButton(0, 0, 11, 11, TRASH_BUTTON_SPRITES, button -> unclaimAll()), (settings) -> {
+                settings.padding(2);
+                settings.alignHorizontallyLeft();
+                settings.alignVerticallyTop();
+            })
             .setTooltip(Tooltip.create(ConstantComponents.CLEAR_CLAIMED_CHUNKS));
+         */
 
-        this.addRenderableWidget(new ImageButton(x + TEXTURE_WIDTH - 11 - 7, y + 6, 11, 11, X_BUTTON_SPRITES, button -> onClose()))
+        frame.addChild(new ImageButton(0, 0, 11, 11, UIConstants.MODAL_CLOSE, button -> onClose()), (settings) -> {
+                settings.padding(2);
+                settings.alignHorizontallyRight();
+                settings.alignVerticallyTop();
+            })
             .setTooltip(Tooltip.create(ConstantComponents.CLOSE));
 
+        frame.addChild(new StringWidget(ConstantComponents.MAP_TITLE, font), (settings) -> {
+            settings.padding(4);
+            settings.alignHorizontallyCenter();
+            settings.alignVerticallyTop();
+        }).setColor(0xFFFFFF);
+
+        this.mapWidget = frame.addChild(MapWidget.create(MAP_SIZE), (settings) -> {
+            settings.padding(0, BANNER_HEIGHT + PADDING + 1);
+            settings.alignHorizontallyCenter();
+            settings.alignVerticallyTop();
+        });
         this.refresh();
-        this.mapWidget = addRenderableWidget(new MapWidget((int) this.left, (int) this.top, MAP_SIZE, MAP_SIZE, this.getMapScale() * 2 + 16));
-        if (!this.initializedMap) {
-            this.calculatePixels();
-            this.initializedMap = true;
-        }
+
+        frame.addChild(TextButton.danger(font.width(ConstantComponents.UNCLAIM_ALL) + PADDING * 2, 18, ConstantComponents.UNCLAIM_ALL, button -> unclaimAll()), (settings) -> {
+            settings.padding(PADDING);
+            settings.alignHorizontallyLeft();
+            settings.alignVerticallyBottom();
+        });
+
+        frame.addChild(TextButton.normal(font.width(ConstantComponents.SETTINGS) + PADDING * 2, 18, ConstantComponents.SETTINGS, button -> {
+            // BaseModal.open(new ClaimMapSettingsModal());
+        }), (settings) -> {
+            settings.padding(PADDING);
+            settings.alignHorizontallyRight();
+            settings.alignVerticallyBottom();
+        });
+
+        frame.arrangeElements();
+        frame.visitWidgets(this::addRenderableWidget);
     }
 
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        int top = (this.height - TEXTURE_HEIGHT) / 2;
-        graphics.drawString(font, ConstantComponents.MAP_TITLE, (width - font.width(ConstantComponents.MAP_TITLE)) / 2, top + 7, 0x2a262b, false);
         drawClaimLabels(graphics, mouseX, mouseY);
 
         if (this.selectionStartX == 0 && this.selectionStartZ == 0) {
@@ -155,28 +170,28 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     private void drawClaimLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        int left = (this.width - TEXTURE_WIDTH) / 2;
-        int top = (this.height - TEXTURE_HEIGHT) / 2 + TEXTURE_HEIGHT - 13;
+        int left = mapWidget.getX() + PADDING;
+        int right = mapWidget.getX() + mapWidget.getWidth() - PADDING;
+        int top = mapWidget.getY() + mapWidget.getHeight() - PADDING - font.lineHeight;
 
         String claimedCount = String.format("%d/%d", this.claimedCount, this.maxClaims);
         String chunkLoadedCount = String.format("%d/%d", this.chunkLoadedCount, this.maxChunkLoaded);
 
-        graphics.drawString(font, claimedCount, left + 18, top, 0x404040, false);
-        graphics.drawString(font, chunkLoadedCount, left + 95, top, 0x404040, false);
+        graphics.drawString(font, claimedCount, left, top, 0xFFFFFF, true);
+        graphics.drawString(font, chunkLoadedCount, right - font.width(chunkLoadedCount), top, 0xFFFFFF, true);
 
-        if (mouseX >= left + 8 && mouseX <= left + 18 + font.width(claimedCount) && mouseY >= top - 5 && mouseY <= top + 10) {
-            ScreenUtils.setTooltip(ConstantComponents.MAX_CLAIMS);
-        } else if (mouseX >= left + 85 && mouseX <= left + 95 + font.width(chunkLoadedCount) && mouseY >= top - 5 && mouseY <= top + 10) {
-            ScreenUtils.setTooltip(ConstantComponents.MAX_CHUNK_LOADED_CLAIMS);
-        }
+        graphics.drawString(font, ConstantComponents.MAX_CLAIMS, left, top - 10, 0xFFFFFF, true);
+        graphics.drawString(font, ConstantComponents.MAX_CHUNK_LOADED_CLAIMS, right - font.width(ConstantComponents.MAX_CHUNK_LOADED_CLAIMS), top - 10, 0xFFFFFF, true);
     }
 
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
-        int left = (this.width - TEXTURE_WIDTH) / 2;
-        int top = (this.height - TEXTURE_HEIGHT) / 2 + 1;
-        graphics.blit(TEXTURE, left, top, 0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        int left = (this.width - WIDTH) / 2;
+        int top = (this.height - HEIGHT) / 2;
+        graphics.blitSprite(UIConstants.MODAL, left, top, WIDTH, HEIGHT);
+        graphics.blitSprite(UIConstants.MODAL_INSET, mapWidget.getX() - 1, mapWidget.getY() - 1, MAP_SIZE + 2, MAP_SIZE + 2);
+        graphics.blitSprite(UIConstants.MODAL_HEADER, left, top, WIDTH, BANNER_HEIGHT);
     }
 
     @Override
@@ -185,20 +200,11 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     @Override
-    public void onClose() {
-        this.mapWidget.close();
-        if (this.future != null && !this.future.isDone()) {
-            this.future.cancel(false); // Don't attempt to modify the texture if the screen is closed
-        }
-        super.onClose();
-    }
-
-    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         for (int i = 0; i < chunkScale; i++) {
             for (int j = 0; j < chunkScale; j++) {
-                float x = left + (i * pixelScale);
-                float y = top + (j * pixelScale);
+                float x = mapWidget.getX() + (i * pixelScale);
+                float y = mapWidget.getY() + (j * pixelScale);
 
                 if (isHovering(mouseX, mouseY, x, y)) {
                     this.selectionStartX = playerChunkX + i;
@@ -216,8 +222,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         for (int i = 0; i < chunkScale; i++) {
             for (int j = 0; j < chunkScale; j++) {
-                float x = left + (i * pixelScale);
-                float y = top + (j * pixelScale);
+                float x = mapWidget.getX() + (i * pixelScale);
+                float y = mapWidget.getY() + (j * pixelScale);
 
                 if (isHovering(mouseX, mouseY, x, y)) {
                     this.selectionEndX = playerChunkX + i;
@@ -238,8 +244,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     private void drawClaims(GuiGraphics graphics, int mouseX, int mouseY) {
         this.claims.forEach((pos, claim) -> {
-            float x = left + (claim.x * pixelScale);
-            float y = top + (claim.y * pixelScale);
+            float x = mapWidget.getX() + (claim.x * pixelScale);
+            float y = mapWidget.getY() + (claim.y * pixelScale);
 
             drawClaimSquare(graphics, x, y, pixelScale, pixelScale, modifyAlpha(claim.color, 127),
                 claim.north, claim.east,
@@ -256,8 +262,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private void drawHover(GuiGraphics graphics, int mouseX, int mouseY) {
         for (int i = 0; i < chunkScale; i++) {
             for (int j = 0; j < chunkScale; j++) {
-                float x = left + (i * pixelScale);
-                float y = top + (j * pixelScale);
+                float x = mapWidget.getX() + (i * pixelScale);
+                float y = mapWidget.getY() + (j * pixelScale);
 
                 if (isHovering(mouseX, mouseY, x, y)) {
                     drawClaimSquare(graphics, x, y, pixelScale, pixelScale, color(this.teamColor, 127),
@@ -274,8 +280,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
         int selectionEndX = Math.max(this.selectionStartX, this.selectionEndX);
         int selectionEndZ = Math.max(this.selectionStartZ, this.selectionEndZ);
 
-        float x = left + ((selectionStartX - playerChunkX) * pixelScale);
-        float y = top + ((selectionStartZ - playerChunkZ) * pixelScale);
+        float x = mapWidget.getX() + ((selectionStartX - playerChunkX) * pixelScale);
+        float y = mapWidget.getY() + ((selectionStartZ - playerChunkZ) * pixelScale);
         float width = Math.max(pixelScale, ((selectionEndX + 1 - selectionStartX)) * pixelScale);
         float height = Math.max(pixelScale, ((selectionEndZ + 1 - selectionStartZ)) * pixelScale);
 

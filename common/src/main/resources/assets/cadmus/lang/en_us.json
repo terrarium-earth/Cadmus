@@ -111,11 +111,12 @@
   "cadmus.personal.item_pickup":  "Personal Item Pickup",
 
   "gui.cadmus.claim_map.title": "Claim Map",
-  "gui.cadmus.claim_map.clear_claimed_chunks": "Clear Claimed Chunks",
+  "gui.cadmus.claim_map.clear_claimed_chunks": "Unclaim All",
   "gui.cadmus.claim_map.close": "Close",
-  "gui.cadmus.claim_map.max_claims": "Max Claims",
-  "gui.cadmus.claim_map.max_chunk_loaded_claims": "Max Chunk Loaded Claims",
+  "gui.cadmus.claim_map.max_claims": "Chunks Claimed",
+  "gui.cadmus.claim_map.max_chunk_loaded_claims": "Chunks Loaded",
   "gui.cadmus.claim_map.loading": "Loading...",
+  "gui.cadmus.claim_map.settings": "Settings",
 
   "rei.sections.project_odyssey": "Project Odyssey",
   "rei.cadmus.cadmus.tooltip": "Open Claim Map"
