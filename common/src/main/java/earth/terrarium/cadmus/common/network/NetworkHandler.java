@@ -4,8 +4,11 @@ package earth.terrarium.cadmus.common.network;
 import com.teamresourceful.resourcefullib.common.network.Network;
 import com.teamresourceful.resourcefullib.common.network.Packet;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.common.network.packets.*;
-import net.minecraft.resources.ResourceLocation;
+import earth.terrarium.cadmus.common.network.packets.clientbound.*;
+import earth.terrarium.cadmus.common.network.packets.serverbound.BulkClaimSettingsPacket;
+import earth.terrarium.cadmus.common.network.packets.serverbound.ChatClaimPacket;
+import earth.terrarium.cadmus.common.network.packets.serverbound.ClaimSettingsPacket;
+import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
 import net.minecraft.server.MinecraftServer;
 
 public class NetworkHandler {
@@ -13,17 +16,21 @@ public class NetworkHandler {
     public static final Network CHANNEL = new Network(Cadmus.id("main"), 1, true);
 
     public static void init() {
-        CHANNEL.register(ServerboundSendClaimChatCommandPacket.TYPE);
-        CHANNEL.register(ClientboundSyncClaimsPacket.TYPE);
-        CHANNEL.register(ClientboundAddClaimPacket.TYPE);
-        CHANNEL.register(ClientboundAddClaimsPacket.TYPE);
-        CHANNEL.register(ClientboundRemoveClaimPacket.TYPE);
-        CHANNEL.register(ClientboundRemoveClaimsPacket.TYPE);
-        CHANNEL.register(ClientboundClearClaimsPacket.TYPE);
-        CHANNEL.register(ClientboundSyncTeamInfo.TYPE);
-        CHANNEL.register(ClientboundSyncAllTeamInfoPacket.TYPE);
-        CHANNEL.register(ClientboundSyncMaxClaims.TYPE);
-        CHANNEL.register(ClientboundSyncAllMaxClaims.TYPE);
+        CHANNEL.register(ChatClaimPacket.TYPE);
+        CHANNEL.register(SyncClaimsPacket.TYPE);
+        CHANNEL.register(AddClaimPacket.TYPE);
+        CHANNEL.register(AddBulkClaimsPacket.TYPE);
+        CHANNEL.register(RemoveClaimPacket.TYPE);
+        CHANNEL.register(RemoveBulkClaimsPacket.TYPE);
+        CHANNEL.register(ClearClaimsPacket.TYPE);
+        CHANNEL.register(SyncTeamInfo.TYPE);
+        CHANNEL.register(SyncAllTeamInfoPacket.TYPE);
+        CHANNEL.register(SyncMaxClaimsPacket.TYPE);
+        CHANNEL.register(SyncAllMaxClaimsPacket.TYPE);
+        CHANNEL.register(SyncClaimSettingsPacket.TYPE);
+        CHANNEL.register(ClaimSettingsPacket.TYPE);
+        CHANNEL.register(RequestClaimSettingsPacket.TYPE);
+        CHANNEL.register(BulkClaimSettingsPacket.TYPE);
     }
 
     /**

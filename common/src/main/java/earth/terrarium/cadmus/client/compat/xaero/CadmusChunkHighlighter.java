@@ -1,5 +1,7 @@
 package earth.terrarium.cadmus.client.compat.xaero;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.color.ConstantColors;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
@@ -116,7 +118,7 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
     private static int getColor(UUID id) {
         return Optionull.mapOrDefault(
             TeamApi.API.getColor(CadmusClient.level(), id),
-            ChatFormatting::getColor,
-            Objects.requireNonNull(ChatFormatting.AQUA.getColor()));
+            Color::getValue,
+            ConstantColors.aqua.getValue());
     }
 }

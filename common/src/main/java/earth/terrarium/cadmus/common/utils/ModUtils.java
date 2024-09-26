@@ -1,11 +1,17 @@
 package earth.terrarium.cadmus.common.utils;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.color.ConstantColors;
 import com.teamresourceful.resourcefullib.common.exceptions.NotImplementedException;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.protections.ProtectionApi;
+import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
+import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.packets.ClientboundSyncClaimsPacket;
+import earth.terrarium.cadmus.common.network.packets.clientbound.SyncClaimsPacket;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -13,6 +19,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.Contract;
 
@@ -23,19 +30,19 @@ public class ModUtils {
 
     private static final int MAX_CHUNKS_PER_PACKET = 500;
 
-    private static final ChatFormatting[] COLORS = new ChatFormatting[]{
-        ChatFormatting.DARK_BLUE,
-        ChatFormatting.DARK_GREEN,
-        ChatFormatting.DARK_AQUA,
-        ChatFormatting.DARK_RED,
-        ChatFormatting.DARK_PURPLE,
-        ChatFormatting.GOLD,
-        ChatFormatting.BLUE,
-        ChatFormatting.GREEN,
-        ChatFormatting.AQUA,
-        ChatFormatting.RED,
-        ChatFormatting.LIGHT_PURPLE,
-        ChatFormatting.YELLOW,
+    public static final Color[] COLORS = new Color[]{
+        ConstantColors.darkblue,
+        ConstantColors.green,
+        ConstantColors.aqua,
+        ConstantColors.darkred,
+        ConstantColors.purple,
+        ConstantColors.gold,
+        ConstantColors.blue,
+        ConstantColors.lime,
+        ConstantColors.cyan,
+        ConstantColors.red,
+        ConstantColors.magenta,
+        ConstantColors.yellow,
     };
 
     @Contract(pure = true)
@@ -48,7 +55,7 @@ public class ModUtils {
         return UUID.nameUUIDFromBytes(string.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static ChatFormatting uuidToColor(UUID id) {
+    public static Color uuidToColor(UUID id) {
         return COLORS[Math.abs(id.hashCode()) % COLORS.length];
     }
 
@@ -56,7 +63,7 @@ public class ModUtils {
      * Sends all claims, packet splitting in batches of {@link #MAX_CHUNKS_PER_PACKET} to the player joining the server.
      */
     public static void sendJoinPackets(ServerPlayer player) {
-        if (!NetworkHandler.CHANNEL.canSendToPlayer(player, ClientboundSyncClaimsPacket.TYPE)) return;
+        if (!NetworkHandler.CHANNEL.canSendToPlayer(player, SyncClaimsPacket.TYPE)) return;
         for (var level : player.server.getAllLevels()) {
             Object2ObjectMap<UUID, Object2BooleanMap<ChunkPos>> allClaims = ClaimApi.API.getAllClaimsByOwner(player.serverLevel());
             if (allClaims.isEmpty()) continue;
@@ -69,7 +76,7 @@ public class ModUtils {
                 count++;
 
                 if (count == MAX_CHUNKS_PER_PACKET || count == allClaims.size()) {
-                    NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncClaimsPacket(level.dimension(), batch), player);
+                    NetworkHandler.CHANNEL.sendToPlayer(new SyncClaimsPacket(level.dimension(), batch), player);
                     batch = new Object2ObjectOpenHashMap<>();
                     count = 0;
                 }
@@ -89,5 +96,26 @@ public class ModUtils {
         }
 
         return Component.literal(CommonUtils.serverTranslatable(key, args).getString());
+    }
+
+    /**
+     * Checks if the player has permission to modify the setting. if not, returns the component with the error message.
+     * @param player the player to check
+     * @param setting the setting to check
+     * @return null if the player has permission, otherwise the component with the error message.
+     */
+    public static Component canUsePermission(Player player, String setting) {
+        var protection = ProtectionApi.API.getProtection(setting);
+        if (protection == null) {
+            return ConstantComponents.NO_PERMISSION_ROLE;
+        }
+        if (!player.hasPermissions(2)) {
+            if (!TeamApi.API.canModifySettings(player)) {
+                return ConstantComponents.NO_PERMISSION_TEAM;
+            } else if (!PrometheusCompat.hasPermission(player, protection.permission())) {
+                return ConstantComponents.NO_PERMISSION_ROLE;
+            }
+        }
+        return null;
     }
 }

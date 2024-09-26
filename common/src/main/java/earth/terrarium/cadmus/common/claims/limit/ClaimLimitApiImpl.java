@@ -4,8 +4,8 @@ import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimiter;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.packets.ClientboundSyncAllMaxClaims;
-import earth.terrarium.cadmus.common.network.packets.ClientboundSyncMaxClaims;
+import earth.terrarium.cadmus.common.network.packets.clientbound.SyncAllMaxClaimsPacket;
+import earth.terrarium.cadmus.common.network.packets.clientbound.SyncMaxClaimsPacket;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.server.MinecraftServer;
 
@@ -51,7 +51,7 @@ public class ClaimLimitApiImpl implements ClaimLimitApi {
         this.maxClaimsByTeam.clear();
         TeamApi.API.getAllTeams(server).forEach(id -> calculate(server, id, false));
         if (!maxClaimsByTeam.isEmpty()) {
-            NetworkHandler.sendToAllClientPlayers(new ClientboundSyncAllMaxClaims(this.maxClaimsByTeam), server);
+            NetworkHandler.sendToAllClientPlayers(new SyncAllMaxClaimsPacket(this.maxClaimsByTeam), server);
         }
     }
 
@@ -65,7 +65,7 @@ public class ClaimLimitApiImpl implements ClaimLimitApi {
         }
         this.maxClaimsByTeam.put(id, IntIntPair.of(maxClaims, maxChunkLoaded));
         if (sync) {
-            NetworkHandler.sendToAllClientPlayers(new ClientboundSyncMaxClaims(id, maxClaims, maxChunkLoaded), server);
+            NetworkHandler.sendToAllClientPlayers(new SyncMaxClaimsPacket(id, maxClaims, maxChunkLoaded), server);
         }
     }
 }

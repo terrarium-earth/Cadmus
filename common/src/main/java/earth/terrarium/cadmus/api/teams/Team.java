@@ -1,8 +1,8 @@
 package earth.terrarium.cadmus.api.teams;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.common.claims.limit.ClaimLimitApiImpl;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +31,7 @@ public interface Team {
      * @param level The level.
      * @return The color of the team, or empty if no team is found.
      */
-    Optional<ChatFormatting> getColor(Level level, UUID id);
+    Optional<Color> getColor(Level level, UUID id);
 
     /**
      * Gets the members of the team.

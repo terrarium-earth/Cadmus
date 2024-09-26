@@ -4,6 +4,8 @@ import com.mojang.math.Axis;
 import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
+import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
@@ -12,10 +14,17 @@ import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
-import earth.terrarium.olympus.client.components.buttons.TextButton;
+import earth.terrarium.cadmus.common.network.NetworkHandler;
+import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
+import earth.terrarium.olympus.client.components.Widgets;
+import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.map.MapRenderer;
 import earth.terrarium.olympus.client.components.map.MapWidget;
+import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.ui.UIConstants;
 import earth.terrarium.olympus.client.ui.modals.DeleteConfirmModal;
+import earth.terrarium.olympus.client.utils.State;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -42,18 +51,23 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
     public static final int MAP_SIZE = 200;
     public static final int BANNER_HEIGHT = 15;
+    public static final int BUTTON_HEIGHT = 24;
     public static final int PADDING = 4;
     public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
-    public static final int HEIGHT = MAP_SIZE + PADDING * 3 + BANNER_HEIGHT + 18;
+    public static final int HEIGHT = MAP_SIZE + PADDING * 4 + 2 + BANNER_HEIGHT + BUTTON_HEIGHT;
 
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
+    private final Map<String, TriState> settings = new HashMap<>();
 
     private final LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
     private final ClientLevel level = player.clientLevel;
 
+    private final State<MapRenderer> mapState = State.empty();
+
     private MapWidget mapWidget;
+    private Button settingsButton;
     private UUID id;
-    private ChatFormatting teamColor;
+    private Color teamColor;
     private int claimedCount;
     private int maxClaims;
     private int chunkLoadedCount;
@@ -75,7 +89,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     public void refresh() {
         this.id = TeamApi.API.getId(this.player);
-        this.teamColor = ChatFormatting.getByCode(CadmusClient.TEAM_INFO.get(id).rightChar());
+        this.teamColor = CadmusClient.TEAM_INFO.get(id).color();
         this.claimedCount = ClaimCommand.getClaimsCount(player, false);
         this.maxClaims = ClaimLimitApi.API.getMaxClaims(player);
         this.chunkLoadedCount = ClaimCommand.getClaimsCount(player, true);
@@ -88,6 +102,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         this.playerChunkZ = Math.round(player.chunkPosition().z - chunkScale / 2);
 
         this.calculateClaims();
+        NetworkHandler.CHANNEL.sendToServer(new RequestClaimSettingsPacket());
     }
 
     public void refreshMap() {
@@ -96,6 +111,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     @Override
     protected void init() {
+        NetworkHandler.CHANNEL.sendToServer(new RequestClaimSettingsPacket());
+
         int x = (this.width - WIDTH) / 2;
         int y = (this.height - HEIGHT) / 2;
 
@@ -126,25 +143,40 @@ public class ClaimMapScreen extends BaseCursorScreen {
         }).setColor(0xFFFFFF);
 
         this.refresh();
-        this.mapWidget = frame.addChild(MapWidget.create(MAP_SIZE), (settings) -> {
+        this.mapWidget = frame.addChild(Widgets.map(mapState), (settings) -> {
             settings.padding(0, BANNER_HEIGHT + PADDING + 1);
             settings.alignHorizontallyCenter();
             settings.alignVerticallyTop();
         });
 
-        frame.addChild(TextButton.danger(font.width(ConstantComponents.UNCLAIM_ALL) + PADDING * 2, 18, ConstantComponents.UNCLAIM_ALL, button -> unclaimAll()), (settings) -> {
-            settings.padding(PADDING);
-            settings.alignHorizontallyLeft();
-            settings.alignVerticallyBottom();
-        });
+        mapWidget.withSize(MAP_SIZE);
 
-        frame.addChild(TextButton.normal(font.width(ConstantComponents.SETTINGS) + PADDING * 2, 18, ConstantComponents.SETTINGS, button -> {
-            // BaseModal.open(new ClaimMapSettingsModal());
-        }), (settings) -> {
-            settings.padding(PADDING);
-            settings.alignHorizontallyRight();
-            settings.alignVerticallyBottom();
-        });
+        frame.addChild(
+            Widgets.button()
+                .withCallback(this::unclaimAll)
+                .withTexture(UIConstants.DANGER_BUTTON)
+                .withSize(MAP_SIZE / 2, BUTTON_HEIGHT)
+                .withRenderer(WidgetRenderers.text(ConstantComponents.UNCLAIM_ALL).withColor(MinecraftColors.WHITE)),
+            (settings) -> {
+                settings.padding(PADDING);
+                settings.alignHorizontallyLeft();
+                settings.alignVerticallyBottom();
+            }
+        );
+
+        settingsButton = frame.addChild(
+            Widgets.button()
+                .withCallback(() -> minecraft.setScreen(new ClaimConfigModal(this)))
+                .withSize(MAP_SIZE / 2, BUTTON_HEIGHT)
+                .withRenderer(WidgetRenderers.text(ConstantComponents.SETTINGS)),
+            (settings) -> {
+                settings.padding(PADDING);
+                settings.alignHorizontallyRight();
+                settings.alignVerticallyBottom();
+            }
+        );
+
+        settingsButton.active = !settings.isEmpty();
 
         frame.arrangeElements();
         frame.visitWidgets(this::addRenderableWidget);
@@ -187,8 +219,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
         int left = (this.width - WIDTH) / 2;
         int top = (this.height - HEIGHT) / 2;
         graphics.blitSprite(UIConstants.MODAL, left, top, WIDTH, HEIGHT);
-        graphics.blitSprite(UIConstants.MODAL_INSET, mapWidget.getX() - 1, mapWidget.getY() - 1, MAP_SIZE + 2, MAP_SIZE + 2);
         graphics.blitSprite(UIConstants.MODAL_HEADER, left, top, WIDTH, BANNER_HEIGHT);
+        graphics.blitSprite(UIConstants.MODAL_FOOTER, left, top + HEIGHT - BUTTON_HEIGHT - PADDING * 2, WIDTH, BUTTON_HEIGHT + PADDING * 2);
     }
 
     @Override
@@ -297,7 +329,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
                 UUID id = claim.get().left();
 
                 Component name = getName(id, claim.get().rightBoolean());
-                int color = color(ChatFormatting.getByCode(CadmusClient.TEAM_INFO.get(id).rightChar()), 127);
+                int color = color(CadmusClient.TEAM_INFO.get(id).color(), 127);
 
                 boolean north = checkSide(i, j, 0, -1);
                 boolean east = checkSide(i, j, 1, 0);
@@ -403,9 +435,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
         return mouseX >= x && mouseX < x + pixelScale && mouseY >= y && mouseY < y + pixelScale;
     }
 
-    @SuppressWarnings("DataFlowIssue")
-    private int color(ChatFormatting color, int alpha) {
-        return modifyAlpha((color == ChatFormatting.RESET ? ChatFormatting.AQUA : color).getColor(), alpha);
+    private int color(Color color, int alpha) {
+        return modifyAlpha(color.getValue(), alpha);
     }
 
     private int modifyAlpha(int color, int alpha) {
@@ -458,6 +489,15 @@ public class ClaimMapScreen extends BaseCursorScreen {
         if (Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
             screen.refresh();
         }
+    }
+
+    public void updateSettings(Map<String, TriState> settings) {
+        this.settings.putAll(settings);
+        settingsButton.active = !settings.isEmpty();
+    }
+
+    public Map<String, TriState> getSettings() {
+        return settings;
     }
 
     private record ClaimTile(

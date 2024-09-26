@@ -1,5 +1,7 @@
 package earth.terrarium.cadmus.client.compat.journeymap;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.color.ConstantColors;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
@@ -32,8 +34,8 @@ public class ClaimedChunkDisplay {
         Component name = TeamApi.API.getName(CadmusClient.level(), id);
         int color = Optionull.mapOrDefault(
             TeamApi.API.getColor(CadmusClient.level(), id),
-            ChatFormatting::getColor,
-            Objects.requireNonNull(ChatFormatting.AQUA.getColor()));
+            Color::getValue,
+            ConstantColors.aqua.getValue());
 
         int darkColor = FastColor.ARGB32.color(
             255,

@@ -24,8 +24,6 @@ import java.util.Locale;
 
 public class ClaimSettingsCommand {
 
-    private static final SimpleCommandExceptionType NO_PERMISSION_TEAM = new SimpleCommandExceptionType(ConstantComponents.NO_PERMISSION_TEAM);
-    private static final SimpleCommandExceptionType NO_PERMISSION_ROLE = new SimpleCommandExceptionType(ConstantComponents.NO_PERMISSION_ROLE);
     private static final SimpleCommandExceptionType INVALID_STATE = new SimpleCommandExceptionType(ConstantComponents.INVALID_STATE);
 
     // I'm gonna claim the entire TRI STATE AREA
@@ -41,7 +39,7 @@ public class ClaimSettingsCommand {
                             .suggests(TRI_STATE_SUGGESTION_PROVIDER)
                             .executes(context -> {
                                 ServerPlayer player = context.getSource().getPlayerOrException();
-                                checkPermissions(player, ProtectionApi.API.getProtection(setting));
+                                checkPermissions(player, setting);
                                 String value = StringArgumentType.getString(context, "value");
                                 set(context.getSource(), setting, value);
                                 return 1;
@@ -87,13 +85,10 @@ public class ClaimSettingsCommand {
         };
     }
 
-    private static void checkPermissions(ServerPlayer player, Protection protection) throws CommandSyntaxException {
-        if (player.hasPermissions(2)) return;
-
-        if (!TeamApi.API.canModifySettings(player)) throw NO_PERMISSION_TEAM.create();
-
-        if (Cadmus.IS_PROMETHEUS_LOADED && !PrometheusCompat.hasPermission(player, protection.permission())) {
-            throw NO_PERMISSION_ROLE.create();
+    public static void checkPermissions(ServerPlayer player, String protection) throws CommandSyntaxException {
+        var error = ModUtils.canUsePermission(player, protection);
+        if (error != null) {
+            throw new SimpleCommandExceptionType(error).create();
         }
     }
 }

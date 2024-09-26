@@ -1,14 +1,15 @@
 package earth.terrarium.cadmus.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.compat.prometheus.PrometheusClientCompat;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.packets.ServerboundSendClaimChatCommandPacket;
-import it.unimi.dsi.fastutil.objects.ObjectCharPair;
+import earth.terrarium.cadmus.common.network.packets.serverbound.ChatClaimPacket;
+import earth.terrarium.cadmus.common.teams.TeamInfo;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 public class CadmusClient {
 
-    public static final Map<UUID, ObjectCharPair<String>> TEAM_INFO = new HashMap<>();
+    public static final Map<UUID, TeamInfo> TEAM_INFO = new HashMap<>();
 
     public static final KeyMapping KEY_OPEN_CLAIM_MAP = new KeyMapping(
         ConstantComponents.OPEN_CLAIM_MAP_KEY.getString(),
@@ -32,6 +33,7 @@ public class CadmusClient {
         if (Cadmus.IS_PROMETHEUS_LOADED) {
             PrometheusClientCompat.init();
         }
+        Color.initRainbow();
     }
 
     public static void onClientTick() {
@@ -62,6 +64,6 @@ public class CadmusClient {
     }
 
     public static void sendClaimCommand(ClaimCommandType type, String command) {
-        NetworkHandler.CHANNEL.sendToServer(new ServerboundSendClaimChatCommandPacket(type, command));
+        NetworkHandler.CHANNEL.sendToServer(new ChatClaimPacket(type, command));
     }
 }

@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.api.teams;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.ApiHelper;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -76,7 +76,7 @@ public interface TeamApi {
      * @param id    The ID of the team.
      * @return The color of the team or a seed-based random color if the team is not found.
      */
-    ChatFormatting getColor(Level level, UUID id);
+    Color getColor(Level level, UUID id);
 
     /**
      * If the ID is a team, gets the team color. If the ID is an admin team, gets the color flag. If it can't find any of these, return a random color using the ID as a seed.
@@ -85,7 +85,7 @@ public interface TeamApi {
      * @param id     The ID of the team.
      * @return The color of the team or a seed-based random color if the team is not found.
      */
-    ChatFormatting getColor(MinecraftServer server, UUID id);
+    Color getColor(MinecraftServer server, UUID id);
 
     /**
      * Checks if the player is a member of the team, or if the player owns the personal team.
