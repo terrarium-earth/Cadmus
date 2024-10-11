@@ -33,7 +33,7 @@ public record ClientboundSyncAllMaxClaims(
         public Type() {
             super(
                 ClientboundSyncAllMaxClaims.class,
-                new ResourceLocation(Cadmus.MOD_ID, "sync_all_max_claims"),
+                Cadmus.id("sync_all_max_claims"),
                 ObjectByteCodec.create(
                     new MapCodec<>(
                         ByteCodec.UUID,

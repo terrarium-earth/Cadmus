@@ -4,10 +4,12 @@ import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.common.protections.Protections;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 
-@Mod.EventBusSubscriber(modid = Cadmus.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Cadmus.MOD_ID)
 final class BlockExplosionProtectionImpl {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

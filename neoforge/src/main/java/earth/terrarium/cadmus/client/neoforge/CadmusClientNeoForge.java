@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.client.neoforge;
 
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.CadmusClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
@@ -7,16 +8,16 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod(value = Cadmus.MOD_ID, dist = Dist.CLIENT)
 public class CadmusClientNeoForge {
 
-    public static void init() {
+    public CadmusClientNeoForge() {
         NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onClientTick);
         NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onPlayerLoggedOut);
         NeoForge.EVENT_BUS.addListener(CadmusClientNeoForge::onRegisterClientCommands);
@@ -27,10 +28,8 @@ public class CadmusClientNeoForge {
         event.enqueueWork(CadmusClient::init);
     }
 
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase.equals(TickEvent.Phase.START)) {
-            CadmusClient.onClientTick();
-        }
+    public static void onClientTick(ClientTickEvent.Pre event) {
+        CadmusClient.onClientTick();
     }
 
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {

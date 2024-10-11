@@ -16,6 +16,6 @@ public class ModEntityTypeTags {
     public static final TagKey<EntityType<?>> CREATURES = tag("creatures");
 
     private static TagKey<EntityType<?>> tag(String name) {
-        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Cadmus.MOD_ID, name));
+        return TagKey.create(Registries.ENTITY_TYPE, Cadmus.id(name));
     }
 }

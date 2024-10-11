@@ -43,7 +43,7 @@ public class CadmusSaveData extends SaveHandler {
             ListTag blockTag = allowedBlocksTag.getList(id, Tag.TAG_STRING);
             Set<ResourceLocation> blocks = new HashSet<>();
             blockTag.forEach(tagEntry ->
-                blocks.add(new ResourceLocation(tagEntry.getAsString())));
+                blocks.add(ResourceLocation.parse(tagEntry.getAsString())));
             allowedBlocks.put(UUID.fromString(id), blocks);
         });
 

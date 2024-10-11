@@ -33,7 +33,7 @@ public record ClientboundAddClaimPacket(
         public Type() {
             super(
                 ClientboundAddClaimPacket.class,
-                new ResourceLocation(Cadmus.MOD_ID, "add_claim"),
+                Cadmus.id("add_claim"),
                 ObjectByteCodec.create(
                     ByteCodec.UUID.fieldOf(ClientboundAddClaimPacket::id),
                     ExtraByteCodecs.CHUNK_POS.fieldOf(ClientboundAddClaimPacket::pos),

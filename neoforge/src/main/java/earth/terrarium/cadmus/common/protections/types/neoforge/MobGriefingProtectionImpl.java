@@ -6,19 +6,21 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
 import net.neoforged.neoforge.event.entity.EntityStruckByLightningEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 
-@Mod.EventBusSubscriber(modid = Cadmus.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Cadmus.MOD_ID)
 final class MobGriefingProtectionImpl {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     private static void onEntityMobGriefing(EntityMobGriefingEvent event) {
         if (!Protections.MOB_GRIEFING.canMobGrief(event.getEntity(), event.getEntity().chunkPosition())) {
-            event.setResult(Event.Result.DENY);
+            event.setCanGrief(false);
         }
     }
 

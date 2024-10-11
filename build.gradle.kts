@@ -8,7 +8,7 @@ plugins {
     java
     id("maven-publish")
     id("com.teamresourceful.resourcefulgradle") version "0.0.+"
-    id("dev.architectury.loom") version "1.6-SNAPSHOT" apply false
+    id("dev.architectury.loom") version "1.7-SNAPSHOT" apply false
     id("architectury-plugin") version "3.4-SNAPSHOT"
     id("com.github.johnrengelman.shadow") version "7.1.2" apply false
 }
@@ -53,13 +53,13 @@ subprojects {
                 includeGroup("maven.modrinth")
             }
         }
+        maven(url = "https://jm.gserv.me/repository/maven-public/")
     }
 
     dependencies {
-        val resourcefulLibVersion: String by project
         val prometheusVersion: String by project
-        val mixinExtrasVersion: String by project
         val reiVersion: String by project
+        val journeymapVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
@@ -69,7 +69,7 @@ subprojects {
 
             officialMojangMappings()
 
-            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.20.3", version = parchmentVersion))
+            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.21", version = parchmentVersion))
         })
 
         "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = "latest.release")
@@ -77,8 +77,9 @@ subprojects {
             isTransitive = false
         }
 
+        "modCompileOnly"(group = "info.journeymap", name = "journeymap-api-$modLoader", version = journeymapVersion)
+
         if (isCommon) {
-            implementation("annotationProcessor"(group = "io.github.llamalad7", name = "mixinextras-common", version = mixinExtrasVersion))
             "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
                 isTransitive = false
             }
@@ -86,8 +87,8 @@ subprojects {
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin", version = reiVersion)
         } else {
-            "modLocalRuntime"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion)
-//            "modLocalRuntime"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
+            "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion)
+            // "modLocalRuntime"(group = "me.shedaniel", name = "RoughlyEnoughItems-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
             "include"(olympus)
@@ -108,7 +109,7 @@ subprojects {
 
     tasks.processResources {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        filesMatching(listOf("META-INF/mods.toml", "fabric.mod.json")) {
+        filesMatching(listOf("META-INF/neoforge.mods.toml", "fabric.mod.json")) {
             expand("version" to project.version)
         }
     }

@@ -11,6 +11,6 @@ public final class ModItemTags {
     public static final TagKey<Item> ALLOWS_CLAIM_PICKUP = tag("allows_claim_pickup");
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Cadmus.MOD_ID, name));
+        return TagKey.create(Registries.ITEM, Cadmus.id(name));
     }
 }

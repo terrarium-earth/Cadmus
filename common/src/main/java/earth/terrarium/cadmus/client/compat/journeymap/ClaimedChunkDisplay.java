@@ -3,13 +3,13 @@ package earth.terrarium.cadmus.client.compat.journeymap;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
-import journeymap.client.api.display.IOverlayListener;
-import journeymap.client.api.display.ModPopupMenu;
-import journeymap.client.api.display.PolygonOverlay;
-import journeymap.client.api.model.MapPolygon;
-import journeymap.client.api.model.ShapeProperties;
-import journeymap.client.api.util.PolygonHelper;
-import journeymap.client.api.util.UIState;
+import journeymap.api.v2.client.display.IOverlayListener;
+import journeymap.api.v2.client.display.PolygonOverlay;
+import journeymap.api.v2.client.fullscreen.ModPopupMenu;
+import journeymap.api.v2.client.model.MapPolygon;
+import journeymap.api.v2.client.model.ShapeProperties;
+import journeymap.api.v2.client.util.PolygonHelper;
+import journeymap.api.v2.client.util.UIState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.core.BlockPos;
@@ -48,7 +48,7 @@ public class ClaimedChunkDisplay {
 
         MapPolygon polygon = PolygonHelper.createChunkPolygon(pos.x, 70, pos.z);
 
-        PolygonOverlay overlay = new PolygonOverlay(Cadmus.MOD_ID, displayId, dimension, shapeProps, polygon);
+        PolygonOverlay overlay = new PolygonOverlay(Cadmus.MOD_ID, dimension, shapeProps, polygon);
         overlay.setOverlayListener(new Listener(overlay, name, chunkLoaded));
         return overlay;
     }

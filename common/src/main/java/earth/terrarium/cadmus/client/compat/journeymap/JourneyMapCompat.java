@@ -5,17 +5,16 @@ import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.client.CadmusClient;
-import journeymap.client.api.ClientPlugin;
-import journeymap.client.api.IClientAPI;
-import journeymap.client.api.IClientPlugin;
-import journeymap.client.api.event.ClientEvent;
-import journeymap.client.api.event.RegistryEvent;
+import journeymap.api.v2.client.IClientAPI;
+import journeymap.api.v2.client.IClientPlugin;
+import journeymap.api.v2.client.JourneyMapPlugin;
+import journeymap.api.v2.client.event.MappingEvent;
+import journeymap.api.v2.common.event.ClientEventRegistry;
+import journeymap.api.v2.common.event.impl.ClientEvent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
-import java.util.EnumSet;
-
-@ClientPlugin
+@JourneyMapPlugin(apiVersion = "2.0.0")
 public class JourneyMapCompat implements IClientPlugin {
 
     private IClientAPI api;
@@ -24,13 +23,6 @@ public class JourneyMapCompat implements IClientPlugin {
     @Override
     public void initialize(IClientAPI api) {
         this.api = api;
-        this.api.subscribe(getModId(),
-            EnumSet.of(
-                ClientEvent.Type.DISPLAY_UPDATE,
-                ClientEvent.Type.MAPPING_STOPPED,
-                ClientEvent.Type.REGISTRY
-            )
-        );
 
         CadmusEvents.AddClaimsEvent.register((level, id, positions) -> update(level.dimension()));
         CadmusEvents.RemoveClaimsEvent.register((level, id, positions) -> update(level.dimension()));
@@ -38,30 +30,33 @@ public class JourneyMapCompat implements IClientPlugin {
         CadmusClientEvents.UpdateTeamInfo.register((id, name, color, updateMaps) -> {
             if (updateMaps) update(CadmusClient.level().dimension());
         });
+
+        ClientEventRegistry.DISPLAY_UPDATE_EVENT.subscribe(getModId(), this::updateOrClear);
+
+        ClientEventRegistry.MAPPING_EVENT.subscribe(getModId(), event -> {
+            if (event.getStage() == MappingEvent.Stage.MAPPING_STOPPED) {
+                clear();
+            } else {
+                updateOrClear(event);
+            }
+        });
+
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT_EVENT.subscribe(getModId(), event -> {
+            this.options = new ClaimedChunkOptions();
+        });
+    }
+
+    public void updateOrClear(ClientEvent event) {
+        if (options != null && Boolean.TRUE.equals(options.showClaimedChunks.get())) {
+            update(event.dimension);
+        } else {
+            clear();
+        }
     }
 
     @Override
     public String getModId() {
         return Cadmus.MOD_ID;
-    }
-
-    @Override
-    public void onEvent(ClientEvent event) {
-        switch (event.type) {
-            case DISPLAY_UPDATE, MAPPING_STARTED -> {
-                if (options != null && Boolean.TRUE.equals(options.showClaimedChunks.get())) {
-                    update(event.dimension);
-                } else {
-                    clear();
-                }
-            }
-            case MAPPING_STOPPED -> clear();
-            case REGISTRY -> {
-                if (event instanceof RegistryEvent.OptionsRegistryEvent) {
-                    this.options = new ClaimedChunkOptions();
-                }
-            }
-        }
     }
 
     private void clear() {

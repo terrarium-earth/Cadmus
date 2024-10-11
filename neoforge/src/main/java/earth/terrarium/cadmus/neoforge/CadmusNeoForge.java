@@ -18,7 +18,6 @@ import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 @Mod(Cadmus.MOD_ID)
 public class CadmusNeoForge {
-
     public CadmusNeoForge() {
         Cadmus.init();
         NeoForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
@@ -26,9 +25,6 @@ public class CadmusNeoForge {
         NeoForge.EVENT_BUS.addListener(this::onEnterSection);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(this::onRightClick);
-        if (FMLEnvironment.dist.isClient()) {
-            CadmusClientNeoForge.init();
-        }
     }
 
     private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {

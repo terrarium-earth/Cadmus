@@ -14,6 +14,6 @@ public final class ModBlockTags {
     public static final TagKey<Block> DOOR_LIKE = tag("door_like");
 
     private static TagKey<Block> tag(String name) {
-        return TagKey.create(Registries.BLOCK, new ResourceLocation(Cadmus.MOD_ID, name));
+        return TagKey.create(Registries.BLOCK, Cadmus.id(name));
     }
 }
