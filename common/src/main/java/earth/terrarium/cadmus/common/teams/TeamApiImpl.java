@@ -101,12 +101,16 @@ public class TeamApiImpl implements TeamApi {
 
                 if (FlagApi.API.isAdminTeam(server, id)) {
                     return Flags.COLOR.get(server, id);
+                } else {
+                    return CadmusSaveData.getTeamColor(server, id);
                 }
-            } else if (CadmusClient.TEAM_INFO.containsKey(id)) {
-                return CadmusClient.TEAM_INFO.get(id).color();
+            } else {
+                if (CadmusClient.TEAM_INFO.containsKey(id)) {
+                    return CadmusClient.TEAM_INFO.get(id).color();
+                } else {
+                    return ModUtils.uuidToColor(id);
+                }
             }
-
-            return ModUtils.uuidToColor(id);
         });
     }
 

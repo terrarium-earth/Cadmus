@@ -37,6 +37,6 @@ public record ClaimSettingsPacket(String setting, TriState value) implements Pac
 
     @Override
     public PacketType<ClaimSettingsPacket> type() {
-        return null;
+        return TYPE;
     }
 }

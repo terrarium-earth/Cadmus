@@ -16,6 +16,7 @@ import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
+import earth.terrarium.cadmus.common.teams.TeamInfo;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.buttons.Button;
 import earth.terrarium.olympus.client.components.map.MapRenderer;
@@ -47,14 +48,16 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class ClaimMapScreen extends BaseCursorScreen {
-
     public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
-    public static final int MAP_SIZE = 200;
+    public static final int MAP_SIZE = 192;
     public static final int BANNER_HEIGHT = 15;
     public static final int BUTTON_HEIGHT = 24;
     public static final int PADDING = 4;
     public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
     public static final int HEIGHT = MAP_SIZE + PADDING * 4 + 2 + BANNER_HEIGHT + BUTTON_HEIGHT;
+
+    public boolean canModifyColor = false;
+    public Color teamColor;
 
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
     private final Map<String, TriState> settings = new HashMap<>();
@@ -67,7 +70,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private MapWidget mapWidget;
     private Button settingsButton;
     private UUID id;
-    private Color teamColor;
     private int claimedCount;
     private int maxClaims;
     private int chunkLoadedCount;
@@ -491,9 +493,15 @@ public class ClaimMapScreen extends BaseCursorScreen {
         }
     }
 
-    public void updateSettings(Map<String, TriState> settings) {
+    public void updateSettings(Map<String, TriState> settings, boolean canModifyColor) {
         this.settings.putAll(settings);
         settingsButton.active = !settings.isEmpty();
+        this.canModifyColor = canModifyColor;
+    }
+
+    public void updateColor(Color color) {
+        this.teamColor = color;
+        CadmusClient.TEAM_INFO.put(TeamApi.API.getId(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
     }
 
     public Map<String, TriState> getSettings() {

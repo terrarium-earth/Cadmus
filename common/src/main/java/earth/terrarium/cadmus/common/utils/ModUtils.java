@@ -105,6 +105,9 @@ public class ModUtils {
      * @return null if the player has permission, otherwise the component with the error message.
      */
     public static Component canUsePermission(Player player, String setting) {
+        if (setting.equals("cadmus.color")) {
+            return canModifyColor(player);
+        }
         var protection = ProtectionApi.API.getProtection(setting);
         if (protection == null) {
             return ConstantComponents.NO_PERMISSION_ROLE;
@@ -115,6 +118,13 @@ public class ModUtils {
             } else if (!PrometheusCompat.hasPermission(player, protection.permission())) {
                 return ConstantComponents.NO_PERMISSION_ROLE;
             }
+        }
+        return null;
+    }
+
+    public static Component canModifyColor(Player player) {
+        if (!player.hasPermissions(2) && !TeamApi.API.canModifySettings(player)) {
+            return ConstantComponents.NO_PERMISSION_TEAM;
         }
         return null;
     }
