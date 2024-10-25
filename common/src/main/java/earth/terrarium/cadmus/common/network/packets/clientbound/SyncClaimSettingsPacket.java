@@ -8,6 +8,7 @@ import com.teamresourceful.resourcefullib.common.network.base.NetworkHandle;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.client.ClaimMapScreen;
 import net.minecraft.client.Minecraft;
 
@@ -22,11 +23,7 @@ public record SyncClaimSettingsPacket(Map<String, TriState> settings, boolean ca
             ByteCodec.BOOLEAN.fieldOf(SyncClaimSettingsPacket::canModifyColor),
             SyncClaimSettingsPacket::new
         ),
-        NetworkHandle.handle(packet -> {
-            if(Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
-                screen.updateSettings(packet.settings(), packet.canModifyColor());
-            }
-        })
+        NetworkHandle.handle(packet -> CadmusClient.updateClaimMapSettings(packet.settings(), packet.canModifyColor()))
     );
 
     @Override

@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.teamresourceful.resourcefullib.common.color.Color;
+import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.client.compat.prometheus.PrometheusClientCompat;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
@@ -33,7 +34,6 @@ public class CadmusClient {
         if (Cadmus.IS_PROMETHEUS_LOADED) {
             PrometheusClientCompat.init();
         }
-        Color.initRainbow();
     }
 
     public static void onClientTick() {
@@ -49,6 +49,12 @@ public class CadmusClient {
 
     public static void openClaimMap() {
         Minecraft.getInstance().setScreen(new ClaimMapScreen());
+    }
+
+    public static void updateClaimMapSettings(Map<String, TriState> settings, boolean canModifyColor) {
+        if(Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
+            screen.updateSettings(settings, canModifyColor);
+        }
     }
 
     public static void onEnterSection() {

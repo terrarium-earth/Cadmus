@@ -7,6 +7,7 @@ import com.teamresourceful.resourcefullib.common.color.ConstantColors;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.Team;
 import earth.terrarium.cadmus.common.utils.ModUtils;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
@@ -42,7 +43,7 @@ public class VanillaTeam implements Team {
         if (name == null) return Optional.empty();
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
         ChatFormatting color = Optionull.map(playerTeam, PlayerTeam::getColor);
-        return Optional.ofNullable(color == ChatFormatting.RESET ? ConstantColors.aqua : (color != null ? new Color(color.getColor()) : null));
+        return Optional.ofNullable(color == ChatFormatting.RESET ? MinecraftColors.AQUA : (color != null ? new Color(color.getColor()) : null));
     }
 
     @Override

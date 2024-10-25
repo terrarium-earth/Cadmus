@@ -31,9 +31,9 @@ public record SyncClaimsPacket(
         Cadmus.id("sync_claims"),
         ObjectByteCodec.create(
             ExtraByteCodecs.resourceKey(Registries.DIMENSION).fieldOf(SyncClaimsPacket::dimension),
-            new MapCodec<>(ByteCodec.UUID,
-                new MapCodec<>(ExtraByteCodecs.CHUNK_POS, ByteCodec.BOOLEAN)
-                    .map(map -> (Object2BooleanMap<ChunkPos>) new Object2BooleanOpenHashMap<>(map), map -> map
+            ByteCodec.mapOf(ByteCodec.UUID,
+                ByteCodec.mapOf(ExtraByteCodecs.CHUNK_POS, ByteCodec.BOOLEAN)
+                    .<Object2BooleanMap<ChunkPos>>map(Object2BooleanOpenHashMap::new, map -> map
                     )).fieldOf(SyncClaimsPacket::claims),
             SyncClaimsPacket::new
         ),

@@ -12,6 +12,7 @@ import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.clientbound.SyncClaimsPacket;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -30,21 +31,6 @@ public class ModUtils {
 
     private static final int MAX_CHUNKS_PER_PACKET = 500;
 
-    public static final Color[] COLORS = new Color[]{
-        ConstantColors.darkblue,
-        ConstantColors.green,
-        ConstantColors.aqua,
-        ConstantColors.darkred,
-        ConstantColors.purple,
-        ConstantColors.gold,
-        ConstantColors.blue,
-        ConstantColors.lime,
-        ConstantColors.cyan,
-        ConstantColors.red,
-        ConstantColors.magenta,
-        ConstantColors.yellow,
-    };
-
     @Contract(pure = true)
     @ExpectPlatform
     public static boolean isMixinModLoaded(String modId) {
@@ -56,7 +42,7 @@ public class ModUtils {
     }
 
     public static Color uuidToColor(UUID id) {
-        return COLORS[Math.abs(id.hashCode()) % COLORS.length];
+        return MinecraftColors.COLORS[Math.abs(id.hashCode()) % MinecraftColors.COLORS.length];
     }
 
     /**

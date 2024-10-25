@@ -34,8 +34,7 @@ public record SyncTeamInfo(
         ),
         NetworkHandle.handle(packet -> {
             CadmusClient.TEAM_INFO.put(packet.id, new TeamInfo(packet.name, packet.color));
-            Minecraft.getInstance().execute(() ->
-                CadmusClientEvents.UpdateTeamInfo.fire(packet.id, packet.name, packet.color, packet.updateMaps));
+            CadmusClientEvents.UpdateTeamInfo.fire(packet.id, packet.name, packet.color, packet.updateMaps);
         })
     );
 

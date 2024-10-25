@@ -25,9 +25,14 @@ public record RequestClaimSettingsPacket() implements Packet<RequestClaimSetting
         Cadmus.id("request_claim_settings"),
         ByteCodec.unit(RequestClaimSettingsPacket::new),
         NetworkHandle.handle((packet, player) -> {
-            var settings = ProtectionApi.API.getSettings().stream().filter(
-                setting -> ModUtils.canUsePermission(player, setting) == null
-            ).collect(() -> new HashMap<String, TriState>(), (hashMap, s) -> hashMap.put(s, CadmusSaveData.getClaimSetting(player.getServer(), TeamApi.API.getId(player), s)), HashMap::putAll);
+            var settings = new HashMap<String, TriState>();
+
+            ProtectionApi.API
+                .getSettings()
+                .stream()
+                .filter(setting -> ModUtils.canUsePermission(player, setting) == null)
+                .forEach(setting -> settings.put(setting, CadmusSaveData.getClaimSetting(player.getServer(), TeamApi.API.getId(player), setting)));
+
             NetworkHandler.CHANNEL.sendToPlayer(new SyncClaimSettingsPacket(settings, ModUtils.canModifyColor(player) == null), player);
         })
     );
