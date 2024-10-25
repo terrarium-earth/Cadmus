@@ -47,7 +47,7 @@ public interface Flag<T> {
     Flag<T> getFromArgument(String argument, CommandContext<CommandSourceStack> context) throws CommandSyntaxException;
 
     /**
-     * Codec for the flag.
+     * Serializes the flag to NBT.
      *
      * @param tag The tag.
      */
