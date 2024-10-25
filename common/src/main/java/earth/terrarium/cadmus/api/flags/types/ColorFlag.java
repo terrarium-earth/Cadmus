@@ -13,6 +13,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 
 public record ColorFlag(String id, Color value) implements Flag<Color> {
+    public static final SimpleCommandExceptionType INVALID_COLOR = new SimpleCommandExceptionType(() -> "Invalid color");
+
     @Override
     public ArgumentBuilder<CommandSourceStack, ?> createArgument(String argument) {
         return Commands.argument(argument, StringArgumentType.word());
@@ -22,7 +24,7 @@ public record ColorFlag(String id, Color value) implements Flag<Color> {
     public Flag<Color> getFromArgument(String argument, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         var color = context.getArgument(argument, String.class);
         Color parsedColor = Color.parse(color);
-        if (parsedColor == null) throw new SimpleCommandExceptionType(() -> "Invalid color").create();
+        if (parsedColor == null) throw INVALID_COLOR.create();
         return new ColorFlag(id, parsedColor);
     }
 

@@ -21,8 +21,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class Cadmus {
 
@@ -33,8 +31,6 @@ public class Cadmus {
     public static final int DEFAULT_MAX_CHUNK_LOADED_CLAIMS = 64;
 
     public static int FORCE_LOADED_CHUNK_COUNT;
-
-    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
@@ -54,7 +50,7 @@ public class Cadmus {
     public static void onEnterSection(Player player, ChunkPos pos) {
         if (player instanceof ServerPlayer serverPlayer) {
             TeamApi.API.displayTeamName(serverPlayer, pos);
-            AdminUtils.checkAccess((ServerPlayer) player, pos);
+            AdminUtils.checkAccess(serverPlayer, pos);
         } else CadmusClient.onEnterSection();
     }
 
