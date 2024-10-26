@@ -24,6 +24,7 @@ public class ConstantComponents {
     public static final Component NO_PERMISSION_ROLE = CommonUtils.serverTranslatable("command.cadmus.exception.no_permission_role");
 
     public static final Component TEAM_DOES_NOT_EXIST = CommonUtils.serverTranslatable("command.cadmus.exception.team_does_not_exist");
+    public static final Component PROTECTION_DOES_NOT_EXIST = CommonUtils.serverTranslatable("command.cadmus.exception.protection_does_not_exist");
 
     public static final Component ADMIN_TEAM_ALREADY_EXISTS = CommonUtils.serverTranslatable("command.cadmus.exception.admin_team_already_exists");
     public static final Component ADMIN_TEAM_DOES_NOT_EXIST = CommonUtils.serverTranslatable("command.cadmus.exception.admin_team_does_not_exist");
@@ -33,9 +34,14 @@ public class ConstantComponents {
 
 
     public static final Component MAP_TITLE = Component.translatable("gui.cadmus.claim_map.title");
-    public static final Component CLEAR_CLAIMED_CHUNKS = Component.translatable("gui.cadmus.claim_map.clear_claimed_chunks");
+    public static final Component UNCLAIM_ALL = Component.translatable("gui.cadmus.claim_map.clear_claimed_chunks");
     public static final Component CLOSE = Component.translatable("gui.cadmus.claim_map.close");
     public static final Component MAX_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_claims");
     public static final Component MAX_CHUNK_LOADED_CLAIMS = Component.translatable("gui.cadmus.claim_map.max_chunk_loaded_claims");
-    public static final Component LOADING = Component.translatable("gui.cadmus.claim_map.loading");
+    public static final Component SETTINGS = Component.translatable("gui.cadmus.claim_map.settings");
+    public static final Component SAVE = Component.translatable("gui.cadmus.claim_map.save");
+
+    public static final Component UNCLAIM_MODAL_TITLE = Component.translatable("gui.cadmus.unclaim_modal.title");
+    public static final Component UNCLAIM_MODAL_DESCRIPTION = Component.translatable("gui.cadmus.unclaim_modal.description");
+    public static final Component UNCLAIM_MODAL_CONFIRM = Component.translatable("gui.cadmus.unclaim_modal.confirm");
 }

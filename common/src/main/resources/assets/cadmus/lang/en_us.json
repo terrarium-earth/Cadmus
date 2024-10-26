@@ -53,6 +53,7 @@
   "command.cadmus.exception.no_permission_role": "Your role does not have permission to manage settings.",
 
   "command.cadmus.exception.team_does_not_exist": "This team does not exist.",
+  "command.cadmus.exception.protection_does_not_exist": "This protection setting does not exist.",
 
   "command.cadmus.exception.admin_team_already_exists": "This admin team already exists.",
   "command.cadmus.exception.admin_team_does_not_exist": "This admin team does not exist.",
@@ -111,11 +112,18 @@
   "cadmus.personal.item_pickup":  "Personal Item Pickup",
 
   "gui.cadmus.claim_map.title": "Claim Map",
-  "gui.cadmus.claim_map.clear_claimed_chunks": "Clear Claimed Chunks",
+  "gui.cadmus.claim_map.clear_claimed_chunks": "Unclaim All",
   "gui.cadmus.claim_map.close": "Close",
-  "gui.cadmus.claim_map.max_claims": "Max Claims",
-  "gui.cadmus.claim_map.max_chunk_loaded_claims": "Max Chunk Loaded Claims",
+  "gui.cadmus.claim_map.max_claims": "Chunks Claimed",
+  "gui.cadmus.claim_map.max_chunk_loaded_claims": "Chunks Loaded",
   "gui.cadmus.claim_map.loading": "Loading...",
+  "gui.cadmus.claim_map.settings": "Settings",
+  "gui.cadmus.claim_map.save": "Save",
+  "gui.cadmus.claim_map.color": "Color",
+
+  "gui.cadmus.unclaim_modal.title": "Unclaim Chunks?",
+  "gui.cadmus.unclaim_modal.description": "Are you sure you want to unclaim all your chunks? This action is irreversible.",
+  "gui.cadmus.unclaim_modal.confirm": "Unclaim",
 
   "rei.sections.project_odyssey": "Project Odyssey",
   "rei.cadmus.cadmus.tooltip": "Open Claim Map"

@@ -18,10 +18,9 @@ public interface FlagApi {
     /**
      * Registers a new flag with a default value.
      *
-     * @param name         The name of the flag.
      * @param defaultValue The value of the flag.
      */
-    void register(String name, Flag<?> defaultValue);
+    <T extends Flag<?>> T register(T defaultValue);
 
     /**
      * Gets the default value of a flag.

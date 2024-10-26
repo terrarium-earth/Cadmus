@@ -2,7 +2,8 @@ package earth.terrarium.cadmus.client.compat.prometheus;
 
 import earth.terrarium.cadmus.common.compat.prometheus.CadmusOptions;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
-import earth.terrarium.olympus.client.components.textbox.IntTextBox;
+import earth.terrarium.olympus.client.components.Widgets;
+import earth.terrarium.olympus.client.utils.State;
 import earth.terrarium.prometheus.api.roles.client.Page;
 import earth.terrarium.prometheus.client.utils.UiUtils;
 import earth.terrarium.prometheus.common.handlers.role.Role;
@@ -14,11 +15,17 @@ public class CadmusOptionsPage implements Page {
 
     private final RoleEditContent content;
 
-    private IntTextBox maxClaimsBox;
-    private IntTextBox maxChunkLoaded;
+    private final State<Integer> maxClaimsBox;
+    private final State<Integer> maxChunkLoaded;
 
     public CadmusOptionsPage(RoleEditContent content, Runnable ignored) {
         this.content = content;
+
+        Role role = content.selected();
+        CadmusOptions options = role.getNonNullOption(CadmusOptions.SERIALIZER);
+
+        maxClaimsBox = State.of(options.maxClaims());
+        maxChunkLoaded = State.of(options.maxChunkLoaded());
     }
 
     @Override
@@ -28,24 +35,16 @@ public class CadmusOptionsPage implements Page {
         Role role = content.selected();
         CadmusOptions options = role.getNonNullOption(CadmusOptions.SERIALIZER);
 
-        maxClaimsBox = UiUtils.addLine(
+        UiUtils.addLine(
             layout, 0, width,
             ConstantComponents.MAX_CLAIMS,
-            (w) -> new IntTextBox(
-                maxClaimsBox,
-                w, 20,
-                options.maxClaims(), i -> {}
-            )
+            (w) -> Widgets.intInput(maxClaimsBox, textBox -> textBox.withSize(w, 20))
         );
 
-        maxChunkLoaded = UiUtils.addLine(
+        UiUtils.addLine(
             layout, 1, width,
             ConstantComponents.MAX_CHUNK_LOADED_CLAIMS,
-            (w) -> new IntTextBox(
-                maxChunkLoaded,
-                w, 20,
-                options.maxChunkLoaded(), i -> {}
-            )
+            (w) -> Widgets.intInput(maxChunkLoaded, textBox -> textBox.withSize(w, 20))
         );
 
         return layout;
@@ -55,8 +54,8 @@ public class CadmusOptionsPage implements Page {
     public void save(Role role) {
         CadmusOptions options = role.getNonNullOption(CadmusOptions.SERIALIZER);
         CadmusOptions newOptions = new CadmusOptions(
-            maxClaimsBox.getIntValue().orElse(options.maxClaims()),
-            maxChunkLoaded.getIntValue().orElse(options.maxChunkLoaded())
+            maxClaimsBox.get(),
+            maxChunkLoaded.get()
         );
         if (!newOptions.equals(options)) {
             role.setData(newOptions);

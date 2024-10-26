@@ -5,16 +5,16 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.flags.FlagApi;
-import earth.terrarium.cadmus.api.flags.types.ChatFormattingFlag;
+import earth.terrarium.cadmus.api.flags.types.ColorFlag;
 import earth.terrarium.cadmus.api.flags.types.StringFlag;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.utils.ModUtils;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -111,7 +111,7 @@ public class AdminClaimCommands {
         if (FlagApi.API.isAdminTeam(source.getServer(), team)) throw ADMIN_TEAM_ALREADY_EXISTS.create();
         UUID id = FlagApi.API.createAdminTeam(source.getServer(), team);
         FlagApi.API.setFlag(source.getServer(), id, Flags.DISPLAY_NAME.id(), new StringFlag(Flags.DISPLAY_NAME.id(), team));
-        FlagApi.API.setFlag(source.getServer(), id, Flags.COLOR.id(), new ChatFormattingFlag(Flags.COLOR.id(), ChatFormatting.LIGHT_PURPLE));
+        FlagApi.API.setFlag(source.getServer(), id, Flags.COLOR.id(), new ColorFlag(Flags.COLOR.id(), Color.DEFAULT));
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.admin.create", team), false);
         TeamApi.API.syncTeamInfo(source.getServer(), id, true);
     }

@@ -50,7 +50,7 @@ public class Cadmus {
     public static void onEnterSection(Player player, ChunkPos pos) {
         if (player instanceof ServerPlayer serverPlayer) {
             TeamApi.API.displayTeamName(serverPlayer, pos);
-            AdminUtils.checkAccess((ServerPlayer) player, pos);
+            AdminUtils.checkAccess(serverPlayer, pos);
         } else CadmusClient.onEnterSection();
     }
 

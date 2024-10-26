@@ -2,9 +2,11 @@ package earth.terrarium.cadmus.common.teams;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.Team;
 import earth.terrarium.cadmus.common.utils.ModUtils;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
@@ -35,12 +37,12 @@ public class VanillaTeam implements Team {
     }
 
     @Override
-    public Optional<ChatFormatting> getColor(Level level, UUID id) {
+    public Optional<Color> getColor(Level level, UUID id) {
         String name = TEAM_CACHE.inverse().get(id);
         if (name == null) return Optional.empty();
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
         ChatFormatting color = Optionull.map(playerTeam, PlayerTeam::getColor);
-        return Optional.ofNullable(color == ChatFormatting.RESET ? ChatFormatting.AQUA : color);
+        return Optional.ofNullable(color).map(ChatFormatting::getColor).map(Color::new).or(() -> Optional.of(MinecraftColors.AQUA));
     }
 
     @Override

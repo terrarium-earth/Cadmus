@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.utils;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
@@ -22,6 +23,7 @@ public class CadmusSaveData extends SaveHandler {
     private final Object2BooleanMap<String> defaultSettings = new Object2BooleanArrayMap<>();
     private final Map<UUID, Set<ResourceLocation>> allowedBlocks = new HashMap<>();
     private final Set<UUID> bypassPlayers = new HashSet<>();
+    private final Map<UUID, Color> teamColors = new HashMap<>();
 
     @Override
     public void loadData(CompoundTag tag) {
@@ -49,6 +51,12 @@ public class CadmusSaveData extends SaveHandler {
 
         CompoundTag bypassTag = tag.getCompound("bypass");
         bypassTag.getAllKeys().forEach(uuid -> bypassPlayers.add(UUID.fromString(uuid)));
+
+        CompoundTag teamColorsTag = tag.getCompound("teamColors");
+        teamColorsTag.getAllKeys().forEach(uuid -> {
+            UUID id = UUID.fromString(uuid);
+            teamColors.put(id, Color.parse(teamColorsTag.getString(uuid)));
+        });
     }
 
     @Override
@@ -76,6 +84,10 @@ public class CadmusSaveData extends SaveHandler {
         CompoundTag bypassTag = new CompoundTag();
         bypassPlayers.forEach(uuid -> bypassTag.put(uuid.toString(), new CompoundTag()));
         tag.put("bypass", bypassTag);
+
+        CompoundTag teamColorsTag = new CompoundTag();
+        teamColors.forEach((uuid, color) -> teamColorsTag.putString(uuid.toString(), color.toString()));
+        tag.put("teamColors", teamColorsTag);
     }
 
     public static CadmusSaveData read(MinecraftServer server) {
@@ -162,5 +174,17 @@ public class CadmusSaveData extends SaveHandler {
         data.settings.clear();
         data.allowedBlocks.clear();
         data.setDirty();
+    }
+
+    public static void setTeamColor(MinecraftServer server, UUID id, Color color) {
+        var data = read(server);
+        data.teamColors.put(id, color);
+        data.setDirty();
+    }
+
+    public static Color getTeamColor(MinecraftServer server, UUID id) {
+        Map<UUID, Color> colors = read(server).teamColors;
+        colors.putIfAbsent(id, ModUtils.uuidToColor(id));
+        return colors.get(id);
     }
 }

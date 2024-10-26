@@ -1,6 +1,7 @@
 package earth.terrarium.cadmus.common.teams;
 
 import com.mojang.authlib.GameProfile;
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.teams.Team;
@@ -9,13 +10,12 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.packets.ClientboundSyncAllTeamInfoPacket;
-import earth.terrarium.cadmus.common.network.packets.ClientboundSyncTeamInfo;
+import earth.terrarium.cadmus.common.network.packets.clientbound.SyncAllTeamInfoPacket;
+import earth.terrarium.cadmus.common.network.packets.clientbound.SyncTeamInfo;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectCharPair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -80,11 +80,11 @@ public class TeamApiImpl implements TeamApi {
                 if (profile == null) return ConstantComponents.UNKNOWN;
                 return Component.literal(profile.getName());
             } else if (CadmusClient.TEAM_INFO.containsKey(id)) {
-                return Component.literal(CadmusClient.TEAM_INFO.get(id).left());
+                return Component.literal(CadmusClient.TEAM_INFO.get(id).name());
             }
 
             return ConstantComponents.UNKNOWN;
-        }).copy().withStyle(getColor(level, id));
+        }).copy().withStyle(getColor(level, id).getAsStyle());
     }
 
     @Override
@@ -93,7 +93,7 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public ChatFormatting getColor(Level level, UUID id) {
+    public Color getColor(Level level, UUID id) {
         return getSelected().getColor(level, id).orElseGet(() -> {
             if (!level.isClientSide()) {
                 MinecraftServer server = level.getServer();
@@ -101,17 +101,21 @@ public class TeamApiImpl implements TeamApi {
 
                 if (FlagApi.API.isAdminTeam(server, id)) {
                     return Flags.COLOR.get(server, id);
+                } else {
+                    return CadmusSaveData.getTeamColor(server, id);
                 }
-            } else if (CadmusClient.TEAM_INFO.containsKey(id)) {
-                return ChatFormatting.getByCode(CadmusClient.TEAM_INFO.get(id).rightChar());
+            } else {
+                if (CadmusClient.TEAM_INFO.containsKey(id)) {
+                    return CadmusClient.TEAM_INFO.get(id).color();
+                } else {
+                    return ModUtils.uuidToColor(id);
+                }
             }
-
-            return ModUtils.uuidToColor(id);
         });
     }
 
     @Override
-    public ChatFormatting getColor(MinecraftServer server, UUID id) {
+    public Color getColor(MinecraftServer server, UUID id) {
         return getColor(server.overworld(), id);
     }
 
@@ -143,37 +147,37 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public void syncAllTeamInfo(MinecraftServer server) {
-        Map<UUID, ObjectCharPair<String>> teamInfo = new HashMap<>();
+        Map<UUID, TeamInfo> teamInfo = new HashMap<>();
 
         getAllTeams(server).forEach(id -> {
             String name = getName(server, id).getString();
-            char color = getColor(server, id).getChar();
-            teamInfo.put(id, ObjectCharPair.of(name, color));
+            Color color = getColor(server, id);
+            teamInfo.put(id, new TeamInfo(name, color));
         });
 
-        NetworkHandler.sendToAllClientPlayers(new ClientboundSyncAllTeamInfoPacket(teamInfo), server);
+        NetworkHandler.sendToAllClientPlayers(new SyncAllTeamInfoPacket(teamInfo), server);
     }
 
     @Override
     public void syncAllTeamInfo(ServerPlayer player) {
-        if (NetworkHandler.CHANNEL.canSendToPlayer(player, ClientboundSyncAllTeamInfoPacket.TYPE)) {
-            Map<UUID, ObjectCharPair<String>> teamInfo = new HashMap<>();
+        if (NetworkHandler.CHANNEL.canSendToPlayer(player, SyncAllTeamInfoPacket.TYPE)) {
+            Map<UUID, TeamInfo> teamInfo = new HashMap<>();
 
             getAllTeams(player.server).forEach(id -> {
                 String name = getName(player.server, id).getString();
-                char color = getColor(player.server, id).getChar();
-                teamInfo.put(id, ObjectCharPair.of(name, color));
+                Color color = getColor(player.server, id);
+                teamInfo.put(id, new TeamInfo(name, color));
             });
 
-            NetworkHandler.CHANNEL.sendToPlayer(new ClientboundSyncAllTeamInfoPacket(teamInfo), player);
+            NetworkHandler.CHANNEL.sendToPlayer(new SyncAllTeamInfoPacket(teamInfo), player);
         }
     }
 
     @Override
     public void syncTeamInfo(MinecraftServer server, UUID id, boolean updateMaps) {
         String name = getName(server, id).getString();
-        char color = getColor(server, id).getChar();
-        NetworkHandler.sendToAllClientPlayers(new ClientboundSyncTeamInfo(id, name, color, updateMaps), server);
+        Color color = getColor(server, id);
+        NetworkHandler.sendToAllClientPlayers(new SyncTeamInfo(id, name, color, updateMaps), server);
     }
 
     @Override

@@ -1,8 +1,10 @@
 package earth.terrarium.cadmus.client.compat.xaero;
 
+import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
+import earth.terrarium.olympus.client.constants.MinecraftColors;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.minecraft.ChatFormatting;
@@ -16,7 +18,6 @@ import xaero.map.WorldMap;
 import xaero.map.highlight.ChunkHighlighter;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -116,7 +117,7 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
     private static int getColor(UUID id) {
         return Optionull.mapOrDefault(
             TeamApi.API.getColor(CadmusClient.level(), id),
-            ChatFormatting::getColor,
-            Objects.requireNonNull(ChatFormatting.AQUA.getColor()));
+            Color::getValue,
+            MinecraftColors.AQUA.getValue());
     }
 }

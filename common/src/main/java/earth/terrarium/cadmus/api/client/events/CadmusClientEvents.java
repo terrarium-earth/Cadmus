@@ -1,6 +1,6 @@
 package earth.terrarium.cadmus.api.client.events;
 
-import net.minecraft.ChatFormatting;
+import com.teamresourceful.resourcefullib.common.color.Color;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class CadmusClientEvents {
     @FunctionalInterface
     public interface UpdateTeamInfo {
 
-        void updateTeamInfo(UUID id, String name, ChatFormatting color, boolean updateMaps);
+        void updateTeamInfo(UUID id, String name, Color color, boolean updateMaps);
 
         /**
          * Called when the team info, consisting of the team's name and color, is synced to the client.
@@ -24,7 +24,7 @@ public class CadmusClientEvents {
         }
 
         @ApiStatus.Internal
-        static void fire(UUID id, String name, ChatFormatting color, boolean updateMaps) {
+        static void fire(UUID id, String name, Color color, boolean updateMaps) {
             for (var listener : UPDATE_TEAM_INFO) {
                 listener.updateTeamInfo(id, name, color, updateMaps);
             }

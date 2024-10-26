@@ -15,8 +15,9 @@ public class FlagApiImpl implements FlagApi {
     private static final Map<String, Flag<?>> FLAGS = new HashMap<>();
 
     @Override
-    public void register(String name, Flag<?> defaultValue) {
-        FLAGS.put(name, defaultValue);
+    public <T extends Flag<?>> T register(T defaultValue) {
+        FLAGS.put(defaultValue.id(), defaultValue);
+        return defaultValue;
     }
 
     @Override

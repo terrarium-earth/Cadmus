@@ -6,7 +6,7 @@ import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
-import earth.terrarium.cadmus.common.network.packets.*;
+import earth.terrarium.cadmus.common.network.packets.clientbound.*;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.resources.ResourceKey;
@@ -32,7 +32,7 @@ public class ClaimApiImpl implements ClaimApi {
 
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
-            NetworkHandler.sendToAllClientPlayers(new ClientboundAddClaimPacket(id, pos, chunkLoad), serverLevel.getServer());
+            NetworkHandler.sendToAllClientPlayers(new AddClaimPacket(id, pos, chunkLoad), serverLevel.getServer());
             TeamApi.API.displayTeamNameToAll(serverLevel.getServer());
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
@@ -58,7 +58,7 @@ public class ClaimApiImpl implements ClaimApi {
 
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
-            NetworkHandler.sendToAllClientPlayers(new ClientboundAddClaimsPacket(id, positions), serverLevel.getServer());
+            NetworkHandler.sendToAllClientPlayers(new AddBulkClaimsPacket(id, positions), serverLevel.getServer());
             TeamApi.API.displayTeamNameToAll(serverLevel.getServer());
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
@@ -78,7 +78,7 @@ public class ClaimApiImpl implements ClaimApi {
 
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
-            NetworkHandler.sendToAllClientPlayers(new ClientboundRemoveClaimPacket(id, pos), serverLevel.getServer());
+            NetworkHandler.sendToAllClientPlayers(new RemoveClaimPacket(id, pos), serverLevel.getServer());
             TeamApi.API.displayTeamNameToAll(serverLevel.getServer());
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
@@ -101,7 +101,7 @@ public class ClaimApiImpl implements ClaimApi {
         }
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
-            NetworkHandler.sendToAllClientPlayers(new ClientboundRemoveClaimsPacket(id, positions), serverLevel.getServer());
+            NetworkHandler.sendToAllClientPlayers(new RemoveBulkClaimsPacket(id, positions), serverLevel.getServer());
             TeamApi.API.displayTeamNameToAll(serverLevel.getServer());
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
@@ -123,7 +123,7 @@ public class ClaimApiImpl implements ClaimApi {
 
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
-            NetworkHandler.sendToAllClientPlayers(new ClientboundClearClaimsPacket(id), serverLevel.getServer());
+            NetworkHandler.sendToAllClientPlayers(new ClearClaimsPacket(id), serverLevel.getServer());
             TeamApi.API.displayTeamNameToAll(serverLevel.getServer());
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
@@ -142,7 +142,7 @@ public class ClaimApiImpl implements ClaimApi {
                         Cadmus.FORCE_LOADED_CHUNK_COUNT--;
                     }
                 });
-                NetworkHandler.sendToAllClientPlayers(new ClientboundClearClaimsPacket(id), server);
+                NetworkHandler.sendToAllClientPlayers(new ClearClaimsPacket(id), server);
                 CadmusEvents.ClearClaimsEvent.fire(level, id);
             });
 

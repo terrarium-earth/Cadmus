@@ -35,7 +35,7 @@ public class BypassCommand {
     private static void bypass(CommandSourceStack source, ServerPlayer player) {
         UUID id = player.getUUID();
         CadmusSaveData.toggleBypass(source.getServer(), id);
-        Component name = Component.literal(player.getGameProfile().getName()).withStyle(TeamApi.API.getColor(source.getLevel(), id));
+        Component name = Component.literal(player.getGameProfile().getName()).withStyle(TeamApi.API.getColor(source.getLevel(), id).getAsStyle());
         if (CadmusSaveData.canBypass(source.getServer(), id)) {
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.bypass.enable", name), false);
         } else {
