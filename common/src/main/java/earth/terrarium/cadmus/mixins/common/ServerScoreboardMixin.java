@@ -1,7 +1,7 @@
 package earth.terrarium.cadmus.mixins.common;
 
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.common.teams.VanillaTeam;
+import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.PlayerTeam;
@@ -24,7 +24,7 @@ public abstract class ServerScoreboardMixin {
 
     @Inject(method = "addPlayerToTeam", at = @At("RETURN"))
     private void cadmus$addPlayerToTeam(String playerName, PlayerTeam playerTeam, CallbackInfoReturnable<Boolean> cir) {
-        if (TeamApi.API.getSelected() instanceof VanillaTeam team) {
+        if (TeamApi.API.getSelected() instanceof VanillaTeamProvider team) {
             team.transferClaims(server, playerTeam, playerName);
             UUID id = team.gerOrCreateId(playerTeam);
             team.onPlayerAdded(server, id, server.getPlayerList().getPlayerByName(playerName));
@@ -36,7 +36,7 @@ public abstract class ServerScoreboardMixin {
         at = @At("RETURN")
     )
     private void cadmus$removePlayerFromTeam(String username, PlayerTeam playerTeam, CallbackInfo ci) {
-        if (TeamApi.API.getSelected() instanceof VanillaTeam team) {
+        if (TeamApi.API.getSelected() instanceof VanillaTeamProvider team) {
             UUID id = team.gerOrCreateId(playerTeam);
             team.onPlayerRemoved(server, id, server.getPlayerList().getPlayerByName(username));
         }
@@ -44,7 +44,7 @@ public abstract class ServerScoreboardMixin {
 
     @Inject(method = "onTeamAdded", at = @At("HEAD"))
     private void cadmus$onTeamAdded(PlayerTeam playerTeam, CallbackInfo ci) {
-        if (TeamApi.API.getSelected() instanceof VanillaTeam team) {
+        if (TeamApi.API.getSelected() instanceof VanillaTeamProvider team) {
             UUID id = team.gerOrCreateId(playerTeam);
             team.onCreate(server, id);
         }
@@ -52,7 +52,7 @@ public abstract class ServerScoreboardMixin {
 
     @Inject(method = "onTeamRemoved", at = @At("HEAD"))
     private void cadmus$onTeamRemoved(PlayerTeam playerTeam, CallbackInfo ci) {
-        if (TeamApi.API.getSelected() instanceof VanillaTeam team) {
+        if (TeamApi.API.getSelected() instanceof VanillaTeamProvider team) {
             UUID id = team.remove(playerTeam);
             team.onRemove(server, id);
         }
@@ -60,7 +60,7 @@ public abstract class ServerScoreboardMixin {
 
     @Inject(method = "onTeamChanged", at = @At("HEAD"))
     private void cadmus$onTeamChanged(PlayerTeam playerTeam, CallbackInfo ci) {
-        if (TeamApi.API.getSelected() instanceof VanillaTeam team) {
+        if (TeamApi.API.getSelected() instanceof VanillaTeamProvider team) {
             UUID id = team.gerOrCreateId(playerTeam);
             team.onChange(server, id);
         }

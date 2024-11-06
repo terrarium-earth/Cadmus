@@ -50,7 +50,7 @@ public class UnclaimAreaCommand {
         Set<ChunkPos> finalPositions = new HashSet<>();
         Set<ChunkPos> positions = ChunkPos.rangeClosed(startPos, endPos).collect(Collectors.toUnmodifiableSet());
 
-        UUID id = TeamApi.API.getId(player);
+        UUID id = TeamApi.API.getTeams(player);
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(claim -> {
                 if (claim.left().equals(id)) {

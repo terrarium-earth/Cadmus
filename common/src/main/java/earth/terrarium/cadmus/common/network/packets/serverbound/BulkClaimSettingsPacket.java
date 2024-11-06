@@ -2,7 +2,6 @@ package earth.terrarium.cadmus.common.network.packets.serverbound;
 
 import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.resourcefullib.common.network.Packet;
-import com.teamresourceful.resourcefullib.common.network.base.ClientboundPacketType;
 import com.teamresourceful.resourcefullib.common.network.base.NetworkHandle;
 import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketType;
@@ -20,7 +19,7 @@ public record BulkClaimSettingsPacket(Map<String, TriState> settings) implements
         Cadmus.id("update_bulk_claim_settings"),
         ByteCodec.mapOf(ByteCodec.STRING, TriState.BYTE_CODEC).map(BulkClaimSettingsPacket::new, BulkClaimSettingsPacket::settings),
         NetworkHandle.handle((packet, player) -> {
-            var team = TeamApi.API.getId(player);
+            var team = TeamApi.API.getTeams(player);
             packet.settings().forEach((setting, value) -> {
                 if (ModUtils.canUsePermission(player, setting) == null) {
                     CadmusSaveData.setClaimSetting(player.getServer(), team, setting, value);

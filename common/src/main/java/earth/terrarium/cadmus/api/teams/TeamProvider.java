@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.common.claims.limit.ClaimLimitApiImpl;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +15,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface Team {
+public interface TeamProvider {
+
+    ResourceLocation id();
 
     /**
      * Gets the team's name.
@@ -71,28 +74,33 @@ public interface Team {
     Set<UUID> getAllTeams(MinecraftServer server);
 
     default void onCreate(MinecraftServer server, UUID id) {
-        CadmusEvents.CreateTeamEvent.fire(server, id);
-        TeamApi.API.syncTeamInfo(server, id, true);
-        ClaimLimitApiImpl.API.calculate(server, id, true);
+        TeamId teamId = new TeamId(id(), id);
+        CadmusEvents.CreateTeamEvent.fire(server, teamId);
+        TeamApi.API.syncTeamInfo(server, teamId, true);
+        ClaimLimitApiImpl.API.calculate(server, teamId, true);
     }
 
     default void onRemove(MinecraftServer server, UUID id) {
-        CadmusEvents.RemoveTeamEvent.fire(server, id);
-        TeamApi.API.removeTeam(server, id);
+        TeamId teamId = new TeamId(id(), id);
+        CadmusEvents.RemoveTeamEvent.fire(server, teamId);
+        TeamApi.API.removeTeam(server, teamId);
     }
 
     default void onChange(MinecraftServer server, UUID id) {
-        CadmusEvents.TeamChangedEvent.fire(server, id);
-        TeamApi.API.syncTeamInfo(server, id, true);
+        TeamId teamId = new TeamId(id(), id);
+        CadmusEvents.TeamChangedEvent.fire(server, teamId);
+        TeamApi.API.syncTeamInfo(server, teamId, true);
     }
 
     default void onPlayerAdded(MinecraftServer server, UUID id, @Nullable ServerPlayer player) {
-        CadmusEvents.AddPlayerToTeamEvent.fire(server, id, player);
-        ClaimLimitApiImpl.API.calculate(server, id, true);
+        TeamId teamId = new TeamId(id(), id);
+        CadmusEvents.AddPlayerToTeamEvent.fire(server, teamId, player);
+        ClaimLimitApiImpl.API.calculate(server, teamId, true);
     }
 
     default void onPlayerRemoved(MinecraftServer server, UUID id, @Nullable ServerPlayer player) {
-        CadmusEvents.RemovePlayerFromTeamEvent.fire(server, id, player);
+        TeamId teamId = new TeamId(id(), id);
+        CadmusEvents.RemovePlayerFromTeamEvent.fire(server, teamId, player);
         ClaimLimitApiImpl.API.calculate(server, id, true);
     }
 }

@@ -90,7 +90,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     public void refresh() {
-        this.id = TeamApi.API.getId(this.player);
+        this.id = TeamApi.API.getTeams(this.player);
         this.teamColor = CadmusClient.TEAM_INFO.get(id).color();
         this.claimedCount = ClaimCommand.getClaimsCount(player, false);
         this.maxClaims = ClaimLimitApi.API.getMaxClaims(player);
@@ -501,7 +501,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     public void updateColor(Color color) {
         this.teamColor = color;
-        CadmusClient.TEAM_INFO.put(TeamApi.API.getId(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
+        CadmusClient.TEAM_INFO.put(TeamApi.API.getTeams(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
     }
 
     public Map<String, TriState> getSettings() {

@@ -60,19 +60,19 @@ public class ClaimAllowedBlocksCommand {
     }
 
     private static void addBlock(CommandSourceStack source, BlockState block) throws CommandSyntaxException {
-        CadmusSaveData.addAllowedBlock(source.getServer(), TeamApi.API.getId(source.getPlayerOrException()), block.getBlock());
+        CadmusSaveData.addAllowedBlock(source.getServer(), TeamApi.API.getTeams(source.getPlayerOrException()), block.getBlock());
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.add_allowed_block", block.getBlock().getName()), false);
     }
 
     private static void removeBlock(CommandSourceStack source, BlockState block) throws CommandSyntaxException {
-        UUID id = TeamApi.API.getId(source.getPlayerOrException());
+        UUID id = TeamApi.API.getTeams(source.getPlayerOrException());
         if (!CadmusSaveData.isBlockAllowed(source.getServer(), id, block.getBlock())) throw BLOCK_NOT_ADDED.create();
         CadmusSaveData.removeAllowedBlock(source.getServer(), id, block.getBlock());
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.remove_allowed_block", block.getBlock().getName()), false);
     }
 
     private static void listBlocks(CommandSourceStack source) throws CommandSyntaxException {
-        CadmusSaveData.getAllowedBlocks(source.getServer(), TeamApi.API.getId(source.getPlayerOrException())).forEach(key -> {
+        CadmusSaveData.getAllowedBlocks(source.getServer(), TeamApi.API.getTeams(source.getPlayerOrException())).forEach(key -> {
             Block block = BuiltInRegistries.BLOCK.get(key);
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.list_allowed_blocks", block == Blocks.AIR ? key : block.getName()), false);
         });

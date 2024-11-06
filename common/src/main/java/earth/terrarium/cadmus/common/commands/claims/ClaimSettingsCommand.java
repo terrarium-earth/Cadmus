@@ -6,11 +6,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
-import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.protections.Protection;
 import earth.terrarium.cadmus.api.protections.ProtectionApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
@@ -58,13 +55,13 @@ public class ClaimSettingsCommand {
     private static void set(CommandSourceStack source, String setting, String value) throws CommandSyntaxException {
         TriState state = stringToState(value);
         ServerPlayer player = source.getPlayerOrException();
-        CadmusSaveData.setClaimSetting(source.getServer(), TeamApi.API.getId(player), setting, state);
+        CadmusSaveData.setClaimSetting(source.getServer(), TeamApi.API.getTeams(player), setting, state);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.set", setting, value), false);
     }
 
     private static void get(CommandSourceStack source, String setting) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), TeamApi.API.getId(player), setting);
+        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), TeamApi.API.getTeams(player), setting);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.get", setting, stateToString(state)), false);
     }
 

@@ -4,7 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.teams.Team;
+import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import net.minecraft.ChatFormatting;
@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class VanillaTeam implements Team {
+public class VanillaTeamProvider implements TeamProvider {
 
     private static final BiMap<String, UUID> TEAM_CACHE = HashBiMap.create();
 

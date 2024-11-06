@@ -48,7 +48,7 @@ public interface ClaimApi {
      * @param chunkLoad If the chunk should be chunk loaded.
      */
     default void claim(@NotNull ServerPlayer player, ChunkPos pos, boolean chunkLoad) {
-        this.claim(player.serverLevel(), TeamApi.API.getId(player), pos, chunkLoad);
+        this.claim(player.serverLevel(), TeamApi.API.getTeams(player), pos, chunkLoad);
     }
 
     /**
@@ -58,7 +58,7 @@ public interface ClaimApi {
      * @param positions The positions mapped to chunk load status.
      */
     default void claim(@NotNull ServerPlayer player, Object2BooleanMap<ChunkPos> positions) {
-        this.claim(player.serverLevel(), TeamApi.API.getId(player), positions);
+        this.claim(player.serverLevel(), TeamApi.API.getTeams(player), positions);
     }
 
     /**
@@ -86,7 +86,7 @@ public interface ClaimApi {
      * @param pos    The chunk position to unclaim.
      */
     default void unclaim(@NotNull ServerPlayer player, ChunkPos pos) {
-        this.unclaim(player.serverLevel(), TeamApi.API.getId(player), pos);
+        this.unclaim(player.serverLevel(), TeamApi.API.getTeams(player), pos);
     }
 
     /**
@@ -96,7 +96,7 @@ public interface ClaimApi {
      * @param positions The chunk positions to unclaim.
      */
     default void unclaim(@NotNull ServerPlayer player, Set<ChunkPos> positions) {
-        this.unclaim(player.serverLevel(), TeamApi.API.getId(player), positions);
+        this.unclaim(player.serverLevel(), TeamApi.API.getTeams(player), positions);
     }
 
     /**
@@ -120,7 +120,7 @@ public interface ClaimApi {
      * @param player The team member.
      */
     default void clear(@NotNull Player player) {
-        this.clear(player.level(), TeamApi.API.getId(player));
+        this.clear(player.level(), TeamApi.API.getTeams(player));
     }
 
     /**
@@ -189,7 +189,7 @@ public interface ClaimApi {
      * @return A map of chunk positions to chunk load status.
      */
     default Optional<Object2BooleanMap<ChunkPos>> getOwnedClaims(Player player) {
-        return this.getOwnedClaims(player.level(), TeamApi.API.getId(player));
+        return this.getOwnedClaims(player.level(), TeamApi.API.getTeams(player));
     }
 
     /**

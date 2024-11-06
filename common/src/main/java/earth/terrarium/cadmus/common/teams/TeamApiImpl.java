@@ -2,9 +2,12 @@ package earth.terrarium.cadmus.common.teams;
 
 import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.flags.Flag;
 import earth.terrarium.cadmus.api.flags.FlagApi;
-import earth.terrarium.cadmus.api.teams.Team;
+import earth.terrarium.cadmus.api.teams.TeamId;
+import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
@@ -18,6 +21,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -27,60 +31,53 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TeamApiImpl implements TeamApi {
 
     private static final Map<Player, Component> LAST_MESSAGE = new WeakHashMap<>();
 
-    private final Object2IntMap<Team> teams = new Object2IntOpenHashMap<>();
-    private Team selected;
+    private final HashMap<ResourceLocation, TeamProvider> teams = new HashMap<>();
+    private final ResourceLocation individual = Cadmus.id("individual");
+    private final ResourceLocation admin = Cadmus.id("admin");
 
     @Override
-    public void register(Team team, int weight) {
-        this.teams.put(team, weight);
+    public void register(ResourceLocation id, TeamProvider team) {
+        this.teams.put(id, team);
+    }
+
+    public TeamProvider getProvider(ResourceLocation id) {
+        return this.teams.get(id);
     }
 
     @Override
-    public Team getSelected() {
-        if (this.selected == null) {
-            int maxWeight = Integer.MIN_VALUE;
-            for (var entry : teams.object2IntEntrySet()) {
-                if (entry.getIntValue() > maxWeight) {
-                    maxWeight = entry.getIntValue();
-                    this.selected = entry.getKey();
-                }
-            }
-        }
-        return this.selected;
-    }
-
-    @Override
-    public Set<UUID> getAllTeams(MinecraftServer server) {
-        Set<UUID> teams = getSelected().getAllTeams(server);
-        server.getAllLevels().forEach(level -> teams.addAll(ClaimApi.API.getAllClaimsByOwner(level).keySet()));
-        server.getPlayerList().getPlayers().forEach(player -> teams.add(player.getUUID()));
-        teams.addAll(FlagApi.API.getAllAdminTeams(server).keySet());
+    public Set<TeamId> getAllTeams(MinecraftServer server) {
+        Set<TeamId> teams = new HashSet<>();
+        this.teams.forEach((id, team) -> team.getAllTeams(server).forEach(uuid -> teams.add(new TeamId(id, uuid))));
+        server.getAllLevels().forEach(level -> ClaimApi.API.getAllClaimsByOwner(level).keySet().forEach(uuid -> teams.add(new TeamId(individual, uuid))));
+        server.getPlayerList().getPlayers().forEach(player -> teams.add(new TeamId(individual, player.getUUID())));
+        FlagApi.API.getAllAdminTeams(server).keySet().forEach(uuid -> teams.add(new TeamId(admin, uuid)));
         return teams;
     }
 
     @Override
-    public Component getName(Level level, UUID id) {
-        return getSelected().getName(level, id).orElseGet(() -> {
+    public Component getName(Level level, TeamId id) {
+        return teams.get(id.providerId()).getName(level, id.teamId()).orElseGet(() -> {
             if (!level.isClientSide()) {
                 MinecraftServer server = level.getServer();
                 if (server == null) return ConstantComponents.UNKNOWN;
 
-                if (FlagApi.API.isAdminTeam(server, id)) {
-                    return Component.literal(Flags.DISPLAY_NAME.get(server, id));
+                if (FlagApi.API.isAdminTeam(server, id.teamId())) {
+                    return Component.literal(Flags.DISPLAY_NAME.get(server, id.teamId()));
                 }
 
                 GameProfileCache cache = server.getProfileCache();
                 if (cache == null) return ConstantComponents.UNKNOWN;
-                GameProfile profile = cache.get(id).orElse(null);
+                GameProfile profile = cache.get(id.teamId()).orElse(null);
                 if (profile == null) return ConstantComponents.UNKNOWN;
                 return Component.literal(profile.getName());
-            } else if (CadmusClient.TEAM_INFO.containsKey(id)) {
-                return Component.literal(CadmusClient.TEAM_INFO.get(id).name());
+            } else if (CadmusClient.TEAM_INFO.containsKey(id.teamId())) {
+                return Component.literal(CadmusClient.TEAM_INFO.get(id.teamId()).name());
             }
 
             return ConstantComponents.UNKNOWN;
@@ -88,13 +85,13 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public Component getName(MinecraftServer server, UUID id) {
+    public Component getName(MinecraftServer server, TeamId id) {
         return getName(server.overworld(), id);
     }
 
     @Override
-    public Color getColor(Level level, UUID id) {
-        return getSelected().getColor(level, id).orElseGet(() -> {
+    public Color getColor(Level level, TeamId id) {
+        return getProvider(id.providerId()).getColor(level, id.teamId()).orElseGet(() -> {
             if (!level.isClientSide()) {
                 MinecraftServer server = level.getServer();
                 if (server == null) return ModUtils.uuidToColor(id);
@@ -125,7 +122,7 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public UUID getId(@NotNull Player player) {
+    public UUID getTeams(@NotNull Player player) {
         return getSelected().getId(player).orElse(player.getUUID());
     }
 

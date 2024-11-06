@@ -60,7 +60,7 @@ public class ClaimAreaCommand {
         Object2BooleanMap<ChunkPos> finalPositions = new Object2BooleanOpenHashMap<>();
         Set<ChunkPos> positions = ChunkPos.rangeClosed(startPos, endPos).collect(Collectors.toUnmodifiableSet());
 
-        UUID id = TeamApi.API.getId(player);
+        UUID id = TeamApi.API.getTeams(player);
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresentOrElse(claim -> {
                 if (claim.left().equals(id) && claim.rightBoolean()) {

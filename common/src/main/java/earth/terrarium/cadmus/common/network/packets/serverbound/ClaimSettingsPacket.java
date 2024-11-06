@@ -9,10 +9,7 @@ import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketT
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.protections.ProtectionApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
-import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 
@@ -31,7 +28,7 @@ public record ClaimSettingsPacket(String setting, TriState value) implements Pac
                 player.displayClientMessage(error, false);
                 return;
             }
-            CadmusSaveData.setClaimSetting(player.getServer(), TeamApi.API.getId(player), packet.setting, packet.value);
+            CadmusSaveData.setClaimSetting(player.getServer(), TeamApi.API.getTeams(player), packet.setting, packet.value);
         })
     );
 

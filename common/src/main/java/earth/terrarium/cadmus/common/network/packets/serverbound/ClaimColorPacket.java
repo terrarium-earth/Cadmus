@@ -18,7 +18,7 @@ public record ClaimColorPacket(Color color) implements Packet<ClaimColorPacket> 
         NetworkHandle.handle((packet, player) -> {
             if (player.getCommandSenderWorld().isClientSide()) return;
             if (ModUtils.canModifyColor(player) != null) return;
-            CadmusSaveData.setTeamColor(player.getServer(), TeamApi.API.getId(player), packet.color());
+            CadmusSaveData.setTeamColor(player.getServer(), TeamApi.API.getTeams(player), packet.color());
         })
     );
 

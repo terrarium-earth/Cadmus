@@ -44,7 +44,8 @@ public interface ClaimLimitApi {
      * @return The maximum number of claims the player can have.
      */
     default int getMaxClaims(@NotNull Player player) {
-        return this.getMaxClaims(TeamApi.API.getId(player));
+        TeamApi.API.getTeams()
+        return this.getMaxClaims(TeamApi.API.getTeams(player));
     }
 
     /**
@@ -54,7 +55,7 @@ public interface ClaimLimitApi {
      * @return The maximum number of chunk loaded claims the player can have.
      */
     default int getMaxChunkLoadedClaims(@NotNull Player player) {
-        return this.getMaxChunkLoadedClaims(TeamApi.API.getId(player));
+        return this.getMaxChunkLoadedClaims(TeamApi.API.getTeams(player));
     }
 
     /**

@@ -80,7 +80,7 @@ public class ClaimCommand {
     }
 
     public static int getClaimsCount(Player player, boolean chunkload) {
-        return getClaimsCount(player.level(), TeamApi.API.getId(player), chunkload);
+        return getClaimsCount(player.level(), TeamApi.API.getTeams(player), chunkload);
     }
 
     public static int getClaimsCount(Level level, UUID id, boolean chunkload) {
