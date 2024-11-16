@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.api.claims.limit;
 
 import earth.terrarium.cadmus.api.ApiHelper;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -88,5 +89,5 @@ public interface ClaimLimitApi {
      * @param id     The team ID.
      * @param sync   If the changes should be synced to the client.
      */
-    void calculate(MinecraftServer server, UUID id, boolean sync);
+    void calculate(MinecraftServer server, TeamId id, boolean sync);
 }

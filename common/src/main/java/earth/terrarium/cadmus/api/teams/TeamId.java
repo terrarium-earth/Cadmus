@@ -20,4 +20,8 @@ public record TeamId(ResourceLocation providerId, UUID teamId) {
         ByteCodec.UUID.fieldOf(TeamId::teamId),
         TeamId::new
     );
+
+    public static TeamId ofNew(ResourceLocation providerId) {
+        return new TeamId(providerId, UUID.randomUUID());
+    }
 }

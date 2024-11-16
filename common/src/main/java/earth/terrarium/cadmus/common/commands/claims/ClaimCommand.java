@@ -2,11 +2,13 @@ package earth.terrarium.cadmus.common.commands.claims;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -26,6 +28,7 @@ public class ClaimCommand {
         dispatcher.register(Commands.literal("claim")
             .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                 .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                    .then(Commands.argument("name", StringArgumentType.greedyString()))
                     .executes(context -> {
                         ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
                         boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
@@ -44,7 +47,7 @@ public class ClaimCommand {
         );
     }
 
-    private static void claim(CommandSourceStack source, ChunkPos pos, boolean chunkload) throws CommandSyntaxException {
+    private static void claim(CommandSourceStack source, TeamId id, ChunkPos pos, boolean chunkload) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         int claimsCount = getClaimsCount(player, chunkload) + 1;
         int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(player) : ClaimLimitApi.API.getMaxClaims(player);
@@ -57,7 +60,7 @@ public class ClaimCommand {
 
         checkClaimed(source.getLevel(), pos);
 
-        ClaimApi.API.claim(player, pos, chunkload);
+        ClaimApi.API.claim(source.getLevel(), id, pos, chunkload);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             chunkload ?
