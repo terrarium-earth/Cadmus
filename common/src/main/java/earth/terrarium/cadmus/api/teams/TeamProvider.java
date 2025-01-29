@@ -61,7 +61,7 @@ public interface TeamProvider {
      * @param player The player.
      * @return The team's ID or empty if the player is not in a team.
      */
-    Optional<UUID> getId(Player player);
+    Set<UUID> getTeams(Player player);
 
     /**
      * Checks if the player can modify the team's settings.
@@ -69,7 +69,7 @@ public interface TeamProvider {
      * @param player The player.
      * @return true if the player can modify the team's settings, false otherwise.
      */
-    boolean canModifySettings(Player player);
+    boolean canModifySettings(Player player, UUID teamId);
 
     Set<UUID> getAllTeams(MinecraftServer server);
 

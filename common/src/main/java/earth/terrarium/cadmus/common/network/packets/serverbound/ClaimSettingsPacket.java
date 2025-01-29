@@ -28,7 +28,7 @@ public record ClaimSettingsPacket(String setting, TriState value) implements Pac
                 player.displayClientMessage(error, false);
                 return;
             }
-            CadmusSaveData.setClaimSetting(player.getServer(), TeamApi.API.getTeams(player), packet.setting, packet.value);
+            CadmusSaveData.setClaimSetting(player.getServer(), TeamApi.API.getTeamsList(player), packet.setting, packet.value);
         })
     );
 

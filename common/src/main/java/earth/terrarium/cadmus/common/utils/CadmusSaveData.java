@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.utils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.SaveHandler;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,20 +20,23 @@ import java.util.*;
 
 public class CadmusSaveData extends SaveHandler {
 
-    private final Map<UUID, Map<String, TriState>> settings = new HashMap<>();
+    private final Map<TeamId, Map<String, TriState>> settings = new HashMap<>();
     private final Object2BooleanMap<String> defaultSettings = new Object2BooleanArrayMap<>();
-    private final Map<UUID, Set<ResourceLocation>> allowedBlocks = new HashMap<>();
+    private final Map<TeamId, Set<ResourceLocation>> allowedBlocks = new HashMap<>();
     private final Set<UUID> bypassPlayers = new HashSet<>();
-    private final Map<UUID, Color> teamColors = new HashMap<>();
+    private final Map<TeamId, Color> teamColors = new HashMap<>();
 
     @Override
     public void loadData(CompoundTag tag) {
         CompoundTag settingsTag = tag.getCompound("settings");
-        settingsTag.getAllKeys().forEach(id -> {
-            CompoundTag claimSettingsTag = settingsTag.getCompound(id);
-            claimSettingsTag.getAllKeys().forEach(setting -> {
-                TriState value = TriState.valueOf(claimSettingsTag.getString(setting));
-                this.settings.computeIfAbsent(UUID.fromString(id), ignored -> new HashMap<>()).put(setting, value);
+        settingsTag.getAllKeys().forEach(provider -> {
+            CompoundTag providerMap = settingsTag.getCompound(provider);
+            providerMap.getAllKeys().forEach(id -> {
+                CompoundTag claimSettingsTag = providerMap.getCompound(id);
+                claimSettingsTag.getAllKeys().forEach(setting -> {
+                    TriState value = TriState.valueOf(claimSettingsTag.getString(setting));
+                    this.settings.computeIfAbsent(new TeamId(ResourceLocation.parse(provider), UUID.fromString(id)), ignored -> new HashMap<>()).put(setting, value);
+                });
             });
         });
 
@@ -41,21 +45,26 @@ public class CadmusSaveData extends SaveHandler {
             defaultSettings.put(setting, defaultSettingsTag.getBoolean(setting)));
 
         CompoundTag allowedBlocksTag = tag.getCompound("allowedBlocks");
-        allowedBlocksTag.getAllKeys().forEach(id -> {
-            ListTag blockTag = allowedBlocksTag.getList(id, Tag.TAG_STRING);
-            Set<ResourceLocation> blocks = new HashSet<>();
-            blockTag.forEach(tagEntry ->
-                blocks.add(ResourceLocation.parse(tagEntry.getAsString())));
-            allowedBlocks.put(UUID.fromString(id), blocks);
+        allowedBlocksTag.getAllKeys().forEach(provider -> {
+            CompoundTag providerMap = allowedBlocksTag.getCompound(provider);
+            providerMap.getAllKeys().forEach(id -> {
+                ListTag blockTag = providerMap.getList(provider, Tag.TAG_STRING);
+                Set<ResourceLocation> blocks = new HashSet<>();
+                blockTag.forEach(tagEntry ->
+                    blocks.add(ResourceLocation.parse(tagEntry.getAsString())));
+                allowedBlocks.put(new TeamId(ResourceLocation.parse(provider), UUID.fromString(id)), blocks);
+            });
         });
 
         CompoundTag bypassTag = tag.getCompound("bypass");
         bypassTag.getAllKeys().forEach(uuid -> bypassPlayers.add(UUID.fromString(uuid)));
 
         CompoundTag teamColorsTag = tag.getCompound("teamColors");
-        teamColorsTag.getAllKeys().forEach(uuid -> {
-            UUID id = UUID.fromString(uuid);
-            teamColors.put(id, Color.parse(teamColorsTag.getString(uuid)));
+        teamColorsTag.getAllKeys().forEach(provider -> {
+            CompoundTag providerMap = teamColorsTag.getCompound(provider);
+            providerMap.getAllKeys().forEach(id -> {
+                teamColors.put(new TeamId(ResourceLocation.parse(provider), UUID.fromString(id)), Color.parse(providerMap.getString(provider)));
+            });
         });
     }
 
@@ -94,13 +103,13 @@ public class CadmusSaveData extends SaveHandler {
         return read(server.overworld().getDataStorage(), SaveHandler.HandlerType.create(CadmusSaveData::new), "cadmus_data");
     }
 
-    public static TriState getClaimSetting(MinecraftServer server, UUID id, String setting) {
+    public static TriState getClaimSetting(MinecraftServer server, TeamId id, String setting) {
         return read(server).settings
             .computeIfAbsent(id, ignored -> new HashMap<>())
             .getOrDefault(setting, TriState.UNDEFINED);
     }
 
-    public static void setClaimSetting(MinecraftServer server, UUID id, String setting, TriState value) {
+    public static void setClaimSetting(MinecraftServer server, TeamId id, String setting, TriState value) {
         var data = read(server);
         data.settings
             .computeIfAbsent(id, ignored -> new HashMap<>())
@@ -108,7 +117,7 @@ public class CadmusSaveData extends SaveHandler {
         data.setDirty();
     }
 
-    public static boolean getClaimSettingOrDefault(MinecraftServer server, UUID id, String setting) {
+    public static boolean getClaimSettingOrDefault(MinecraftServer server, TeamId id, String setting) {
         TriState value = getClaimSetting(server, id, setting);
         return value.isUndefined() ? getDefaultClaimSetting(server, setting) : value.isTrue();
     }
@@ -141,28 +150,28 @@ public class CadmusSaveData extends SaveHandler {
         }
     }
 
-    public static void addAllowedBlock(MinecraftServer server, UUID player, Block block) {
+    public static void addAllowedBlock(MinecraftServer server, TeamId player, Block block) {
         var data = read(server);
         data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).add(BuiltInRegistries.BLOCK.getKey(block));
         data.setDirty();
     }
 
-    public static void removeAllowedBlock(MinecraftServer server, UUID player, Block block) {
+    public static void removeAllowedBlock(MinecraftServer server, TeamId player, Block block) {
         var data = read(server);
         data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).remove(BuiltInRegistries.BLOCK.getKey(block));
         data.setDirty();
     }
 
-    public static boolean isBlockAllowed(MinecraftServer server, UUID player, Block block) {
+    public static boolean isBlockAllowed(MinecraftServer server, TeamId player, Block block) {
         var data = read(server);
         return data.allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>()).contains(BuiltInRegistries.BLOCK.getKey(block));
     }
 
-    public static Set<ResourceLocation> getAllowedBlocks(MinecraftServer server, UUID player) {
+    public static Set<ResourceLocation> getAllowedBlocks(MinecraftServer server, TeamId player) {
         return read(server).allowedBlocks.computeIfAbsent(player, ignored -> new HashSet<>());
     }
 
-    public static void removeTeam(MinecraftServer server, UUID id) {
+    public static void removeTeam(MinecraftServer server, TeamId id) {
         var data = read(server);
         data.settings.remove(id);
         data.allowedBlocks.remove(id);
@@ -176,15 +185,15 @@ public class CadmusSaveData extends SaveHandler {
         data.setDirty();
     }
 
-    public static void setTeamColor(MinecraftServer server, UUID id, Color color) {
+    public static void setTeamColor(MinecraftServer server, TeamId id, Color color) {
         var data = read(server);
         data.teamColors.put(id, color);
         data.setDirty();
     }
 
-    public static Color getTeamColor(MinecraftServer server, UUID id) {
-        Map<UUID, Color> colors = read(server).teamColors;
-        colors.putIfAbsent(id, ModUtils.uuidToColor(id));
+    public static Color getTeamColor(MinecraftServer server, TeamId id) {
+        Map<TeamId, Color> colors = read(server).teamColors;
+        colors.putIfAbsent(id, ModUtils.uuidToColor(id.id()));
         return colors.get(id);
     }
 }

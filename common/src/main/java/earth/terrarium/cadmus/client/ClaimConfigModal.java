@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.client;
 
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.BulkClaimSettingsPacket;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class ClaimConfigModal extends BaseModal {
     private final Map<String, RadioState<TriState>> settings = new HashMap<>();
     private final State<Color> color;
+    private final State<TeamId> selectedTeam;
     private final boolean canModifyColor;
 
     protected ClaimConfigModal(ClaimMapScreen background) {
@@ -38,6 +40,7 @@ public class ClaimConfigModal extends BaseModal {
         })));
 
         this.color = State.of(background.teamColor);
+        this.selectedTeam = State.of(background.)
         this.canModifyColor = background.canModifyColor;
     }
 

@@ -14,7 +14,7 @@ public abstract class EntityMixin {
     private boolean cadmus$canRide(boolean original, Entity vehicle) {
         return original && !vehicle.level().isClientSide() ?
             ClaimApi.API.getClaim(vehicle.level(), vehicle.chunkPosition())
-                .map(claim -> Flags.USE_VEHICLES.get(vehicle.getServer(), claim.first()))
+                .map(claim -> Flags.USE_VEHICLES.get(vehicle.getServer(), claim.first().id()))
                 .orElse(false) :
             original;
     }

@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.flags.Flag;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
@@ -17,8 +16,6 @@ import earth.terrarium.cadmus.common.network.packets.clientbound.SyncAllTeamInfo
 import earth.terrarium.cadmus.common.network.packets.clientbound.SyncTeamInfo;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -46,15 +43,21 @@ public class TeamApiImpl implements TeamApi {
         this.teams.put(id, team);
     }
 
+    @Override
     public TeamProvider getProvider(ResourceLocation id) {
         return this.teams.get(id);
+    }
+
+    @Override
+    public Set<ResourceLocation> getAllProviders() {
+        return teams.keySet();
     }
 
     @Override
     public Set<TeamId> getAllTeams(MinecraftServer server) {
         Set<TeamId> teams = new HashSet<>();
         this.teams.forEach((id, team) -> team.getAllTeams(server).forEach(uuid -> teams.add(new TeamId(id, uuid))));
-        server.getAllLevels().forEach(level -> ClaimApi.API.getAllClaimsByOwner(level).keySet().forEach(uuid -> teams.add(new TeamId(individual, uuid))));
+        server.getAllLevels().forEach(level -> teams.addAll(ClaimApi.API.getAllClaimsByOwner(level).keySet()));
         server.getPlayerList().getPlayers().forEach(player -> teams.add(new TeamId(individual, player.getUUID())));
         FlagApi.API.getAllAdminTeams(server).keySet().forEach(uuid -> teams.add(new TeamId(admin, uuid)));
         return teams;
@@ -62,22 +65,22 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public Component getName(Level level, TeamId id) {
-        return teams.get(id.providerId()).getName(level, id.teamId()).orElseGet(() -> {
+        return teams.get(id.provider()).getName(level, id.id()).orElseGet(() -> {
             if (!level.isClientSide()) {
                 MinecraftServer server = level.getServer();
                 if (server == null) return ConstantComponents.UNKNOWN;
 
-                if (FlagApi.API.isAdminTeam(server, id.teamId())) {
-                    return Component.literal(Flags.DISPLAY_NAME.get(server, id.teamId()));
+                if (FlagApi.API.isAdminTeam(server, id.id())) {
+                    return Component.literal(Flags.DISPLAY_NAME.get(server, id.id()));
                 }
 
                 GameProfileCache cache = server.getProfileCache();
                 if (cache == null) return ConstantComponents.UNKNOWN;
-                GameProfile profile = cache.get(id.teamId()).orElse(null);
+                GameProfile profile = cache.get(id.id()).orElse(null);
                 if (profile == null) return ConstantComponents.UNKNOWN;
                 return Component.literal(profile.getName());
-            } else if (CadmusClient.TEAM_INFO.containsKey(id.teamId())) {
-                return Component.literal(CadmusClient.TEAM_INFO.get(id.teamId()).name());
+            } else if (CadmusClient.TEAM_INFO.containsKey(id.id())) {
+                return Component.literal(CadmusClient.TEAM_INFO.get(id.id()).name());
             }
 
             return ConstantComponents.UNKNOWN;
@@ -91,60 +94,58 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public Color getColor(Level level, TeamId id) {
-        return getProvider(id.providerId()).getColor(level, id.teamId()).orElseGet(() -> {
-            if (!level.isClientSide()) {
-                MinecraftServer server = level.getServer();
-                if (server == null) return ModUtils.uuidToColor(id);
-
-                if (FlagApi.API.isAdminTeam(server, id)) {
-                    return Flags.COLOR.get(server, id);
-                } else {
-                    return CadmusSaveData.getTeamColor(server, id);
-                }
-            } else {
-                if (CadmusClient.TEAM_INFO.containsKey(id)) {
-                    return CadmusClient.TEAM_INFO.get(id).color();
-                } else {
-                    return ModUtils.uuidToColor(id);
-                }
-            }
-        });
+        return getProvider(id.provider()).getColor(level, id.id()).orElseGet(() -> ModUtils.uuidToColor(id.id()));
     }
 
     @Override
-    public Color getColor(MinecraftServer server, UUID id) {
+    public Color getColor(MinecraftServer server, TeamId id) {
         return getColor(server.overworld(), id);
     }
 
     @Override
-    public boolean isMember(Level level, UUID id, Player player) {
-        return player.getUUID().equals(id) || getSelected().isMember(level, id, player);
+    public boolean isMember(Level level, TeamId id, Player player) {
+        return getProvider(id.provider()).isMember(level, id.id(), player);
     }
 
     @Override
-    public UUID getTeams(@NotNull Player player) {
-        return getSelected().getId(player).orElse(player.getUUID());
+    public Set<UUID> getMembers(Level level, TeamId id) {
+        return getProvider(id.provider()).getMembers(level, id.id());
+    }
+
+    @Override
+    public Set<TeamId> getTeamsList(@NotNull Player player) {
+        return getTeams(player).entrySet().stream().flatMap(entry -> entry.getValue().stream().map(uuid -> new TeamId(entry.getKey(), uuid))).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Map<ResourceLocation, Set<UUID>> getTeams(@NotNull Player player) {
+        Map<ResourceLocation, Set<UUID>> teams = new HashMap<>();
+        this.teams.forEach((resourceLocation, teamProvider) -> {
+            Set<UUID> teamIds = teamProvider.getTeams(player);
+            if (!teamIds.isEmpty()) teams.put(resourceLocation, teamIds);
+        });
+        return teams;
     }
 
     @Override
     public boolean isOnTeam(@NotNull Player player) {
-        return getSelected().getId(player).isPresent();
+        return !this.getTeamsList(player).isEmpty();
     }
 
     @Override
-    public boolean canModifySettings(@NotNull Player player) {
-        return !isOnTeam(player) || getSelected().canModifySettings(player);
+    public boolean canModifySettings(@NotNull Player player, TeamId id) {
+        return this.getProvider(id.provider()).canModifySettings(player, id.id());
     }
 
     @Override
-    public void removeTeam(MinecraftServer server, UUID id) {
+    public void removeTeam(MinecraftServer server, TeamId id) {
         server.getAllLevels().forEach(level -> ClaimApi.API.clear(level, id));
         CadmusSaveData.removeTeam(server, id);
     }
 
     @Override
     public void syncAllTeamInfo(MinecraftServer server) {
-        Map<UUID, TeamInfo> teamInfo = new HashMap<>();
+        Map<TeamId, TeamInfo> teamInfo = new HashMap<>();
 
         getAllTeams(server).forEach(id -> {
             String name = getName(server, id).getString();
@@ -158,7 +159,7 @@ public class TeamApiImpl implements TeamApi {
     @Override
     public void syncAllTeamInfo(ServerPlayer player) {
         if (NetworkHandler.CHANNEL.canSendToPlayer(player, SyncAllTeamInfoPacket.TYPE)) {
-            Map<UUID, TeamInfo> teamInfo = new HashMap<>();
+            Map<TeamId, TeamInfo> teamInfo = new HashMap<>();
 
             getAllTeams(player.server).forEach(id -> {
                 String name = getName(player.server, id).getString();
@@ -171,7 +172,7 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public void syncTeamInfo(MinecraftServer server, UUID id, boolean updateMaps) {
+    public void syncTeamInfo(MinecraftServer server, TeamId id, boolean updateMaps) {
         String name = getName(server, id).getString();
         Color color = getColor(server, id);
         NetworkHandler.sendToAllClientPlayers(new SyncTeamInfo(id, name, color, updateMaps), server);

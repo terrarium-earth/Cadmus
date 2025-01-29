@@ -1,11 +1,12 @@
 package earth.terrarium.cadmus.common.protections.types;
 
-import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
 import earth.terrarium.cadmus.common.tags.ModBlockTags;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -55,14 +56,14 @@ public final class BlockInteractProtection implements Protection {
         return playerEntity == null || canInteractWithBlock(playerEntity, pos, state);
     }
 
-    private boolean checkFlags(ServerLevel level, BlockPos pos, UUID id) {
+    private boolean checkFlags(ServerLevel level, BlockPos pos, TeamId id) {
         MinecraftServer server = level.getServer();
-        if (!FlagApi.API.isAdminTeam(server, id)) return true;
+        if (!id.provider().equals(AdminTeamProvider.ID)) return true;
 
         BlockState state = level.getBlockState(pos);
-        if (state.is(ModBlockTags.DOOR_LIKE)) return Flags.USE_DOORS.get(server, id);
-        if (state.is(ModBlockTags.INTERACTABLE_STORAGE)) return Flags.USE_CHESTS.get(server, id);
-        if (state.is(ModBlockTags.REDSTONE)) return Flags.USE_REDSTONE.get(server, id);
+        if (state.is(ModBlockTags.DOOR_LIKE)) return Flags.USE_DOORS.get(server, id.id());
+        if (state.is(ModBlockTags.INTERACTABLE_STORAGE)) return Flags.USE_CHESTS.get(server, id.id());
+        if (state.is(ModBlockTags.REDSTONE)) return Flags.USE_REDSTONE.get(server, id.id());
         return true;
     }
 }

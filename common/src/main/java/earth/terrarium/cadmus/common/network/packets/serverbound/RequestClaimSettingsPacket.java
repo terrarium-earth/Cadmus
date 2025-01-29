@@ -26,7 +26,7 @@ public record RequestClaimSettingsPacket() implements Packet<RequestClaimSetting
 
             for (String setting : ProtectionApi.API.getSettings()) {
                 if (ModUtils.canUsePermission(player, setting) != null) continue;
-                settings.put(setting, CadmusSaveData.getClaimSetting(player.getServer(), TeamApi.API.getTeams(player), setting));
+                settings.put(setting, CadmusSaveData.getClaimSetting(player.getServer(), TeamApi.API.getTeamsList(player), setting));
             }
 
             NetworkHandler.CHANNEL.sendToPlayer(new SyncClaimSettingsPacket(settings, ModUtils.canModifyColor(player) == null), player);

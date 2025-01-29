@@ -28,7 +28,7 @@ public interface ClaimLimitApi {
      * @param id The team ID.
      * @return The maximum number of claims the team can have.
      */
-    int getMaxClaims(UUID id);
+    int getMaxClaims(TeamId id);
 
     /**
      * Gets the maximum number of chunk loaded claims the team can have.
@@ -36,28 +36,7 @@ public interface ClaimLimitApi {
      * @param id The team ID.
      * @return The maximum number of chunk loaded claims the team can have.
      */
-    int getMaxChunkLoadedClaims(UUID id);
-
-    /**
-     * Gets the maximum number of claims the player can have.
-     *
-     * @param player The player to get the claims from.
-     * @return The maximum number of claims the player can have.
-     */
-    default int getMaxClaims(@NotNull Player player) {
-        TeamApi.API.getTeams()
-        return this.getMaxClaims(TeamApi.API.getTeams(player));
-    }
-
-    /**
-     * Gets the maximum number of chunk loaded claims the player can have.
-     *
-     * @param player The player to get the claims from.
-     * @return The maximum number of chunk loaded claims the player can have.
-     */
-    default int getMaxChunkLoadedClaims(@NotNull Player player) {
-        return this.getMaxChunkLoadedClaims(TeamApi.API.getTeams(player));
-    }
+    int getMaxChunkLoadedClaims(TeamId id);
 
     /**
      * Sets the maximum claims for the team.
@@ -66,14 +45,14 @@ public interface ClaimLimitApi {
      * @param maxClaims      The maximum claims for the team.
      * @param maxChunkLoaded The maximum chunk loaded claims for the team.
      */
-    void set(UUID id, int maxClaims, int maxChunkLoaded);
+    void set(TeamId id, int maxClaims, int maxChunkLoaded);
 
     /**
      * Sets the maximum claims for each team.
      *
      * @param maxClaimsByTeam The maximum claims for each team.
      */
-    void set(Map<UUID, IntIntPair> maxClaimsByTeam);
+    void set(Map<TeamId, IntIntPair> maxClaimsByTeam);
 
     /**
      * Calculates the maximum claims for each team.

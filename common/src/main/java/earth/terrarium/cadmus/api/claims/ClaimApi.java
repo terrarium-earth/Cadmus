@@ -11,11 +11,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -142,7 +140,7 @@ public interface ClaimApi {
      */
     default Optional<Object2BooleanMap<ChunkPos>> getOwnedClaims(Player player) {
         var map = new Object2BooleanArrayMap<ChunkPos>();
-        for (TeamId team : TeamApi.API.getTeams(player)) {
+        for (TeamId team : TeamApi.API.getTeamsList(player)) {
             this.getOwnedClaims(player.level(), team).ifPresent(map::putAll);
         }
         return Optional.of(map);

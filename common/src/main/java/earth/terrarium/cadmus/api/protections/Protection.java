@@ -2,11 +2,11 @@ package earth.terrarium.cadmus.api.protections;
 
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
@@ -19,7 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface Protection {
 
@@ -71,8 +70,8 @@ public interface Protection {
     }
 
     private boolean flagEnabled(MinecraftServer server, TeamId id) {
-        return FlagApi.API.isAdminTeam(server, id) &&
-            flag().get(server, id);
+        return id.provider().equals(AdminTeamProvider.ID) &&
+            flag().get(server, id.id());
     }
 
     default Optional<TeamId> getId(Level level, BlockPos pos) {
@@ -86,8 +85,8 @@ public interface Protection {
     default boolean isPlayerAllowed(Player player, TeamId id) {
         if (CadmusSaveData.canBypass(player.getServer(), player.getUUID())) return true;
 
-        if (id.providerId().equals()) {
-            return flagEnabled(player.getServer(), id.teamId());
+        if (id.provider().equals(AdminTeamProvider.ID)) {
+            return flagEnabled(player.getServer(), id);
         }
 
         if (hasPermission(player)) return true;

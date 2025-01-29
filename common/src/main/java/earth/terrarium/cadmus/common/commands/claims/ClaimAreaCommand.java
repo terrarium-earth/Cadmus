@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
@@ -32,13 +33,15 @@ public class ClaimAreaCommand {
                                 ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
                                 ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
                                 boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                claim(context.getSource(), startPos, endPos, chunkload);
+                                TeamId id = TeamId.getId(context);
+                                claim(context.getSource(), id, startPos, endPos, chunkload);
                                 return 1;
                             }))
                         .executes(context -> {
                             ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
                             ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                            claim(context.getSource(), startPos, endPos, false);
+                            TeamId id = TeamId.getId(context);
+                            claim(context.getSource(), id, startPos, endPos, false);
                             return 1;
                         })
                     )
@@ -47,7 +50,7 @@ public class ClaimAreaCommand {
         );
     }
 
-    private static void claim(CommandSourceStack source, ChunkPos startPos, ChunkPos endPos, boolean chunkload) throws CommandSyntaxException {
+    private static void claim(CommandSourceStack source, TeamId id, ChunkPos startPos, ChunkPos endPos, boolean chunkload) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         int dist = startPos.getChessboardDistance(endPos);
         if (dist > 50) {
@@ -60,7 +63,6 @@ public class ClaimAreaCommand {
         Object2BooleanMap<ChunkPos> finalPositions = new Object2BooleanOpenHashMap<>();
         Set<ChunkPos> positions = ChunkPos.rangeClosed(startPos, endPos).collect(Collectors.toUnmodifiableSet());
 
-        UUID id = TeamApi.API.getTeams(player);
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresentOrElse(claim -> {
                 if (claim.left().equals(id) && claim.rightBoolean()) {
@@ -70,7 +72,7 @@ public class ClaimAreaCommand {
         );
 
         int claimsCount = ClaimCommand.getClaimsCount(player, chunkload) + finalPositions.size();
-        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(player) : ClaimLimitApi.API.getMaxClaims(player);
+        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(id) : ClaimLimitApi.API.getMaxClaims(id);
         if (claimsCount > maxClaims) {
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.not_enough_claims",
@@ -78,7 +80,7 @@ public class ClaimAreaCommand {
             )).create();
         }
 
-        ClaimApi.API.claim(player, finalPositions);
+        ClaimApi.API.claim(source.getLevel(), id, finalPositions);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             chunkload ?

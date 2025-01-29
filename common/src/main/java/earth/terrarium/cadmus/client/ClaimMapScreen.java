@@ -11,6 +11,7 @@ import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
@@ -42,10 +43,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimMapScreen extends BaseCursorScreen {
     public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
@@ -69,11 +67,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     private MapWidget mapWidget;
     private Button settingsButton;
-    private UUID id;
-    private int claimedCount;
-    private int maxClaims;
-    private int chunkLoadedCount;
-    private int maxChunkLoaded;
+    private final Map<TeamId, TeamData> teams = new HashMap<>();
 
     private float chunkScale;
     private float pixelScale;
@@ -90,12 +84,18 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     public void refresh() {
-        this.id = TeamApi.API.getTeams(this.player);
-        this.teamColor = CadmusClient.TEAM_INFO.get(id).color();
-        this.claimedCount = ClaimCommand.getClaimsCount(player, false);
-        this.maxClaims = ClaimLimitApi.API.getMaxClaims(player);
-        this.chunkLoadedCount = ClaimCommand.getClaimsCount(player, true);
-        this.maxChunkLoaded = ClaimLimitApi.API.getMaxChunkLoadedClaims(player);
+        teams.clear();
+        TeamApi.API.getTeamsList(this.player).forEach(teamId -> {
+            TeamInfo info = CadmusClient.TEAM_INFO.get(teamId);
+            teams.put(teamId, new TeamData(
+                info.name(),
+                info.color(),
+                ClaimCommand.getClaimsCount(level, teamId, false),
+                ClaimLimitApi.API.getMaxClaims(teamId),
+                ClaimCommand.getClaimsCount(level, teamId, true),
+                ClaimLimitApi.API.getMaxChunkLoadedClaims(teamId)
+            ));
+        });
 
         int renderDistanceScale = this.getScaledRenderDistance();
         this.chunkScale = renderDistanceScale / 16f;
@@ -501,7 +501,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     public void updateColor(Color color) {
         this.teamColor = color;
-        CadmusClient.TEAM_INFO.put(TeamApi.API.getTeams(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
+        CadmusClient.TEAM_INFO.put(TeamApi.API.getTeamsList(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
     }
 
     public Map<String, TriState> getSettings() {
@@ -518,8 +518,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
         boolean south, boolean west,
         boolean northEast, boolean southEast,
         boolean southWest, boolean northWest
-    ) {
-    }
+    ) {}
+
+    private record TeamData(String name, Color color, int claimed, int maxClaims, int loaded, int maxLoaded) {}
 
     static {
         CadmusEvents.AddClaimsEvent.register((level, id, positions) -> update());

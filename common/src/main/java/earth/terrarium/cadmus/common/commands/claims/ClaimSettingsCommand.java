@@ -55,13 +55,13 @@ public class ClaimSettingsCommand {
     private static void set(CommandSourceStack source, String setting, String value) throws CommandSyntaxException {
         TriState state = stringToState(value);
         ServerPlayer player = source.getPlayerOrException();
-        CadmusSaveData.setClaimSetting(source.getServer(), TeamApi.API.getTeams(player), setting, state);
+        CadmusSaveData.setClaimSetting(source.getServer(), TeamApi.API.getTeamsList(player), setting, state);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.set", setting, value), false);
     }
 
     private static void get(CommandSourceStack source, String setting) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), TeamApi.API.getTeams(player), setting);
+        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), TeamApi.API.getTeamsList(player), setting);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.get", setting, stateToString(state)), false);
     }
 

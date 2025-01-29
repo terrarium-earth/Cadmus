@@ -11,7 +11,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public interface TeamApi {
 
@@ -33,6 +35,10 @@ public interface TeamApi {
      */
     Set<TeamId> getAllTeams(MinecraftServer server);
 
+    Set<ResourceLocation> getAllProviders();
+
+    TeamProvider getProvider(ResourceLocation id);
+
     /**
      * Checks if the team exists.
      *
@@ -51,7 +57,7 @@ public interface TeamApi {
      * @param id    The ID of the team.
      * @return The name of the team or the player, or "Unknown" if the team or player is not found. The component also has the color of the team.
      */
-    Component getName(Level level, ResourceLocation provider, TeamId id);
+    Component getName(Level level, TeamId id);
 
     /**
      * If the ID is a team, gets the team name. If the ID is a player, gets the player name. If the ID is an admin team, gets the name flag. If it can't find any of these, return "Unknown"
@@ -90,13 +96,17 @@ public interface TeamApi {
      */
     boolean isMember(Level level, TeamId id, Player player);
 
+    Set<UUID> getMembers(Level level, TeamId id);
+
     /**
      * Gets the id of the team if the player is in one, or the player's UUID if not.
      *
      * @param player The player.
      * @return The team's ID or the player's UUID.
      */
-    Set<TeamId> getTeams(@NotNull Player player);
+    Set<TeamId> getTeamsList(@NotNull Player player);
+
+    Map<ResourceLocation, Set<UUID>> getTeams(@NotNull Player player);
 
     /**
      * Checks if the player is on a team.
@@ -112,7 +122,7 @@ public interface TeamApi {
      * @param player The player.
      * @return true if the player is not on a team or if the player can modify the team's settings, false otherwise.
      */
-    boolean canModifySettings(@NotNull Player player);
+    boolean canModifySettings(@NotNull Player player, TeamId id);
 
     /**
      * Removes the team. Clears all the team's chunks and settings.

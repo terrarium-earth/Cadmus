@@ -42,7 +42,7 @@ public class Cadmus {
         Protections.init();
         ClaimSettings.init();
         Flags.init();
-        TeamApi.API.register(new VanillaTeamProvider(), 0);
+        TeamApi.API.register(VanillaTeamProvider.ID, new VanillaTeamProvider());
         ClaimLimitApi.API.register(new VanillaClaimLimiter());
         if (IS_PROMETHEUS_LOADED) PrometheusCompat.init();
     }
@@ -58,7 +58,7 @@ public class Cadmus {
         ModUtils.sendJoinPackets(player);
         TeamApi.API.syncAllTeamInfo(player);
         TeamApi.API.displayTeamName(player);
-        ClaimLimitApiImpl.API.calculate(player.server, player.getUUID(), true);
+        // ClaimLimitApiImpl.API.calculate(player.server, player.getUUID(), true); // TODO implement
     }
 
     public static void onServerStarted(MinecraftServer server) {

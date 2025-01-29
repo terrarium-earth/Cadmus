@@ -47,11 +47,11 @@ public class ClaimSaveData extends SaveHandler {
     @Override
     public void saveData(CompoundTag tag) {
         this.claimsById.forEach((id, map) -> {
-            CompoundTag providerClaims = tag.getCompound(id.providerId().toString());
+            CompoundTag providerClaims = tag.getCompound(id.provider().toString());
             var claims = new ArrayList<Long>();
             map.forEach((pos, chunkLoad) -> claims.add(BlockPos.asLong(pos.x, chunkLoad ? 1 : 0, pos.z)));
-            providerClaims.put(id.teamId().toString(), new LongArrayTag(claims));
-            tag.put(id.providerId().toString(), providerClaims);
+            providerClaims.put(id.id().toString(), new LongArrayTag(claims));
+            tag.put(id.provider().toString(), providerClaims);
         });
     }
 

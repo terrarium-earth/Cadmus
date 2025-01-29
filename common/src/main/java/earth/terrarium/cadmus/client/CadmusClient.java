@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.compat.prometheus.PrometheusClientCompat;
 import earth.terrarium.cadmus.common.claims.ClaimSaveData;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 public class CadmusClient {
 
-    public static final Map<UUID, TeamInfo> TEAM_INFO = new HashMap<>();
+    public static final Map<TeamId, TeamInfo> TEAM_INFO = new HashMap<>();
 
     public static final KeyMapping KEY_OPEN_CLAIM_MAP = new KeyMapping(
         ConstantComponents.OPEN_CLAIM_MAP_KEY.getString(),

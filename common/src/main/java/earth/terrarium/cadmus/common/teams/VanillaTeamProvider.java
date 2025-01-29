@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.teams;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.teamresourceful.resourcefullib.common.color.Color;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.utils.ModUtils;
@@ -10,6 +11,7 @@ import earth.terrarium.olympus.client.constants.MinecraftColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,8 +26,13 @@ import java.util.Set;
 import java.util.UUID;
 
 public class VanillaTeamProvider implements TeamProvider {
-
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Cadmus.MOD_ID, "vanilla_teams");
     private static final BiMap<String, UUID> TEAM_CACHE = HashBiMap.create();
+
+    @Override
+    public ResourceLocation id() {
+        return null;
+    }
 
     @Override
     public Optional<Component> getName(Level level, UUID id) {
@@ -70,15 +77,15 @@ public class VanillaTeamProvider implements TeamProvider {
     }
 
     @Override
-    public Optional<UUID> getId(Player player) {
+    public Set<UUID> getTeams(Player player) {
         PlayerTeam team = player.getScoreboard().getPlayersTeam(player.getGameProfile().getName());
-        if (team == null) return Optional.empty();
-        return Optional.of(gerOrCreateId(team));
+        if (team == null) return Set.of();
+        return Set.of(gerOrCreateId(team));
     }
 
     @Override
-    public boolean canModifySettings(Player player) {
-        return true;
+    public boolean canModifySettings(Player player, UUID teamId) {
+        return isMember(player.level(), teamId, player);
     }
 
     @Override
@@ -92,17 +99,5 @@ public class VanillaTeamProvider implements TeamProvider {
 
     public UUID remove(PlayerTeam team) {
         return TEAM_CACHE.remove(team.getName());
-    }
-
-    public void transferClaims(MinecraftServer server, PlayerTeam team, String playerName) {
-        UUID id = TEAM_CACHE.get(team.getName());
-        ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
-        if (player == null) return;
-
-        server.getAllLevels().forEach(level ->
-            ClaimApi.API.getOwnedClaims(level, player.getUUID()).ifPresent(claims ->
-                ClaimApi.API.claim(level, id, claims)));
-
-        server.getAllLevels().forEach(level -> ClaimApi.API.clear(level, player.getUUID()));
     }
 }

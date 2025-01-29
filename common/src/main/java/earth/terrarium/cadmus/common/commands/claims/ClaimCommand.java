@@ -32,16 +32,19 @@ public class ClaimCommand {
                     .executes(context -> {
                         ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
                         boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                        claim(context.getSource(), pos, chunkload);
+                        TeamId id = TeamId.getId(context);
+                        claim(context.getSource(), id, pos, chunkload);
                         return 1;
                     }))
                 .executes(context -> {
                     ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
-                    claim(context.getSource(), pos, false);
+                    TeamId id = TeamId.getId(context);
+                    claim(context.getSource(), id, pos, false);
                     return 1;
                 }))
             .executes(context -> {
-                claim(context.getSource(), context.getSource().getPlayerOrException().chunkPosition(), false);
+                TeamId id = TeamId.getId(context);
+                claim(context.getSource(), id, context.getSource().getPlayerOrException().chunkPosition(), false);
                 return 1;
             })
         );
@@ -49,8 +52,8 @@ public class ClaimCommand {
 
     private static void claim(CommandSourceStack source, TeamId id, ChunkPos pos, boolean chunkload) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        int claimsCount = getClaimsCount(player, chunkload) + 1;
-        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(player) : ClaimLimitApi.API.getMaxClaims(player);
+        int claimsCount = getClaimsCount(player.level(), id, chunkload) + 1;
+        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(id) : ClaimLimitApi.API.getMaxClaims(id);
         if (claimsCount > maxClaims) {
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.maxed_out_claims",
@@ -82,11 +85,7 @@ public class ClaimCommand {
         }
     }
 
-    public static int getClaimsCount(Player player, boolean chunkload) {
-        return getClaimsCount(player.level(), TeamApi.API.getTeams(player), chunkload);
-    }
-
-    public static int getClaimsCount(Level level, UUID id, boolean chunkload) {
+    public static int getClaimsCount(Level level, TeamId id, boolean chunkload) {
         var claims = ClaimApi.API.getOwnedClaims(level, id).orElse(null);
         if (claims == null) return 0;
         return chunkload ?

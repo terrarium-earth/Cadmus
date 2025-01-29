@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.client.compat.xaero;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import it.unimi.dsi.fastutil.Pair;
@@ -19,7 +20,6 @@ import xaero.map.highlight.ChunkHighlighter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class CadmusChunkHighlighter extends ChunkHighlighter {
 
@@ -36,7 +36,7 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
     protected int[] getColors(ResourceKey<Level> dimension, int chunkX, int chunkZ) {
         if (!WorldMap.settings.displayClaims) return null;
 
-        UUID id = getClaim(dimension, chunkX, chunkZ).map(Pair::left).orElse(null);
+        TeamId id = getClaim(dimension, chunkX, chunkZ).map(Pair::left).orElse(null);
         if (id == null) return null;
 
         var topClaim = getClaim(dimension, chunkX, chunkZ - 1);
@@ -64,13 +64,13 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
         if (!WorldMap.settings.displayClaims) return 0;
         if (!regionHasHighlights(dimension, regionX, regionZ)) return 0;
 
-        UUID id = getClaim(dimension, regionX << 5, regionZ << 5).map(Pair::left).orElse(null);
+        TeamId id = getClaim(dimension, regionX << 5, regionZ << 5).map(Pair::left).orElse(null);
         if (id == null) return 0;
 
         long accumulator = WorldMap.settings.claimsBorderOpacity;
-        accumulator += id.getLeastSignificantBits();
+        accumulator += id.id().getLeastSignificantBits();
         accumulator *= 37L;
-        accumulator += id.getMostSignificantBits();
+        accumulator += id.id().getMostSignificantBits();
         accumulator *= 37L;
         accumulator = accumulator * 37L + (long) WorldMap.settings.claimsFillOpacity;
         accumulator = accumulator * 37L + regionX;
@@ -106,7 +106,7 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
     @Override
     public void addMinimapBlockHighlightTooltips(List<Component> list, ResourceKey<Level> dimension, int blockX, int blockZ, int width) {}
 
-    private Optional<ObjectBooleanPair<UUID>> getClaim(ResourceKey<Level> dimension, int chunkX, int chunkZ) {
+    private Optional<ObjectBooleanPair<TeamId>> getClaim(ResourceKey<Level> dimension, int chunkX, int chunkZ) {
         return ClaimApi.API.getClientClaim(dimension, new ChunkPos(chunkX, chunkZ));
     }
 
@@ -114,7 +114,7 @@ public class CadmusChunkHighlighter extends ChunkHighlighter {
         return getClaim(dimension, chunkX, chunkZ).isPresent();
     }
 
-    private static int getColor(UUID id) {
+    private static int getColor(TeamId id) {
         return Optionull.mapOrDefault(
             TeamApi.API.getColor(CadmusClient.level(), id),
             Color::getValue,
