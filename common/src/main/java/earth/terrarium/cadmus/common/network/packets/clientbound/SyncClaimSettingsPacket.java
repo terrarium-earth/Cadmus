@@ -8,22 +8,21 @@ import com.teamresourceful.resourcefullib.common.network.base.NetworkHandle;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.client.ClaimMapScreen;
+import earth.terrarium.cadmus.common.protections.ClaimSettings;
+import earth.terrarium.cadmus.common.protections.SettingsData;
 import net.minecraft.client.Minecraft;
 
 import java.util.Map;
 
-public record SyncClaimSettingsPacket(Map<String, TriState> settings, boolean canModifyColor) implements Packet<SyncClaimSettingsPacket> {
+public record SyncClaimSettingsPacket(Map<TeamId, SettingsData> settings) implements Packet<SyncClaimSettingsPacket> {
 
     public static final ClientboundPacketType<SyncClaimSettingsPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("sync_claim_settings"),
-        ObjectByteCodec.create(
-            ByteCodec.mapOf(ByteCodec.STRING, TriState.BYTE_CODEC).fieldOf(SyncClaimSettingsPacket::settings),
-            ByteCodec.BOOLEAN.fieldOf(SyncClaimSettingsPacket::canModifyColor),
-            SyncClaimSettingsPacket::new
-        ),
-        NetworkHandle.handle(packet -> CadmusClient.updateClaimMapSettings(packet.settings(), packet.canModifyColor()))
+        ByteCodec.mapOf(TeamId.BYTE_CODEC, SettingsData.CODEC).fieldOf(SyncClaimSettingsPacket::settings).map(SyncClaimSettingsPacket::new, SyncClaimSettingsPacket::settings),
+        NetworkHandle.handle(packet -> CadmusClient.updateClaimMapSettings(packet.settings()))
     );
 
     @Override

@@ -47,7 +47,7 @@ public final class EntityDamageProtection implements Protection {
     public boolean canDamageEntity(Player player, Entity entity) {
         if (entity.getType().is(ModEntityTypeTags.ALLOWS_CLAIM_DAMAGE_ENTITIES)) return true;
         return player.level().isClientSide() || getId(player.level(), entity.chunkPosition()).map(id ->
-            checkFlags(player.getServer(), entity, id) && isPlayerAllowed(player, id)).orElse(true);
+            checkFlags(player.getServer(), entity, id.id()) && isPlayerAllowed(player, id)).orElse(true);
     }
 
     public boolean canDamageEntity(Level level, UUID player, Entity entity) {

@@ -11,6 +11,7 @@ import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.ChatClaimPacket;
+import earth.terrarium.cadmus.common.protections.SettingsData;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -52,7 +53,7 @@ public class CadmusClient {
         Minecraft.getInstance().setScreen(new ClaimMapScreen());
     }
 
-    public static void updateClaimMapSettings(Map<String, TriState> settings, boolean canModifyColor) {
+    public static void updateClaimMapSettings(Map<TeamId, SettingsData> settings) {
         if(Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
             screen.updateSettings(settings, canModifyColor);
         }

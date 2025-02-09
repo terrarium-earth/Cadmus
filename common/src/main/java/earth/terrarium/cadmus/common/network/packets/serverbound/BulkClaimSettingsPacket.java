@@ -26,7 +26,7 @@ public record BulkClaimSettingsPacket(TeamId id, Map<String, TriState> settings)
         ),
         NetworkHandle.handle((packet, player) -> {
             packet.settings().forEach((setting, value) -> {
-                if (ModUtils.canUsePermission(player, setting) == null) {
+                if (ModUtils.canUsePermission(player, packet.id, setting) == null) {
                     CadmusSaveData.setClaimSetting(player.getServer(), packet.id, setting, value);
                 }
             });
