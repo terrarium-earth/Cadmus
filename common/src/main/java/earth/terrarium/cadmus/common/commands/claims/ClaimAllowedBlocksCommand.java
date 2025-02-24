@@ -3,8 +3,6 @@ package earth.terrarium.cadmus.common.commands.claims;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
@@ -12,20 +10,13 @@ import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.*;
 
 public class ClaimAllowedBlocksCommand {
 
@@ -37,13 +28,13 @@ public class ClaimAllowedBlocksCommand {
                 .then(Commands.argument("provider", ResourceLocationArgument.id())
                 .suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
                 .then(Commands.argument("id", UuidArgument.uuid()))
-                .suggests(TeamId.TEAM_ID_SUGGESTION_PROVIDER)
+                .suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
                 .then(Commands.literal("allowedBlocks")
                     .then(Commands.literal("add")
                         .then(Commands.argument("value", BlockStateArgument.block(buildContext))
                             .executes(context -> {
                                 BlockState block = BlockStateArgument.getBlock(context, "value").getState();
-                                TeamId id = TeamId.getId(context);
+                                TeamId id = TeamId.fromCommand(context);
                                 addBlock(context.getSource(), block, id);
                                 return 1;
                             })
@@ -53,7 +44,7 @@ public class ClaimAllowedBlocksCommand {
                         .then(Commands.argument("value", BlockStateArgument.block(buildContext))
                             .executes(context -> {
                                 BlockState block = BlockStateArgument.getBlock(context, "value").getState();
-                                TeamId id = TeamId.getId(context);
+                                TeamId id = TeamId.fromCommand(context);
                                 removeBlock(context.getSource(), block, id);
                                 return 1;
                             })
@@ -61,13 +52,13 @@ public class ClaimAllowedBlocksCommand {
                     )
                     .then(Commands.literal("list")
                         .executes(context -> {
-                            TeamId id = TeamId.getId(context);
+                            TeamId id = TeamId.fromCommand(context);
                             listBlocks(context.getSource(), id);
                             return 1;
                         })
                     )
                     .executes(context -> {
-                        TeamId id = TeamId.getId(context);
+                        TeamId id = TeamId.fromCommand(context);
                         listBlocks(context.getSource(), id);
                         return 1;
                     })

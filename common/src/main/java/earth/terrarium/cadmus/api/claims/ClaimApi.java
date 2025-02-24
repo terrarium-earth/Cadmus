@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.api.claims;
 
+import com.teamresourceful.resourcefullib.common.network.Packet;
 import earth.terrarium.cadmus.api.ApiHelper;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
@@ -65,6 +66,13 @@ public interface ClaimApi {
      * @param id    The team ID.
      */
     void clear(Level level, TeamId id);
+
+    /**
+     * Clears all claims in the level for the given player.
+     *
+     * @param player The player.
+     */
+    void clear(Player player);
 
     /**
      * Completely clears all claims in every level.

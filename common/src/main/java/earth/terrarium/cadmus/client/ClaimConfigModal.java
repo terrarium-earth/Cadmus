@@ -39,9 +39,9 @@ public class ClaimConfigModal extends BaseModal {
             case FALSE -> 2;
         })));
 
-        this.color = State.of(background.teamColor);
+        this.color = State.of(background.getColor());
         this.selectedTeam = State.of(background.selected);
-        this.canModifyColor = background.canModifyColor;
+        this.canModifyColor = background.canModifyColor();
     }
 
     @Override

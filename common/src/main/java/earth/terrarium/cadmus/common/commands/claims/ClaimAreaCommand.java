@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
-import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -18,7 +17,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ClaimAreaCommand {
@@ -33,14 +31,14 @@ public class ClaimAreaCommand {
                                 ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
                                 ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
                                 boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                TeamId id = TeamId.getId(context);
+                                TeamId id = TeamId.fromCommand(context);
                                 claim(context.getSource(), id, startPos, endPos, chunkload);
                                 return 1;
                             }))
                         .executes(context -> {
                             ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
                             ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                            TeamId id = TeamId.getId(context);
+                            TeamId id = TeamId.fromCommand(context);
                             claim(context.getSource(), id, startPos, endPos, false);
                             return 1;
                         })

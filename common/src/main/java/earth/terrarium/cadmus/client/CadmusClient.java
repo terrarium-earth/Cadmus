@@ -55,7 +55,7 @@ public class CadmusClient {
 
     public static void updateClaimMapSettings(Map<TeamId, SettingsData> settings) {
         if(Minecraft.getInstance().screen instanceof ClaimMapScreen screen) {
-            screen.updateSettings(settings, canModifyColor);
+            screen.updateSettings(settings);
         }
     }
 

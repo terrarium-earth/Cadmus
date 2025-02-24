@@ -142,7 +142,7 @@ public class AdminCommands {
 
         ClaimApi.API.claim(source.getLevel(), teamId, pos, chunkload);
 
-        int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), id, chunkload);
+        int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), teamId, chunkload);
         int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(teamId) : ClaimLimitApi.API.getMaxClaims(teamId);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
@@ -163,7 +163,7 @@ public class AdminCommands {
 
         ClaimApi.API.unclaim(source.getLevel(), teamId, pos);
 
-        int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), id, false);
+        int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), teamId, false);
         int maxClaims = ClaimLimitApi.API.getMaxClaims(teamId);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_chunk_at",
@@ -184,9 +184,9 @@ public class AdminCommands {
         TeamId teamId = new TeamId(provider, id);
         if (!TeamApi.API.teamExists(source.getServer(), teamId)) throw TEAM_DOES_NOT_EXIST.create();
 
-        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), id, false);
+        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), teamId, false);
         ClaimApi.API.clear(source.getLevel(), teamId);
-        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), id, false);
+        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), teamId, false);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_all",
             diff

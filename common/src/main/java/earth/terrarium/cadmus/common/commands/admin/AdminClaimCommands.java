@@ -155,11 +155,12 @@ public class AdminClaimCommands {
 
     private static void unclaimAll(CommandSourceStack source, String team) throws CommandSyntaxException {
         UUID id = FlagApi.API.getIdFromName(source.getServer(), team).orElse(null);
+        TeamId adminID = TeamId.ofAdmin(id);
         if (id == null) throw AdminClaimCommands.ADMIN_TEAM_DOES_NOT_EXIST.create();
 
-        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), id, false);
-        ClaimApi.API.clear(source.getLevel(), new TeamId(AdminTeamProvider.ID, id));
-        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), id, false);
+        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), adminID, false);
+        ClaimApi.API.clear(source.getLevel(), adminID);
+        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), adminID, false);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_all_admin",
             diff

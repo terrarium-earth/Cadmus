@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
@@ -129,6 +130,11 @@ public class ClaimApiImpl implements ClaimApi {
             TeamApi.API.syncTeamInfo(serverLevel.getServer(), id, false);
         }
         CadmusEvents.ClearClaimsEvent.fire(level, id);
+    }
+
+    @Override
+    public void clear(Player player) {
+        TeamApi.API.getTeamsList(player).forEach(team -> clear(player.level(), team));
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
 import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.CommonComponents;
@@ -36,7 +37,7 @@ public record TeamId(ResourceLocation provider, UUID id) {
             id -> Component.translatable(id.toLanguageKey("provider"))
         );
 
-    public static final SuggestionProvider<CommandSourceStack> TEAM_ID_SUGGESTION_PROVIDER = (context, builder) -> {
+    public static final SuggestionProvider<CommandSourceStack> TEAM_UUID_SUGGESTION_PROVIDER = (context, builder) -> {
         ResourceLocation providerName = context.getArgument("provider", ResourceLocation.class);
         var provider = TeamApi.API.getProvider(providerName);
         return SharedSuggestionProvider.suggest(
@@ -47,7 +48,7 @@ public record TeamId(ResourceLocation provider, UUID id) {
         );
     };
 
-    public static TeamId getId(CommandContext<CommandSourceStack> context) {
+    public static TeamId fromCommand(CommandContext<CommandSourceStack> context) {
         TeamId teamId = new TeamId(context.getArgument("provider", ResourceLocation.class), context.getArgument("id", UUID.class));
         if(!TeamApi.API.getProvider(teamId.provider).canModifySettings(context.getSource().getPlayer(), teamId.id)) {
             throw new IllegalArgumentException("Member cannot modify team settings");
@@ -57,5 +58,9 @@ public record TeamId(ResourceLocation provider, UUID id) {
 
     public static TeamId ofNew(ResourceLocation providerId) {
         return new TeamId(providerId, UUID.randomUUID());
+    }
+
+    public static TeamId ofAdmin(UUID id) {
+        return new TeamId(AdminTeamProvider.ID, id);
     }
 }

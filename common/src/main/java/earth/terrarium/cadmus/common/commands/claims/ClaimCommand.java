@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ClaimCommand {
 
@@ -32,18 +32,18 @@ public class ClaimCommand {
                     .executes(context -> {
                         ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
                         boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                        TeamId id = TeamId.getId(context);
+                        TeamId id = TeamId.fromCommand(context);
                         claim(context.getSource(), id, pos, chunkload);
                         return 1;
                     }))
                 .executes(context -> {
                     ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
-                    TeamId id = TeamId.getId(context);
+                    TeamId id = TeamId.fromCommand(context);
                     claim(context.getSource(), id, pos, false);
                     return 1;
                 }))
             .executes(context -> {
-                TeamId id = TeamId.getId(context);
+                TeamId id = TeamId.fromCommand(context);
                 claim(context.getSource(), id, context.getSource().getPlayerOrException().chunkPosition(), false);
                 return 1;
             })
@@ -91,5 +91,20 @@ public class ClaimCommand {
         return chunkload ?
             (int) claims.values().stream().filter(loaded -> loaded).count() :
             claims.size();
+    }
+
+    public static int getClaimsCount(Player player, boolean chunkload) {
+        AtomicInteger count = new AtomicInteger();
+        TeamApi.API.getTeamsList(player).forEach(team -> {
+            var claims = ClaimApi.API.getOwnedClaims(player.level(), team).orElse(null);
+            if (claims != null) {
+                if (chunkload) {
+                    count.addAndGet((int) claims.values().stream().filter(loaded -> loaded).count());
+                } else {
+                    count.addAndGet(claims.size());
+                }
+            }
+        });
+        return count.get();
     }
 }

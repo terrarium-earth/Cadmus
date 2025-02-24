@@ -7,11 +7,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -28,27 +31,28 @@ public class ClaimShapeCommand {
             .then(Commands.literal("shape")
                 .then(Commands.argument("sides", IntegerArgumentType.integer(3, 10))
                     .then(Commands.argument("radius", IntegerArgumentType.integer(1, 10))
-                        .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                        .then(Commands.argument("provider", ResourceLocationArgument.id())
+                            .suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                            .then(Commands.argument("id", UuidArgument.uuid()))
+                            .suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                            .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                                .executes(context -> {
+                                    int sides = IntegerArgumentType.getInteger(context, "sides");
+                                    int radius = IntegerArgumentType.getInteger(context, "radius");
+                                    boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
+                                    claim(context.getSource(), TeamId.fromCommand(context), sides, radius, chunkload);
+                                    return 1;
+                                }))
                             .executes(context -> {
                                 int sides = IntegerArgumentType.getInteger(context, "sides");
                                 int radius = IntegerArgumentType.getInteger(context, "radius");
-                                boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                claim(context.getSource(), sides, radius, chunkload);
+                                claim(context.getSource(), TeamId.fromCommand(context), sides, radius, false);
                                 return 1;
                             }))
-                        .executes(context -> {
-                            int sides = IntegerArgumentType.getInteger(context, "sides");
-                            int radius = IntegerArgumentType.getInteger(context, "radius");
-                            claim(context.getSource(), sides, radius, false);
-                            return 1;
-                        })
-                    )
-                )
-            )
-        );
+                    ))));
     }
 
-    private static void claim(CommandSourceStack source, int sides, int radius, boolean chunkload) throws CommandSyntaxException {
+    private static void claim(CommandSourceStack source, TeamId id, int sides, int radius, boolean chunkload) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         BlockPos centerBlock = player.blockPosition();
 
@@ -94,7 +98,7 @@ public class ClaimShapeCommand {
         });
 
         int claimsCount = ClaimCommand.getClaimsCount(player, chunkload) + finalPositions.size();
-        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(player) : ClaimLimitApi.API.getMaxClaims(player);
+        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(id) : ClaimLimitApi.API.getMaxClaims(id);
         if (claimsCount >= maxClaims) {
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.not_enough_claims",
@@ -103,7 +107,7 @@ public class ClaimShapeCommand {
         }
 
         if (!finalPositions.isEmpty()) {
-            ClaimApi.API.claim(player, finalPositions);
+            ClaimApi.API.claim(source.getLevel(), id, finalPositions);
         }
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(

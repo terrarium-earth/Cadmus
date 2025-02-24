@@ -101,6 +101,6 @@ public interface TeamProvider {
     default void onPlayerRemoved(MinecraftServer server, UUID id, @Nullable ServerPlayer player) {
         TeamId teamId = new TeamId(id(), id);
         CadmusEvents.RemovePlayerFromTeamEvent.fire(server, teamId, player);
-        ClaimLimitApiImpl.API.calculate(server, id, true);
+        ClaimLimitApiImpl.API.calculate(server, teamId, true);
     }
 }

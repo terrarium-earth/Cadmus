@@ -17,6 +17,7 @@ import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
+import earth.terrarium.cadmus.common.protections.SettingsData;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.buttons.Button;
@@ -55,9 +56,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
     public static final int HEIGHT = MAP_SIZE + PADDING * 4 + 2 + BANNER_HEIGHT + BUTTON_HEIGHT;
 
-    public boolean canModifyColor = false;
-    public Color teamColor;
-
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
 
     private final LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
@@ -90,12 +88,13 @@ public class ClaimMapScreen extends BaseCursorScreen {
             TeamInfo info = CadmusClient.TEAM_INFO.get(teamId);
             teams.put(teamId, new TeamData(
                 info.name(),
-                info.color(),
                 ClaimCommand.getClaimsCount(level, teamId, false),
                 ClaimLimitApi.API.getMaxClaims(teamId),
                 ClaimCommand.getClaimsCount(level, teamId, true),
                 ClaimLimitApi.API.getMaxChunkLoadedClaims(teamId),
-                new HashMap<>()
+                new HashMap<>(),
+                State.of(info.color()),
+                State.empty()
             ));
         });
 
@@ -305,7 +304,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
                 float y = mapWidget.getY() + (j * pixelScale);
 
                 if (isHovering(mouseX, mouseY, x, y)) {
-                    drawClaimSquare(graphics, x, y, pixelScale, pixelScale, color(this.teamColor, 127),
+                    drawClaimSquare(graphics, x, y, pixelScale, pixelScale, color(getColor(), 127),
                         true, true, true, true, true, true, true, true);
                     return;
                 }
@@ -324,7 +323,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         float width = Math.max(pixelScale, ((selectionEndX + 1 - selectionStartX)) * pixelScale);
         float height = Math.max(pixelScale, ((selectionEndZ + 1 - selectionStartZ)) * pixelScale);
 
-        drawClaimSquare(graphics, x, y, width, height, color(this.teamColor, 127),
+        drawClaimSquare(graphics, x, y, width, height, color(getColor(), 127),
             true, true, true, true, true, true, true, true);
     }
 
@@ -501,19 +500,34 @@ public class ClaimMapScreen extends BaseCursorScreen {
         }
     }
 
-    public void updateSettings(Map<String, TriState> settings, boolean canModifyColor) {
-        this.settings.putAll(settings);
-        settingsButton.active = !settings.isEmpty();
-        this.canModifyColor = canModifyColor;
+    public void updateSettings(Map<TeamId, SettingsData> settings) {
+        settings.forEach((teamId, settingsData) -> {
+            var team = teams.get(teamId);
+            if (team != null) {
+                team.settings.putAll(settingsData.settings());
+                team.modifyColor.set(settingsData.canModifyColor());
+            }
+        });
     }
 
     public void updateColor(Color color) {
-        this.teamColor = color;
         CadmusClient.TEAM_INFO.put(selected, new TeamInfo(CadmusClient.TEAM_INFO.get(selected).name(), color));
     }
 
     public Map<String, TriState> getSettings() {
-        return settings;
+        return teams.get(selected).settings;
+    }
+
+    private TeamData getSelected() {
+        return teams.get(selected);
+    }
+
+    public Color getColor() {
+        return teams.get(selected).color.get();
+    }
+
+    public boolean canModifyColor() {
+        return teams.get(selected).modifyColor.get();
     }
 
     private record ClaimTile(
@@ -528,8 +542,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
         boolean southWest, boolean northWest
     ) {}
 
-    private record TeamData(String name, Color color, int claimed, int maxClaims, int loaded, int maxLoaded, Map<String, TriState> settings) {
-        public static final TeamData EMPTY = new TeamData("empty", Color.DEFAULT, 0, 0,0, 0, new HashMap<>());
+    private record TeamData(String name, int claimed, int maxClaims, int loaded, int maxLoaded, Map<String, TriState> settings, State<Color> color, State<Boolean> modifyColor) {
+        public static final TeamData EMPTY = new TeamData("empty", 0, 0,0, 0, new HashMap<>(), State.of(Color.DEFAULT), State.empty());
     }
 
     static {
