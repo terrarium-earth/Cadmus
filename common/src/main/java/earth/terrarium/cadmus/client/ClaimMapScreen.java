@@ -514,20 +514,20 @@ public class ClaimMapScreen extends BaseCursorScreen {
         CadmusClient.TEAM_INFO.put(selected, new TeamInfo(CadmusClient.TEAM_INFO.get(selected).name(), color));
     }
 
-    public Map<String, TriState> getSettings() {
-        return teams.get(selected).settings;
-    }
-
     private TeamData getSelected() {
         return teams.get(selected);
     }
 
+    public Map<String, TriState> getSettings() {
+        return getSelected().settings;
+    }
+    
     public Color getColor() {
-        return teams.get(selected).color.get();
+        return getSelected().color.get();
     }
 
     public boolean canModifyColor() {
-        return teams.get(selected).modifyColor.get();
+        return getSelected().modifyColor.get();
     }
 
     private record ClaimTile(

@@ -25,6 +25,7 @@ public class CadmusSaveData extends SaveHandler {
     private final Map<TeamId, Set<ResourceLocation>> allowedBlocks = new HashMap<>();
     private final Set<UUID> bypassPlayers = new HashSet<>();
     private final Map<TeamId, Color> teamColors = new HashMap<>();
+    private final Set<UUID> uniquePlayers = new HashSet<>();
 
     @Override
     public void loadData(CompoundTag tag) {
@@ -56,8 +57,8 @@ public class CadmusSaveData extends SaveHandler {
             });
         });
 
-        CompoundTag bypassTag = tag.getCompound("bypass");
-        bypassTag.getAllKeys().forEach(uuid -> bypassPlayers.add(UUID.fromString(uuid)));
+        ListTag bypassTag = tag.getList("bypass", Tag.TAG_STRING);
+        bypassTag.forEach(tagEntry -> bypassPlayers.add(UUID.fromString(tagEntry.getAsString())));
 
         CompoundTag teamColorsTag = tag.getCompound("teamColors");
         teamColorsTag.getAllKeys().forEach(provider -> {
@@ -66,6 +67,9 @@ public class CadmusSaveData extends SaveHandler {
                 teamColors.put(new TeamId(ResourceLocation.parse(provider), UUID.fromString(id)), Color.parse(providerMap.getString(provider)));
             });
         });
+
+        CompoundTag uniquePlayersTag = tag.getCompound("uniquePlayers");
+        uniquePlayersTag.getAllKeys().forEach(uuid -> uniquePlayers.add(UUID.fromString(uuid)));
     }
 
     @Override
@@ -90,13 +94,17 @@ public class CadmusSaveData extends SaveHandler {
         });
         tag.put("allowedBlocks", allowedBlocksTag);
 
-        CompoundTag bypassTag = new CompoundTag();
-        bypassPlayers.forEach(uuid -> bypassTag.put(uuid.toString(), new CompoundTag()));
+        ListTag bypassTag = new ListTag();
+        bypassPlayers.forEach(uuid -> bypassTag.add(StringTag.valueOf(uuid.toString())));
         tag.put("bypass", bypassTag);
 
         CompoundTag teamColorsTag = new CompoundTag();
         teamColors.forEach((uuid, color) -> teamColorsTag.putString(uuid.toString(), color.toString()));
         tag.put("teamColors", teamColorsTag);
+
+        ListTag uniquePlayersTag = new ListTag();
+        uniquePlayers.forEach(uuid -> uniquePlayersTag.add(StringTag.valueOf(uuid.toString())));
+        tag.put("uniquePlayers", uniquePlayersTag);
     }
 
     public static CadmusSaveData read(MinecraftServer server) {
@@ -195,5 +203,15 @@ public class CadmusSaveData extends SaveHandler {
         Map<TeamId, Color> colors = read(server).teamColors;
         colors.putIfAbsent(id, ModUtils.uuidToColor(id.id()));
         return colors.get(id);
+    }
+
+    public static void addUniquePlayer(ServerPlayer player) {
+        var data = read(Objects.requireNonNull(player.getServer()));
+        data.uniquePlayers.add(player.getUUID());
+        data.setDirty();
+    }
+
+    public static Set<UUID> getUniquePlayers(MinecraftServer server) {
+        return read(server).uniquePlayers;
     }
 }

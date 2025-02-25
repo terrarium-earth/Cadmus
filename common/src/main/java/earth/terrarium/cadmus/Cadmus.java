@@ -12,6 +12,8 @@ import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
 import earth.terrarium.cadmus.common.protections.Protections;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
+import earth.terrarium.cadmus.common.teams.IndividualTeamProvider;
 import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.utils.AdminUtils;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
@@ -42,7 +44,9 @@ public class Cadmus {
         Protections.init();
         ClaimSettings.init();
         Flags.init();
+        TeamApi.API.register(IndividualTeamProvider.ID, new IndividualTeamProvider());
         TeamApi.API.register(VanillaTeamProvider.ID, new VanillaTeamProvider());
+        TeamApi.API.register(AdminTeamProvider.ID, new AdminTeamProvider());
         ClaimLimitApi.API.register(new VanillaClaimLimiter());
         if (IS_PROMETHEUS_LOADED) PrometheusCompat.init();
     }

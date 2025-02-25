@@ -26,12 +26,12 @@ import java.util.Set;
 import java.util.UUID;
 
 public class VanillaTeamProvider implements TeamProvider {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Cadmus.MOD_ID, "vanilla_teams");
+    public static final ResourceLocation ID = Cadmus.id("vanilla_teams");
     private static final BiMap<String, UUID> TEAM_CACHE = HashBiMap.create();
 
     @Override
     public ResourceLocation id() {
-        return null;
+        return ID;
     }
 
     @Override

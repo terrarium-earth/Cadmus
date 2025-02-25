@@ -35,8 +35,6 @@ public class TeamApiImpl implements TeamApi {
     private static final Map<Player, Component> LAST_MESSAGE = new WeakHashMap<>();
 
     private final HashMap<ResourceLocation, TeamProvider> teams = new HashMap<>();
-    private final ResourceLocation individual = Cadmus.id("individual");
-    private final ResourceLocation admin = Cadmus.id("admin");
 
     @Override
     public void register(ResourceLocation id, TeamProvider team) {
@@ -57,9 +55,6 @@ public class TeamApiImpl implements TeamApi {
     public Set<TeamId> getAllTeams(MinecraftServer server) {
         Set<TeamId> teams = new HashSet<>();
         this.teams.forEach((id, team) -> team.getAllTeams(server).forEach(uuid -> teams.add(new TeamId(id, uuid))));
-        server.getAllLevels().forEach(level -> teams.addAll(ClaimApi.API.getAllClaimsByOwner(level).keySet()));
-        server.getPlayerList().getPlayers().forEach(player -> teams.add(new TeamId(individual, player.getUUID())));
-        FlagApi.API.getAllAdminTeams(server).keySet().forEach(uuid -> teams.add(new TeamId(admin, uuid)));
         return teams;
     }
 

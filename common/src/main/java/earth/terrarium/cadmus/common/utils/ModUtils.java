@@ -49,6 +49,7 @@ public class ModUtils {
      * Sends all claims, packet splitting in batches of {@link #MAX_CHUNKS_PER_PACKET} to the player joining the server.
      */
     public static void sendJoinPackets(ServerPlayer player) {
+        CadmusSaveData.addUniquePlayer(player);
         if (!NetworkHandler.CHANNEL.canSendToPlayer(player, SyncClaimsPacket.TYPE)) return;
         for (var level : player.server.getAllLevels()) {
             Object2ObjectMap<TeamId, Object2BooleanMap<ChunkPos>> allClaims = ClaimApi.API.getAllClaimsByOwner(player.serverLevel());
