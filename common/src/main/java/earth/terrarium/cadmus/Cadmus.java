@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.limit.ClaimLimitApiImpl;
 import earth.terrarium.cadmus.common.claims.limit.VanillaClaimLimiter;
@@ -62,7 +63,7 @@ public class Cadmus {
         ModUtils.sendJoinPackets(player);
         TeamApi.API.syncAllTeamInfo(player);
         TeamApi.API.displayTeamName(player);
-        // ClaimLimitApiImpl.API.calculate(player.server, player.getUUID(), true); // TODO implement
+        TeamApi.API.getTeamsList(player).forEach(team -> ClaimLimitApiImpl.API.calculate(player.server, team, true));
     }
 
     public static void onServerStarted(MinecraftServer server) {

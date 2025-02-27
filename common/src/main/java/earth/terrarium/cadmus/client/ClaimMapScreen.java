@@ -85,6 +85,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public void refresh() {
         teams.clear();
         TeamApi.API.getTeamsList(this.player).forEach(teamId -> {
+            if (selected == null) selected = teamId;
             TeamInfo info = CadmusClient.TEAM_INFO.get(teamId);
             teams.put(teamId, new TeamData(
                 info.name(),
@@ -521,7 +522,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public Map<String, TriState> getSettings() {
         return getSelected().settings;
     }
-    
+
     public Color getColor() {
         return getSelected().color.get();
     }
