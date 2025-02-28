@@ -63,4 +63,8 @@ public record TeamId(ResourceLocation provider, UUID id) {
     public static TeamId ofAdmin(UUID id) {
         return new TeamId(AdminTeamProvider.ID, id);
     }
+
+    public boolean isAdmin() {
+        return AdminTeamProvider.ID.equals(provider);
+    }
 }
