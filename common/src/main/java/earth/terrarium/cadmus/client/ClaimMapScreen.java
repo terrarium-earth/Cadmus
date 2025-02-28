@@ -26,6 +26,7 @@ import earth.terrarium.olympus.client.components.map.MapWidget;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.ui.UIIcons;
 import earth.terrarium.olympus.client.ui.modals.DeleteConfirmModal;
 import earth.terrarium.olympus.client.utils.State;
 import it.unimi.dsi.fastutil.Pair;
@@ -139,6 +140,19 @@ public class ClaimMapScreen extends BaseCursorScreen {
             })
             .setTooltip(Tooltip.create(UIConstants.REFRESH));
 
+        frame.addChild(Widgets.button()
+            .withRenderer(WidgetRenderers.icon(UIIcons.TRASH).withColor(MinecraftColors.RED))
+            .withTexture(null)
+            .withCallback(this::unclaimAll)
+            .withTooltip(ConstantComponents.UNCLAIM_ALL)
+            .withSize(11),
+            (settings) -> {
+                settings.padding(28, 2);
+                settings.alignHorizontallyRight();
+                settings.alignVerticallyTop();
+            }
+        );
+
         frame.addChild(new StringWidget(ConstantComponents.MAP_TITLE, font), (settings) -> {
             settings.padding(4);
             settings.alignHorizontallyLeft();
@@ -153,19 +167,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         });
 
         mapWidget.withSize(MAP_SIZE);
-
-        frame.addChild(
-            Widgets.button()
-                .withCallback(this::unclaimAll)
-                .withTexture(UIConstants.DANGER_BUTTON)
-                .withSize(MAP_SIZE / 2, BUTTON_HEIGHT)
-                .withRenderer(WidgetRenderers.text(ConstantComponents.UNCLAIM_ALL).withColor(MinecraftColors.WHITE)),
-            (settings) -> {
-                settings.padding(PADDING);
-                settings.alignHorizontallyLeft();
-                settings.alignVerticallyBottom();
-            }
-        );
 
         settingsButton = frame.addChild(
             Widgets.button()
