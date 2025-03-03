@@ -68,6 +68,13 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
+    public void unclaim(Level level, Player player, ChunkPos pos) {
+        Optional<ObjectBooleanPair<TeamId>> claim = getClaim(level, pos);
+        if (claim.isEmpty() || !TeamApi.API.isMember(level, claim.get().left(), player)) return;
+        unclaim(level, claim.get().left(), pos);
+    }
+
+    @Override
     public void unclaim(Level level, TeamId id, ChunkPos pos) {
         if (getClaim(level, pos).map(ObjectBooleanPair::rightBoolean).orElse(false)) {
             level.getChunkSource().updateChunkForced(pos, false);
@@ -101,6 +108,7 @@ public class ClaimApiImpl implements ClaimApi {
             data.claims().remove(pos);
             data.claimsById().get(id).removeBoolean(pos);
         }
+
         if (level instanceof ServerLevel serverLevel) {
             data.setDirty();
             NetworkHandler.sendToAllClientPlayers(new RemoveBulkClaimsPacket(id, positions), serverLevel.getServer());

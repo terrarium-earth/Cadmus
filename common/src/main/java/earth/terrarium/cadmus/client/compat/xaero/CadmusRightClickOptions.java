@@ -41,28 +41,28 @@ public class CadmusRightClickOptions {
 
     private static void addUnclaimOptions(GuiMap screen, List<RightClickOption> options, ChunkPos pos) {
         options.add(new BetterRightClickOption("gui.xaero_pac_unclaim_chunks", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM, null, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
     }
 
     private static void addClaimOptions(GuiMap screen, List<RightClickOption> options, ChunkPos pos) {
         options.add(new BetterRightClickOption("gui.xaero_pac_claim_chunks", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, null, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
 
         options.add(new BetterRightClickOption("text.cadmus.chunkload_selected", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, "%s %s true".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, null, "%s %s true".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()))));
     }
 
     private static void addUnclaimAreaOptions(GuiMap screen, List<RightClickOption> options, ChunkPos startPos, ChunkPos endPos) {
         options.add(new BetterRightClickOption("gui.xaero_pac_unclaim_chunks", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_AREA, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_AREA, null, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
     }
 
     private static void addClaimAreaOptions(GuiMap screen, List<RightClickOption> options, ChunkPos startPos, ChunkPos endPos) {
         options.add(new BetterRightClickOption("gui.xaero_pac_claim_chunks", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, null, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
 
         options.add(new BetterRightClickOption("text.cadmus.chunkload_selected", options.size(), screen, () ->
-            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, "%s %s %s %s true".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
+            CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, null, "%s %s %s %s true".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()))));
     }
 
     private static class BetterRightClickOption extends RightClickOption {

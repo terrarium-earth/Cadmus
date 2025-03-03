@@ -31,7 +31,7 @@ public class ClaimSaveData extends SaveHandler {
 
             providerClaims.getAllKeys().forEach(stringId -> {
                 TeamId id = new TeamId(provider, UUID.fromString(stringId));
-                long[] values = tag.getLongArray(stringId);
+                long[] values = providerClaims.getLongArray(stringId);
                 for (long value : values) {
                     int x = BlockPos.getX(value);
                     int z = BlockPos.getZ(value);

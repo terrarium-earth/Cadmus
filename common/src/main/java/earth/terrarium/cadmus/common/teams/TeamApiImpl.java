@@ -74,8 +74,8 @@ public class TeamApiImpl implements TeamApi {
                 GameProfile profile = cache.get(id.id()).orElse(null);
                 if (profile == null) return ConstantComponents.UNKNOWN;
                 return Component.literal(profile.getName());
-            } else if (CadmusClient.TEAM_INFO.containsKey(id.id())) {
-                return Component.literal(CadmusClient.TEAM_INFO.get(id.id()).name());
+            } else if (CadmusClient.TEAM_INFO.containsKey(id)) {
+                return Component.literal(CadmusClient.TEAM_INFO.get(id).name());
             }
 
             return ConstantComponents.UNKNOWN;

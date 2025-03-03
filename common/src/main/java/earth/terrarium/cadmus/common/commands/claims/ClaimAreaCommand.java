@@ -12,6 +12,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -24,24 +26,28 @@ public class ClaimAreaCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("claim")
             .then(Commands.literal("area")
-                .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
-                    .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
-                        .then(Commands.argument("chunkload", BoolArgumentType.bool())
-                            .executes(context -> {
-                                ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
-                                ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                                boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                TeamId id = TeamId.fromCommand(context);
-                                claim(context.getSource(), id, startPos, endPos, chunkload);
-                                return 1;
-                            }))
-                        .executes(context -> {
-                            ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
-                            ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                            TeamId id = TeamId.fromCommand(context);
-                            claim(context.getSource(), id, startPos, endPos, false);
-                            return 1;
-                        })
+                .then(Commands.argument("provider", ResourceLocationArgument.id()).suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                    .then(Commands.argument("id", UuidArgument.uuid()).suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                        .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
+                            .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
+                                .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                                    .executes(context -> {
+                                        ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
+                                        ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
+                                        boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
+                                        TeamId id = TeamId.fromCommand(context);
+                                        claim(context.getSource(), id, startPos, endPos, chunkload);
+                                        return 1;
+                                    }))
+                                .executes(context -> {
+                                    ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
+                                    ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
+                                    TeamId id = TeamId.fromCommand(context);
+                                    claim(context.getSource(), id, startPos, endPos, false);
+                                    return 1;
+                                })
+                            )
+                        )
                     )
                 )
             )

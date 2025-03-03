@@ -25,12 +25,12 @@ public class AdminTeamProvider implements TeamProvider {
 
     @Override
     public Optional<Component> getName(Level level, UUID id) {
-        return Optional.of(Component.literal(FlagApi.API.<String>getFlag(level.getServer(), id, Flags.DISPLAY_NAME.id()).value()));
+        return Optional.ofNullable(level.getServer()).map(server -> Component.literal(FlagApi.API.<String>getFlag(server, id, Flags.DISPLAY_NAME.id()).value()));
     }
 
     @Override
     public Optional<Color> getColor(Level level, UUID id) {
-        return Optional.of(FlagApi.API.<Color>getFlag(level.getServer(), id, Flags.COLOR.id()).value());
+        return Optional.ofNullable(level.getServer()).map(server -> FlagApi.API.<Color>getFlag(server, id, Flags.COLOR.id()).value());
     }
 
     @Override

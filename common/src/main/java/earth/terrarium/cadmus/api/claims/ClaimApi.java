@@ -48,6 +48,8 @@ public interface ClaimApi {
      * @param id    The team ID.
      * @param pos   The chunk position to unclaim.
      */
+    void unclaim(Level level, Player player, ChunkPos pos);
+
     void unclaim(Level level, TeamId id, ChunkPos pos);
 
     /**
@@ -58,6 +60,14 @@ public interface ClaimApi {
      * @param positions The chunk position to unclaim.
      */
     void unclaim(Level level, TeamId id, Set<ChunkPos> positions);
+
+    default void unclaim(Level level, Player player, Set<ChunkPos> positions) {
+        Set<TeamId> teams = new HashSet<>();
+        positions.forEach(position -> getClaim(level, position).map(ObjectBooleanPair::left).ifPresent(teams::add));
+        teams.forEach(id -> {
+            if (TeamApi.API.isMember(level, id, player)) unclaim(level, id, positions);
+        });
+    }
 
     /**
      * Clears all claims in the level for the given team.

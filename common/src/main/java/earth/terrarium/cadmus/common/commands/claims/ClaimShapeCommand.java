@@ -29,27 +29,30 @@ public class ClaimShapeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("claim")
             .then(Commands.literal("shape")
-                .then(Commands.argument("sides", IntegerArgumentType.integer(3, 10))
-                    .then(Commands.argument("radius", IntegerArgumentType.integer(1, 10))
-                        .then(Commands.argument("provider", ResourceLocationArgument.id())
-                            .suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("id", UuidArgument.uuid()))
-                            .suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                .then(Commands.argument("provider", ResourceLocationArgument.id()).suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                    .then(Commands.argument("id", UuidArgument.uuid()).suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                        .then(Commands.argument("sides", IntegerArgumentType.integer(3, 10))
+                            .then(Commands.argument("radius", IntegerArgumentType.integer(1, 10))
+                                .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                                    .executes(context -> {
+                                        int sides = IntegerArgumentType.getInteger(context, "sides");
+                                        int radius = IntegerArgumentType.getInteger(context, "radius");
+                                        boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
+                                        claim(context.getSource(), TeamId.fromCommand(context), sides, radius, chunkload);
+                                        return 1;
+                                    }))
                                 .executes(context -> {
                                     int sides = IntegerArgumentType.getInteger(context, "sides");
                                     int radius = IntegerArgumentType.getInteger(context, "radius");
-                                    boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                    claim(context.getSource(), TeamId.fromCommand(context), sides, radius, chunkload);
+                                    claim(context.getSource(), TeamId.fromCommand(context), sides, radius, false);
                                     return 1;
-                                }))
-                            .executes(context -> {
-                                int sides = IntegerArgumentType.getInteger(context, "sides");
-                                int radius = IntegerArgumentType.getInteger(context, "radius");
-                                claim(context.getSource(), TeamId.fromCommand(context), sides, radius, false);
-                                return 1;
-                            }))
-                    ))));
+                                })
+                            )
+                        )
+                    )
+                )
+            )
+        );
     }
 
     private static void claim(CommandSourceStack source, TeamId id, int sides, int radius, boolean chunkload) throws CommandSyntaxException {

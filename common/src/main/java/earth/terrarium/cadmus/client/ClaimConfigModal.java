@@ -27,7 +27,7 @@ import java.util.Map;
 public class ClaimConfigModal extends BaseModal {
     private final Map<String, RadioState<TriState>> settings = new HashMap<>();
     private final State<Color> color;
-    private final State<TeamId> selectedTeam;
+    private final TeamId selectedTeam;
     private final boolean canModifyColor;
 
     protected ClaimConfigModal(ClaimMapScreen background) {
@@ -40,7 +40,7 @@ public class ClaimConfigModal extends BaseModal {
         })));
 
         this.color = State.of(background.getColor());
-        this.selectedTeam = State.of(background.selected);
+        this.selectedTeam = background.selected.get();
         this.canModifyColor = background.canModifyColor();
     }
 
@@ -80,11 +80,11 @@ public class ClaimConfigModal extends BaseModal {
             button.withCallback(() -> {
                 var finalSettings = new HashMap<String, TriState>();
                 this.settings.forEach((key, value) -> finalSettings.put(key, value.get()));
-                var packet = new BulkClaimSettingsPacket(selectedTeam.get(), finalSettings);
+                var packet = new BulkClaimSettingsPacket(selectedTeam, finalSettings);
                 NetworkHandler.CHANNEL.sendToServer(packet);
 
                 if (canModifyColor) {
-                    NetworkHandler.CHANNEL.sendToServer(new ClaimColorPacket(selectedTeam.get(), color.get()));
+                    NetworkHandler.CHANNEL.sendToServer(new ClaimColorPacket(selectedTeam, color.get()));
                     ((ClaimMapScreen) this.background).updateColor(color.get());
                 }
             });

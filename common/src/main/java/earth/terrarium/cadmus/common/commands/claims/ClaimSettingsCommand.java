@@ -16,12 +16,10 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.UuidArgument;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 public class ClaimSettingsCommand {
 
@@ -36,25 +34,24 @@ public class ClaimSettingsCommand {
             dispatcher.register(Commands.literal("claim")
                 .then(Commands.literal("settings")
                     .then(Commands.literal(setting)
-                        .then(Commands.argument("provider", ResourceLocationArgument.id())
-                            .suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("id", UuidArgument.uuid()))
-                            .suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
-                            .then(Commands.argument("value", StringArgumentType.string())
-                                .suggests(TRI_STATE_SUGGESTION_PROVIDER)
+                        .then(Commands.argument("provider", ResourceLocationArgument.id()).suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                            .then(Commands.argument("id", UuidArgument.uuid()).suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                                .then(Commands.argument("value", StringArgumentType.string())
+                                    .suggests(TRI_STATE_SUGGESTION_PROVIDER)
+                                    .executes(context -> {
+                                        ServerPlayer player = context.getSource().getPlayerOrException();
+                                        TeamId teamId = TeamId.fromCommand(context);
+                                        checkPermissions(player, teamId, setting);
+                                        String value = StringArgumentType.getString(context, "value");
+                                        set(context.getSource(), teamId, setting, value);
+                                        return 1;
+                                    })
+                                )
                                 .executes(context -> {
-                                    ServerPlayer player = context.getSource().getPlayerOrException();
-                                    TeamId teamId = TeamId.fromCommand(context);
-                                    checkPermissions(player, teamId, setting);
-                                    String value = StringArgumentType.getString(context, "value");
-                                    set(context.getSource(), teamId, setting, value);
+                                    get(context.getSource(), TeamId.fromCommand(context), setting);
                                     return 1;
                                 })
                             )
-                            .executes(context -> {
-                                get(context.getSource(), TeamId.fromCommand(context), setting);
-                                return 1;
-                            })
                         )
                     )
                 )

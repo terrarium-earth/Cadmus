@@ -60,6 +60,7 @@ subprojects {
         val prometheusVersion: String by project
         val reiVersion: String by project
         val journeymapVersion: String by project
+        val journeymapApiVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
@@ -77,7 +78,7 @@ subprojects {
             isTransitive = false
         }
 
-        "modCompileOnly"(group = "info.journeymap", name = "journeymap-api-$modLoader", version = journeymapVersion)
+        "modCompileOnly"(group = "info.journeymap", name = "journeymap-api-$modLoader", version = journeymapApiVersion)
 
         if (isCommon) {
             "modCompileOnly"(group = "earth.terrarium.prometheus", name = "prometheus-$modLoader-$minecraftVersion", version = prometheusVersion) {
@@ -92,6 +93,9 @@ subprojects {
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-api-$modLoader", version = reiVersion)
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
             "include"(olympus)
+
+            // "modRuntimeOnly"(group = "maven.modrinth", name = "journeymap", version = "$journeymapVersion+$modLoader")
+            // "modRuntimeOnly"(group = "maven.modrinth", name = "common-network", version = project.properties["commonNetwork${modLoader}Version"] as String)
         }
     }
 

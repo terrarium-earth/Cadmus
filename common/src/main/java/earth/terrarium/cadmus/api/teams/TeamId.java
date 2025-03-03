@@ -67,4 +67,8 @@ public record TeamId(ResourceLocation provider, UUID id) {
     public boolean isAdmin() {
         return AdminTeamProvider.ID.equals(provider);
     }
+
+    public String asArg() {
+        return provider.toString() + " " + id.toString();
+    }
 }

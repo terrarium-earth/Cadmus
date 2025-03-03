@@ -15,8 +15,10 @@ import earth.terrarium.cadmus.common.protections.SettingsData;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +73,15 @@ public class CadmusClient {
         return Objects.requireNonNull(Minecraft.getInstance().level);
     }
 
-    public static void sendClaimCommand(ClaimCommandType type, String command) {
+    public static Player player() {
+        return Minecraft.getInstance().player;
+    }
+
+    public static void sendClaimCommand(ClaimCommandType type, TeamId id, String command) {
+        NetworkHandler.CHANNEL.sendToServer(new ChatClaimPacket(type, id.asArg() + " " + command));
+    }
+
+    public static void sendTeamlessClaimCommand(ClaimCommandType type, String command) {
         NetworkHandler.CHANNEL.sendToServer(new ChatClaimPacket(type, command));
     }
 }

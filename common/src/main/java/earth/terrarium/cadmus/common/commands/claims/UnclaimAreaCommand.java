@@ -4,21 +4,16 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class UnclaimAreaCommand {
@@ -26,26 +21,21 @@ public class UnclaimAreaCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("unclaim")
             .then(Commands.literal("area")
-                .then(Commands.argument("provider", ResourceLocationArgument.id())
-                    .suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
-                    .then(Commands.argument("id", UuidArgument.uuid()))
-                    .suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
-                    .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
-                        .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
-                            .executes(context -> {
-                                ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
-                                ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                                unclaim(context.getSource(), TeamId.fromCommand(context), startPos, endPos);
-                                return 1;
-                            })
-                        )
+                .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
+                    .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
+                        .executes(context -> {
+                            ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
+                            ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
+                            unclaim(context.getSource(), startPos, endPos);
+                            return 1;
+                        })
                     )
                 )
             )
         );
     }
 
-    private static void unclaim(CommandSourceStack source, TeamId id, ChunkPos startPos, ChunkPos endPos) throws CommandSyntaxException {
+    private static void unclaim(CommandSourceStack source, ChunkPos startPos, ChunkPos endPos) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         int dist = startPos.getChessboardDistance(endPos);
         if (dist > 50) {
@@ -60,21 +50,20 @@ public class UnclaimAreaCommand {
 
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(claim -> {
-                if (claim.left().equals(id)) {
+                if (TeamApi.API.isMember(source.getLevel(), claim.left(), player)) {
                     finalPositions.add(pos);
                 }
             })
         );
 
-        ClaimApi.API.unclaim(source.getLevel(), id, finalPositions);
+        ClaimApi.API.unclaim(source.getLevel(), player, finalPositions);
 
         int claimsCount = ClaimCommand.getClaimsCount(player, false);
-        int maxClaims = ClaimLimitApi.API.getMaxClaims(id);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_chunks_area",
             startPos.x, startPos.z,
             endPos.x, endPos.z,
-            claimsCount, maxClaims
+            claimsCount
         ), false);
     }
 }
