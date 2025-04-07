@@ -15,7 +15,7 @@ public abstract class EntityMixin {
         return original && !vehicle.level().isClientSide() ?
             ClaimApi.API.getClaim(vehicle.level(), vehicle.chunkPosition())
                 .map(claim -> Flags.USE_VEHICLES.get(vehicle.getServer(), claim.first().id()))
-                .orElse(false) :
+                .orElse(true) :
             original;
     }
 }
