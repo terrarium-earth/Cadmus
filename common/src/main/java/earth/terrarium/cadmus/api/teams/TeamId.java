@@ -20,7 +20,7 @@ import java.util.UUID;
 public record TeamId(ResourceLocation provider, UUID id) {
     public static final Codec<TeamId> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("provider").forGetter(TeamId::provider),
-            Codec.STRING.xmap(UUID::fromString, UUID::toString).fieldOf("id").forGetter(TeamId::id)
+            UUIDUtil.STRING_CODEC.fieldOf("id").forGetter(TeamId::id)
     ).apply(instance, TeamId::new));
 
     public static final ByteCodec<TeamId> BYTE_CODEC = ObjectByteCodec.create(
