@@ -33,12 +33,12 @@ public class ClaimInfoCommand {
 
     private static void getInfo(CommandSourceStack source, ChunkPos pos) {
         ClaimApi.API.getClaim(source.getLevel(), pos).ifPresentOrElse(claim -> {
-            boolean chunkLoaded = claim.rightBoolean();
-            Component name = TeamApi.API.getName(source.getLevel(), claim.left());
+            boolean chunkLoaded = claim.isChunkLoaded();
+            Component name = TeamApi.API.getName(source.getLevel(), claim.team());
 
             source.sendSuccess(() -> CommonComponents.joinLines(
                 ModUtils.translatableWithStyle("command.cadmus.info.claimed_by", name.getString()).copy().withStyle(name.getStyle()),
-                ModUtils.translatableWithStyle("command.cadmus.info.id", claim.left()),
+                ModUtils.translatableWithStyle("command.cadmus.info.id", claim.team()),
                 ModUtils.translatableWithStyle("command.cadmus.info.position", pos.x, pos.z),
                 chunkLoaded ? ConstantComponents.CHUNK_LOADED_TRUE : ConstantComponents.CHUNK_LOADED_FALSE
             ), false);

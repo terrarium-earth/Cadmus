@@ -7,6 +7,7 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.ClaimData;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
@@ -356,9 +357,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
                 var claim = ClaimApi.API.getClaim(level, pos);
                 if (claim.isEmpty()) continue;
-                TeamId id = claim.get().left();
+                TeamId id = claim.get().team();
 
-                Component name = getName(id, claim.get().rightBoolean());
+                Component name = getName(id, claim.get().isChunkLoaded());
                 int color = color(CadmusClient.TEAM_INFO.getOrDefault(id, new TeamInfo("", Color.DEFAULT)).color(), 127);
 
                 boolean north = checkSide(i, j, 0, -1);
@@ -379,9 +380,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private boolean checkSide(int x, int z, int offsetX, int offsetZ) {
         ChunkPos pos = new ChunkPos(playerChunkX + x + offsetX, playerChunkZ + z + offsetZ);
 
-        return ClaimApi.API.getClaim(level, pos).map(pair -> {
+        return ClaimApi.API.getClaim(level, pos).map(claim -> {
             ChunkPos currentPos = new ChunkPos(playerChunkX + x, playerChunkZ + z);
-            return !pair.left().equals(ClaimApi.API.getClaim(level, currentPos).map(Pair::left).orElse(null));
+            return !claim.team().equals(ClaimApi.API.getClaim(level, currentPos).map(ClaimData::team).orElse(null));
         }).orElse(true);
     }
 

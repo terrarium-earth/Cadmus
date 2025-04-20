@@ -179,7 +179,7 @@ public class TeamApiImpl implements TeamApi {
         Component message = ClaimApi.API.getClaim(player.level(), player.chunkPosition()).map(claim -> {
             String greeting = Flags.GREETING.get(player.serverLevel(), player.chunkPosition());
             return greeting.isBlank() ?
-                getName(player.level(), claim.left()) :
+                getName(player.level(), claim.team()) :
                 Component.literal(greeting).withStyle(ChatFormatting.GOLD);
         }).orElseGet(() -> {
             String farewell = Flags.FAREWELL.get(player.serverLevel(), pos);

@@ -82,7 +82,7 @@ public class ClaimCommand {
     public static void checkClaimed(ServerLevel level, ChunkPos pos) throws CommandSyntaxException {
         var claim = ClaimApi.API.getClaim(level, pos);
         if (claim.isPresent()) {
-            Component name = TeamApi.API.getName(level, claim.get().left());
+            Component name = TeamApi.API.getName(level, claim.get().team());
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.already_claimed",
                 name

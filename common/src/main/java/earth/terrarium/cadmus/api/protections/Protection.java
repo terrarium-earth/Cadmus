@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.api.protections;
 
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.ClaimData;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
@@ -79,7 +80,7 @@ public interface Protection {
     }
 
     default Optional<TeamId> getId(Level level, ChunkPos pos) {
-        return ClaimApi.API.getClaim(level, pos).map(Pair::left);
+        return ClaimApi.API.getClaim(level, pos).map(ClaimData::team);
     }
 
     default boolean isPlayerAllowed(Player player, TeamId id) {

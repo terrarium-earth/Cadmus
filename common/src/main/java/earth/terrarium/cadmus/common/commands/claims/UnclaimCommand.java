@@ -60,9 +60,9 @@ public class UnclaimCommand {
         }
 
         ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(team -> {
-            ClaimApi.API.unclaim(source.getLevel(), team.first(), pos);
-            int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), team.first(), false);
-            int maxClaims = ClaimLimitApi.API.getMaxClaims(team.first());
+            ClaimApi.API.unclaim(source.getLevel(), team.team(), pos);
+            int claimsCount = ClaimCommand.getClaimsCount(source.getLevel(), team.team(), false);
+            int maxClaims = ClaimLimitApi.API.getMaxClaims(team.team());
             source.sendSuccess(() -> ModUtils.translatableWithStyle(
                 "command.cadmus.info.unclaimed_chunk_at",
                 pos.x, pos.z,

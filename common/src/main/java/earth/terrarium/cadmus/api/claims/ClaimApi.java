@@ -77,7 +77,7 @@ public interface ClaimApi {
      */
     default void unclaim(Level level, Player player, Set<ChunkPos> positions) {
         Set<TeamId> teams = new HashSet<>();
-        positions.forEach(position -> getClaim(level, position).map(ObjectBooleanPair::left).ifPresent(teams::add));
+        positions.forEach(position -> getClaim(level, position).map(ClaimData::team).ifPresent(teams::add));
         teams.forEach(id -> {
             if (TeamApi.API.isMember(level, id, player)) unclaim(level, id, positions);
         });

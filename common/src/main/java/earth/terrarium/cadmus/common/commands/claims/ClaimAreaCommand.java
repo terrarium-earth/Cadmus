@@ -69,7 +69,7 @@ public class ClaimAreaCommand {
 
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresentOrElse(claim -> {
-                if (claim.left().equals(id) && claim.rightBoolean()) {
+                if (claim.team().equals(id) && claim.isChunkLoaded()) {
                     finalPositions.put(pos, chunkload);
                 }
             }, () -> finalPositions.put(pos, chunkload))

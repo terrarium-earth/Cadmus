@@ -50,7 +50,7 @@ public class UnclaimAreaCommand {
 
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(claim -> {
-                if (TeamApi.API.isMember(source.getLevel(), claim.left(), player)) {
+                if (TeamApi.API.isMember(source.getLevel(), claim.team(), player)) {
                     finalPositions.add(pos);
                 }
             })

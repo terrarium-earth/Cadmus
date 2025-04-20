@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.claims;
 
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.ClaimData;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
@@ -171,9 +172,10 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public Optional<ObjectBooleanPair<TeamId>> getClaim(Level level, ChunkPos pos) {
+    public Optional<ClaimData> getClaim(Level level, ChunkPos pos) {
         var data = ClaimSaveData.read(level);
-        return Optional.ofNullable(data.claims().get(pos));
+        ObjectBooleanPair<TeamId> teamIdObjectBooleanPair = data.claims().get(pos);
+        return Optional.of(new ClaimData(teamIdObjectBooleanPair.left(), teamIdObjectBooleanPair.rightBoolean()));
     }
 
     @Override

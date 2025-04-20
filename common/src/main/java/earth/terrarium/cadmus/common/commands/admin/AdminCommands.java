@@ -176,7 +176,7 @@ public class AdminCommands {
         ServerPlayer player = source.getPlayerOrException();
         var claim = ClaimApi.API.getClaim(source.getLevel(), player.chunkPosition());
         if (claim.isEmpty()) throw UnclaimCommand.NOT_CLAIMED.create();
-        TeamId teamId = claim.get().left();
+        TeamId teamId = claim.get().team();
         unclaim(source, player.chunkPosition(), teamId.provider(), teamId.id());
     }
 
