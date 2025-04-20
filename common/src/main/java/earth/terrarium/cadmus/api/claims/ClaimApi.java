@@ -42,14 +42,21 @@ public interface ClaimApi {
     void claim(Level level, TeamId id, Object2BooleanMap<ChunkPos> positions);
 
     /**
-     * Unclaims a chunk.
+     * Unclaims a chunk as long as its owned by a team the player can modify.
+     *
+     * @param level     The level.
+     * @param player    The player.
+     * @param pos       The chunk position to unclaim.
+     */
+    void unclaim(Level level, Player player, ChunkPos pos);
+
+    /**
+     * Unclaims a chunk for a specific team. If the team doesn't own the chunk it will not have an effect
      *
      * @param level The level.
      * @param id    The team ID.
      * @param pos   The chunk position to unclaim.
      */
-    void unclaim(Level level, Player player, ChunkPos pos);
-
     void unclaim(Level level, TeamId id, ChunkPos pos);
 
     /**
@@ -57,10 +64,17 @@ public interface ClaimApi {
      *
      * @param level     The level.
      * @param id        The team ID.
-     * @param positions The chunk position to unclaim.
+     * @param positions The chunk positions to unclaim.
      */
     void unclaim(Level level, TeamId id, Set<ChunkPos> positions);
 
+    /**
+     * Unclaims a set of chunks for all teams the player has permission to act on the behalf of.
+     *
+     * @param level     The level.
+     * @param player    The player
+     * @param positions The chunk positions to unclaim.
+     */
     default void unclaim(Level level, Player player, Set<ChunkPos> positions) {
         Set<TeamId> teams = new HashSet<>();
         positions.forEach(position -> getClaim(level, position).map(ObjectBooleanPair::left).ifPresent(teams::add));
@@ -98,7 +112,7 @@ public interface ClaimApi {
      * @param pos   The chunk position to get the claim from.
      * @return The claim ID and chunk load status if the chunk is claimed, empty otherwise.
      */
-    Optional<ObjectBooleanPair<TeamId>> getClaim(Level level, ChunkPos pos);
+    Optional<ClaimData> getClaim(Level level, ChunkPos pos);
 
     /**
      * Checks if a chunk is claimed.
