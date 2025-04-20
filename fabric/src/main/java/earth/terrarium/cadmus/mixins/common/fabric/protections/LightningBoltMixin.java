@@ -38,8 +38,8 @@ public abstract class LightningBoltMixin extends Entity {
         }
 
         return ClaimApi.API.getClaim(level, entity.chunkPosition()).map(claim ->
-            claim.left().isAdmin() &&
-                Flags.LIGHTNING.get(level.getServer(), claim.first().id())
+            claim.team().isAdmin() &&
+                Flags.LIGHTNING.get(level.getServer(), claim.team().id())
         ).orElse(true);
     }
 }

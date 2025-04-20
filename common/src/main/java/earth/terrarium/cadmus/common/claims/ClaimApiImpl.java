@@ -70,14 +70,14 @@ public class ClaimApiImpl implements ClaimApi {
 
     @Override
     public void unclaim(Level level, Player player, ChunkPos pos) {
-        Optional<ObjectBooleanPair<TeamId>> claim = getClaim(level, pos);
-        if (claim.isEmpty() || !TeamApi.API.isMember(level, claim.get().left(), player)) return;
-        unclaim(level, claim.get().left(), pos);
+        var claim = getClaim(level, pos);
+        if (claim.isEmpty() || !TeamApi.API.isMember(level, claim.get().team(), player)) return;
+        unclaim(level, claim.get().team(), pos);
     }
 
     @Override
     public void unclaim(Level level, TeamId id, ChunkPos pos) {
-        if (getClaim(level, pos).map(ObjectBooleanPair::rightBoolean).orElse(false)) {
+        if (getClaim(level, pos).map(ClaimData::isChunkLoaded).orElse(false)) {
             level.getChunkSource().updateChunkForced(pos, false);
             Cadmus.FORCE_LOADED_CHUNK_COUNT--;
         }
@@ -98,7 +98,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public void unclaim(Level level, TeamId id, Set<ChunkPos> positions) {
         for (var pos : positions) {
-            if (getClaim(level, pos).map(ObjectBooleanPair::rightBoolean).orElse(false)) {
+            if (getClaim(level, pos).map(ClaimData::isChunkLoaded).orElse(false)) {
                 level.getChunkSource().updateChunkForced(pos, false);
                 Cadmus.FORCE_LOADED_CHUNK_COUNT--;
             }

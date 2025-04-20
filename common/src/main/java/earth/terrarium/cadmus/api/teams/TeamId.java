@@ -10,6 +10,7 @@ import com.teamresourceful.resourcefullib.common.bytecodecs.ExtraByteCodecs;
 import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

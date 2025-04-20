@@ -58,7 +58,7 @@ public final class BlockInteractProtection implements Protection {
 
     private boolean checkFlags(ServerLevel level, BlockPos pos, TeamId id) {
         MinecraftServer server = level.getServer();
-        if (!id.provider().isAdmin()) return true;
+        if (!id.isAdmin()) return true;
 
         BlockState state = level.getBlockState(pos);
         if (state.is(ModBlockTags.DOOR_LIKE)) return Flags.USE_DOORS.get(server, id.id());
