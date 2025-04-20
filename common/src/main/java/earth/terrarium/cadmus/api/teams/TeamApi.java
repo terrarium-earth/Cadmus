@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Set;
@@ -35,8 +36,20 @@ public interface TeamApi {
      */
     Set<TeamId> getAllTeams(MinecraftServer server);
 
+    /**
+     * Gets all team providers.
+     *
+     * @return  A set of all team providers.
+     */
     Set<ResourceLocation> getAllProviders();
 
+    /**
+     *
+     * Gets a specific team provider by its ID. May return null if it doesn't exist.
+     * @param id    Id of registered team provider
+     * @return      a team provider, may be null
+     */
+    @Nullable
     TeamProvider getProvider(ResourceLocation id);
 
     /**
