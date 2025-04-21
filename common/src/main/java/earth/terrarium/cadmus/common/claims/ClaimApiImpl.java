@@ -175,8 +175,7 @@ public class ClaimApiImpl implements ClaimApi {
     @Override
     public Optional<ClaimData> getClaim(Level level, ChunkPos pos) {
         var data = ClaimSaveData.read(level);
-        ObjectBooleanPair<TeamId> teamIdObjectBooleanPair = data.claims().get(pos);
-        return Optional.of(new ClaimData(teamIdObjectBooleanPair.left(), teamIdObjectBooleanPair.rightBoolean()));
+        return Optional.ofNullable(data.claims().get(pos)).map(pair -> new ClaimData(pair.left(), pair.rightBoolean()));
     }
 
     @Override
