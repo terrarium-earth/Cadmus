@@ -50,13 +50,13 @@ public class UnclaimAreaCommand {
 
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(claim -> {
-                if (TeamApi.API.isMember(source.getLevel(), claim.team(), player.getUUID())) {
+                if (TeamApi.API.isMember(source.getLevel(), player.getGameProfile(), claim.team())) {
                     finalPositions.add(pos);
                 }
             })
         );
 
-        ClaimApi.API.unclaim(source.getLevel(), player, finalPositions);
+        ClaimApi.API.unclaim(player, finalPositions);
 
         int claimsCount = ClaimCommand.getClaimsCount(player, false);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(

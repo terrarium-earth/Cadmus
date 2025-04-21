@@ -27,6 +27,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +90,7 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public Color getColor(Level level, TeamId id) {
-        return getProvider(id.provider()).getColor(level, id.id()).orElseGet(() -> ModUtils.uuidToColor(id.id()));
+        return Optional.ofNullable(getProvider(id.provider())).flatMap(it -> it.getColor(level, id.id())).orElseGet(() -> ModUtils.uuidToColor(id.id()));
     }
 
     @Override
@@ -98,13 +99,13 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public boolean isMember(Level level, TeamId id, GameProfile player) {
-        return getProvider(id.provider()).isMember(level, id.id(), player);
+    public boolean isMember(Level level, GameProfile player, TeamId id) {
+        return Optional.ofNullable(getProvider(id.provider())).map(provider -> provider.isMember(level, id.id(), player)).orElse(false);
     }
 
     @Override
     public Set<UUID> getMembers(Level level, TeamId id) {
-        return getProvider(id.provider()).getMembers(level, id.id());
+        return Optional.ofNullable(getProvider(id.provider())).map(provider -> provider.getMembers(level, id.id())).orElse(Set.of());
     }
 
     @Override

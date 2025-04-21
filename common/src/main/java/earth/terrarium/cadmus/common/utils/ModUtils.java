@@ -103,7 +103,7 @@ public class ModUtils {
         if (!player.hasPermissions(2)) {
             if (!TeamApi.API.canModifySettings(player, id)) {
                 return ConstantComponents.NO_PERMISSION_TEAM;
-            } else if (!PrometheusCompat.hasPermission(player, protection.permission())) {
+            } else if (player.getServer() == null || !PrometheusCompat.hasPermission(player.getServer(), player.getGameProfile(), protection.permission())) {
                 return ConstantComponents.NO_PERMISSION_ROLE;
             }
         }
