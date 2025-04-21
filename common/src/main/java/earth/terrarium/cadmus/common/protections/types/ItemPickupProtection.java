@@ -7,13 +7,11 @@ import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
 import earth.terrarium.cadmus.common.tags.ModItemTags;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
-import earth.terrarium.cadmus.mixins.common.ItemEntityMixin;
-import net.minecraft.core.BlockPos;
+import earth.terrarium.cadmus.mixins.common.ItemEntityAccessor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Objects;
 
@@ -50,7 +48,7 @@ public final class ItemPickupProtection implements Protection {
 
     public boolean canPickupItem(Level level, GameProfile player, ItemEntity item) {
         if (item.getItem().is(ModItemTags.ALLOWS_CLAIM_PICKUP)) return true;
-        return Objects.equals(((ItemEntityMixin) item).getThrower(), player.getId()) ||
+        return Objects.equals(((ItemEntityAccessor) item).getThrower(), player.getId()) ||
             level.isClientSide() ||
             getId(level, item.chunkPosition()).map(id ->
                 isPlayerAllowed(level, player, id)).orElse(true);

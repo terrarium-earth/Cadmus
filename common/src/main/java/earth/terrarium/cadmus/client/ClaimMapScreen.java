@@ -19,6 +19,7 @@ import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
 import earth.terrarium.cadmus.common.protections.SettingsData;
+import earth.terrarium.cadmus.common.teams.IndividualTeamProvider;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.buttons.Button;
@@ -69,7 +70,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private MapWidget mapWidget;
     private Button settingsButton;
     private final Map<TeamId, TeamData> teams = new HashMap<>();
-    public static final DropdownState<TeamId> selected = DropdownState.empty();
+    public static final DropdownState<TeamId> selected = DropdownState.of(new TeamId(IndividualTeamProvider.ID, Minecraft.getInstance().player.getUUID()));
 
     private float chunkScale;
     private float pixelScale;
@@ -185,7 +186,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
             Widgets.dropdown(
                 selected,
                 teams.keySet().stream().toList(),
-                teamId -> Component.literal(teams.get(teamId).name),
+                teamId -> Optional.ofNullable(teams.get(teamId)).map(team -> Component.literal(team.name)).orElse(ConstantComponents.UNKNOWN.copy()),
                 button -> {
                     button.withSize(MAP_SIZE / 2, BUTTON_HEIGHT);
                     if (teams.size() <= 1) {
@@ -536,20 +537,16 @@ public class ClaimMapScreen extends BaseCursorScreen {
         CadmusClient.TEAM_INFO.put(selected.get(), new TeamInfo(CadmusClient.TEAM_INFO.get(selected.get()).name(), color));
     }
 
-    private TeamData getSelected() {
-        return teams.get(selected.get());
-    }
-
     public Map<String, TriState> getSettings() {
-        return getSelected().settings;
+        return getData().settings;
     }
 
     public Color getColor() {
-        return getSelected().color.get();
+        return getData().color.get();
     }
 
     public boolean canModifyColor() {
-        return getSelected().modifyColor.get();
+        return getData().modifyColor.get();
     }
 
     private record ClaimTile(
@@ -565,7 +562,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     ) {}
 
     private record TeamData(String name, int claimed, int maxClaims, int loaded, int maxLoaded, Map<String, TriState> settings, State<Color> color, State<Boolean> modifyColor) {
-        public static final TeamData EMPTY = new TeamData("empty", 0, 0,0, 0, new HashMap<>(), State.of(Color.DEFAULT), State.empty());
+        public static final TeamData EMPTY = new TeamData("empty", 0, 0,0, 0, new HashMap<>(), State.of(Color.DEFAULT), State.of(false));
     }
 
     static {

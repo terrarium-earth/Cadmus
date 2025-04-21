@@ -2,12 +2,11 @@ package earth.terrarium.cadmus.common.teams;
 
 import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
-import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.flags.FlagApi;
+import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
-import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.flags.Flags;
@@ -25,9 +24,7 @@ import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,7 +107,7 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public Set<TeamId> getTeamsList(Level level, GameProfile player) {
-        return Set.of();
+        return getTeams(level, player).entrySet().stream().flatMap(entry -> entry.getValue().stream().map(value -> new TeamId(entry.getKey(), value))).collect(Collectors.toSet());
     }
 
     @Override
