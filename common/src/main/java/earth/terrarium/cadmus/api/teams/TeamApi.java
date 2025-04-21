@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.api.teams;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.ApiHelper;
 import net.minecraft.network.chat.Component;
@@ -104,11 +105,28 @@ public interface TeamApi {
      *
      * @param level  The level.
      * @param id     The ID of the team.
+     * @param player The player's ID.
+     * @return true if the player is a member of the team, false otherwise.
+     */
+    boolean isMember(Level level, GameProfile player, TeamId id);
+
+    /**
+     * Checks if the player is a member of the team, or if the player owns the personal team.
+     *
+     * @param id     The ID of the team.
      * @param player The player.
      * @return true if the player is a member of the team, false otherwise.
      */
-    boolean isMember(Level level, TeamId id, Player player);
+    default boolean isMember(@NotNull Player player, TeamId id) {
+        return isMember(player.level(), player.getGameProfile(), id);
+    }
 
+    /**
+     * Checks if the player is a member of the team, or if the player owns the personal team.
+     * @param level The level.
+     * @param id    The ID of the team.
+     * @return The members of the team.
+     */
     Set<UUID> getMembers(Level level, TeamId id);
 
     /**
@@ -117,9 +135,36 @@ public interface TeamApi {
      * @param player The player.
      * @return The team's ID or the player's UUID.
      */
-    Set<TeamId> getTeamsList(@NotNull Player player);
+    Set<TeamId> getTeamsList(Level level, GameProfile player);
 
-    Map<ResourceLocation, Set<UUID>> getTeams(@NotNull Player player);
+    /**
+     * Gets the id of the player's team.
+     *
+     * @param player The player.
+     * @return The team's ID or empty if the player is not in a team.
+     */
+    default Set<TeamId> getTeamsList(@NotNull Player player) {
+        return getTeamsList(player.level(), player.getGameProfile());
+    }
+
+    /**
+     * Gets the id of the player's team.
+     *
+     * @param level  The level.
+     * @param player The player profile.
+     * @return The team's ID or empty if the player is not in a team.
+     */
+    Map<ResourceLocation, Set<UUID>> getTeams(Level level, GameProfile player);
+
+    /**
+     * Gets the id of the player's team.
+     *
+     * @param player The player.
+     * @return The team's ID or empty if the player is not in a team.
+     */
+    default Map<ResourceLocation, Set<UUID>> getTeams(@NotNull Player player) {
+        return getTeams(player.level(), player.getGameProfile());
+    }
 
     /**
      * Checks if the player is on a team.
@@ -127,7 +172,17 @@ public interface TeamApi {
      * @param player The player.
      * @return true if the player is on a team, false otherwise.
      */
-    boolean isOnTeam(@NotNull Player player);
+    boolean isOnTeam(Level level, GameProfile player);
+
+    /**
+     * Checks if the player is on a team.
+     *
+     * @param player The player.
+     * @return true if the player is on a team, false otherwise.
+     */
+    default boolean isOnTeam(@NotNull Player player) {
+        return isOnTeam(player.level(), player.getGameProfile());
+    }
 
     /**
      * Checks if the player can modify the team's settings.
@@ -135,7 +190,19 @@ public interface TeamApi {
      * @param player The player.
      * @return true if the player is not on a team or if the player can modify the team's settings, false otherwise.
      */
-    boolean canModifySettings(@NotNull Player player, TeamId id);
+    default boolean canModifySettings(Level level, GameProfile player, TeamId id) {
+        return getProvider(id.provider()).canModifySettings(level, id.id(), player);
+    }
+
+    /**
+     * Checks if the player can modify the team's settings.
+     *
+     * @param player The player.
+     * @return true if the player is not on a team or if the player can modify the team's settings, false otherwise.
+     */
+    default boolean canModifySettings(@NotNull Player player, TeamId id) {
+        return canModifySettings(player.level(), player.getGameProfile(), id);
+    }
 
     /**
      * Removes the team. Clears all the team's chunks and settings.

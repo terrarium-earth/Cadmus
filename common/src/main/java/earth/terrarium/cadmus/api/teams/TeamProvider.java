@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.api.teams;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.common.claims.limit.ClaimLimitApiImpl;
@@ -53,7 +54,27 @@ public interface TeamProvider {
      * @param player The player.
      * @return true if the player is a member of the team, false otherwise.
      */
-    boolean isMember(Level level, UUID id, Player player);
+    boolean isMember(Level level, UUID id, GameProfile player);
+
+    /**
+     * Checks if the player is a member of the team.
+     *
+     * @param id     The ID of the team.
+     * @param player The player.
+     * @return true if the player is a member of the team, false otherwise.
+     */
+    default boolean isMember(UUID id, Player player) {
+        return isMember(player.level(), id, player.getGameProfile());
+    }
+
+    /**
+     * Gets the id of the player's team.
+     *
+     * @param level     The level.
+     * @param player    The player profile.
+     * @return The team's ID or empty if the player is not in a team.
+     */
+    Set<UUID> getTeams(Level level, GameProfile player);
 
     /**
      * Gets the id of the player's team.
@@ -61,16 +82,37 @@ public interface TeamProvider {
      * @param player The player.
      * @return The team's ID or empty if the player is not in a team.
      */
-    Set<UUID> getTeams(Player player);
+    default Set<UUID> getTeams(Player player) {
+        return getTeams(player.level(), player.getGameProfile());
+    }
 
     /**
      * Checks if the player can modify the team's settings.
      *
+     * @param level The level.
+     * @param teamId the team to check.
+     * @param player The player profile.
+     * @return true if the player can modify the team's settings, false otherwise.
+     */
+    boolean canModifySettings(Level level, UUID teamId, GameProfile player);
+
+    /**
+     * Checks if the player can modify the team's settings.
+     *
+     * @param teamId The team to check.
      * @param player The player.
      * @return true if the player can modify the team's settings, false otherwise.
      */
-    boolean canModifySettings(Player player, UUID teamId);
+    default boolean canModifySettings(UUID teamId, Player player) {
+        return canModifySettings(player.level(), teamId, player.getGameProfile());
+    }
 
+    /**
+     * Gets all teams for the given server.
+     *
+     * @param server The server.
+     * @return A set of all teams.
+     */
     Set<UUID> getAllTeams(MinecraftServer server);
 
     default void onCreate(MinecraftServer server, UUID id) {

@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.api.protections;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.ClaimData;
@@ -58,8 +59,12 @@ public interface Protection {
      */
     GameRules.Key<GameRules.BooleanValue> gameRule();
 
+    private boolean hasPermission(MinecraftServer server, GameProfile profile) {
+        return Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(server, profile, permission());
+    }
+
     private boolean hasPermission(Player player) {
-        return Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(player, permission());
+        return hasPermission(player.getServer(), player.getGameProfile());
     }
 
     private boolean gameRuleEnabled(Level level) {
@@ -84,17 +89,21 @@ public interface Protection {
     }
 
     default boolean isPlayerAllowed(Player player, TeamId id) {
-        if (CadmusSaveData.canBypass(player.getServer(), player.getUUID())) return true;
+        return isPlayerAllowed(player.level(), player.getGameProfile(), id);
+    }
+
+    default boolean isPlayerAllowed(Level level, GameProfile player, TeamId id) {
+        if (CadmusSaveData.canBypass(level.getServer(), player.getId())) return true;
 
         if (id.provider().equals(AdminTeamProvider.ID)) {
-            return flagEnabled(player.getServer(), id);
+            return flagEnabled(level.getServer(), id);
         }
 
-        if (hasPermission(player)) return true;
-        if (gameRuleEnabled(player.level())) return true;
+        if (hasPermission(level.getServer(), player)) return true;
+        if (gameRuleEnabled(level)) return true;
 
-        if (settingEnabled(player.getServer(), id)) return true;
-        return TeamApi.API.isMember(player.level(), id, player);
+        if (settingEnabled(level.getServer(), id)) return true;
+        return TeamApi.API.isMember(level, player, id);
     }
 
     default boolean isEntityAllowed(Entity entity, TeamId id) {

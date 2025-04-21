@@ -98,7 +98,7 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public boolean isMember(Level level, TeamId id, Player player) {
+    public boolean isMember(Level level, TeamId id, GameProfile player) {
         return getProvider(id.provider()).isMember(level, id.id(), player);
     }
 
@@ -108,28 +108,23 @@ public class TeamApiImpl implements TeamApi {
     }
 
     @Override
-    public Set<TeamId> getTeamsList(@NotNull Player player) {
-        return getTeams(player).entrySet().stream().flatMap(entry -> entry.getValue().stream().map(uuid -> new TeamId(entry.getKey(), uuid))).collect(Collectors.toSet());
+    public Set<TeamId> getTeamsList(Level level, GameProfile player) {
+        return Set.of();
     }
 
     @Override
-    public Map<ResourceLocation, Set<UUID>> getTeams(@NotNull Player player) {
+    public Map<ResourceLocation, Set<UUID>> getTeams(Level level, GameProfile player) {
         Map<ResourceLocation, Set<UUID>> teams = new HashMap<>();
         this.teams.forEach((resourceLocation, teamProvider) -> {
-            Set<UUID> teamIds = teamProvider.getTeams(player);
+            Set<UUID> teamIds = teamProvider.getTeams(level, player);
             if (!teamIds.isEmpty()) teams.put(resourceLocation, teamIds);
         });
         return teams;
     }
 
     @Override
-    public boolean isOnTeam(@NotNull Player player) {
-        return !this.getTeamsList(player).isEmpty();
-    }
-
-    @Override
-    public boolean canModifySettings(@NotNull Player player, TeamId id) {
-        return this.getProvider(id.provider()).canModifySettings(player, id.id());
+    public boolean isOnTeam(Level level, GameProfile player) {
+        return !this.getTeamsList(level, player).isEmpty();
     }
 
     @Override

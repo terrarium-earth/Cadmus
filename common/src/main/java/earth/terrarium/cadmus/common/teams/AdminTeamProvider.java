@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.teams;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.flags.FlagApi;
@@ -39,19 +40,19 @@ public class AdminTeamProvider implements TeamProvider {
     }
 
     @Override
-    public boolean isMember(Level level, UUID id, Player player) {
+    public boolean isMember(Level level, UUID id, GameProfile player) {
         return false;
     }
 
     @Override
-    public Set<UUID> getTeams(Player player) {
-        if (!player.hasPermissions(2) || player.getServer() == null) return Set.of();
-        return getAllTeams(player.getServer());
+    public Set<UUID> getTeams(Level level, GameProfile player) {
+        if (level.getServer() == null || level.getServer().getProfilePermissions(player) == 2) return Set.of();
+        return getAllTeams(level.getServer());
     }
 
     @Override
-    public boolean canModifySettings(Player player, UUID teamId) {
-        return player.hasPermissions(2);
+    public boolean canModifySettings(Level level, UUID teamId, GameProfile player) {
+        return level.getServer() != null && level.getServer().getProfilePermissions(player) == 2;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.claims;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.ClaimData;
@@ -69,9 +70,9 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public void unclaim(Level level, Player player, ChunkPos pos) {
+    public void unclaim(Level level, GameProfile player, ChunkPos pos) {
         var claim = getClaim(level, pos);
-        if (claim.isEmpty() || !TeamApi.API.isMember(level, claim.get().team(), player)) return;
+        if (claim.isEmpty() || !TeamApi.API.isMember(level, player, claim.get().team())) return;
         unclaim(level, claim.get().team(), pos);
     }
 
@@ -142,8 +143,8 @@ public class ClaimApiImpl implements ClaimApi {
     }
 
     @Override
-    public void clear(Player player) {
-        TeamApi.API.getTeamsList(player).forEach(team -> clear(player.level(), team));
+    public void clear(Level level, GameProfile player) {
+        TeamApi.API.getTeamsList(level, player).forEach(team -> clear(level, team));
     }
 
     @Override

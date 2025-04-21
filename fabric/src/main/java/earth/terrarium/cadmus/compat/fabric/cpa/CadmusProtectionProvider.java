@@ -39,7 +39,7 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         if (player != null) {
             return Protections.BLOCK_BREAKING.canBreakBlock(player, pos);
         }
-        return Protections.BLOCK_BREAKING.canBreakBlock(level, profile.getId(), pos);
+        return Protections.BLOCK_BREAKING.canBreakBlock(level, profile, pos);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         if (player != null) {
             return Protections.BLOCK_PLACING.canPlaceBlock(player, pos, level.getBlockState(pos));
         }
-        return Protections.BLOCK_PLACING.canPlaceBlock(level, profile.getId(), pos, level.getBlockState(pos));
+        return Protections.BLOCK_PLACING.canPlaceBlock(level, profile, pos, level.getBlockState(pos));
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         if (player != null) {
             return Protections.BLOCK_INTERACTIONS.canInteractWithBlock(player, pos, level.getBlockState(pos));
         }
-        return Protections.BLOCK_INTERACTIONS.canInteractWithBlock(level, profile.getId(), pos, level.getBlockState(pos));
+        return Protections.BLOCK_INTERACTIONS.canInteractWithBlock(level, profile, pos, level.getBlockState(pos));
     }
 
     @Override
@@ -68,7 +68,7 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         if (player != null) {
             return Protections.ENTITY_INTERACTIONS.canInteractWithEntity(player, entity);
         }
-        return Protections.ENTITY_INTERACTIONS.canInteractWithEntity(level, profile.getId(), entity);
+        return Protections.ENTITY_INTERACTIONS.canInteractWithEntity(level, profile, entity);
     }
 
     @Override
@@ -76,6 +76,6 @@ public class CadmusProtectionProvider implements ProtectionProvider {
         if (player != null) {
             return Protections.ENTITY_DAMAGE.canDamageEntity(player, entity);
         }
-        return Protections.ENTITY_DAMAGE.canDamageEntity(level, profile.getId(), entity);
+        return Protections.ENTITY_DAMAGE.canDamageEntity(level, profile, entity);
     }
 }

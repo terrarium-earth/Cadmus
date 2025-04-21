@@ -73,7 +73,7 @@ subprojects {
             parchment(create(group = "org.parchmentmc.data", name = "parchment-1.21", version = parchmentVersion))
         })
 
-        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = "latest.release")
+        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = "3.0.12")
         val olympus = "modImplementation"(group = "earth.terrarium.olympus", name = "olympus-$modLoader-$minecraftVersion", version = "1.0.9") {
             isTransitive = false
         }

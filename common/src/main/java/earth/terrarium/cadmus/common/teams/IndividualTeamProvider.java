@@ -1,18 +1,16 @@
 package earth.terrarium.cadmus.common.teams;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,18 +43,18 @@ public class IndividualTeamProvider implements TeamProvider {
     }
 
     @Override
-    public boolean isMember(Level level, UUID id, Player player) {
-        return id.equals(player.getUUID());
+    public boolean isMember(Level level, UUID id, GameProfile player) {
+        return id.equals(player);
     }
 
     @Override
-    public Set<UUID> getTeams(Player player) {
-        return Set.of(player.getUUID());
+    public Set<UUID> getTeams(Level level, GameProfile player) {
+        return Set.of(player.getId());
     }
 
     @Override
-    public boolean canModifySettings(Player player, UUID teamId) {
-        return teamId.equals(player.getUUID());
+    public boolean canModifySettings(Level level, UUID teamId, GameProfile player) {
+        return teamId.equals(player.getId());
     }
 
     @Override

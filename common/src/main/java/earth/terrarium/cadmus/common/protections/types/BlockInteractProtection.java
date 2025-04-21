@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.protections.types;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
 import earth.terrarium.cadmus.api.teams.TeamId;
@@ -46,14 +47,13 @@ public final class BlockInteractProtection implements Protection {
     }
 
     public boolean canInteractWithBlock(Player player, BlockPos pos, BlockState state) {
-        if (state.is(ModBlockTags.ALLOWS_CLAIM_INTERACTIONS)) return true;
-        return player.level().isClientSide() || getId(player.level(), pos).map(id ->
-            checkFlags((ServerLevel) player.level(), pos, id) && isPlayerAllowed(player, id) || isBlockAllowed(player.level(), id, pos)).orElse(true);
+        return canInteractWithBlock(player.level(), player.getGameProfile(), pos, state);
     }
 
-    public boolean canInteractWithBlock(Level level, UUID player, BlockPos pos, BlockState state) {
-        Player playerEntity = level.getPlayerByUUID(player);
-        return playerEntity == null || canInteractWithBlock(playerEntity, pos, state);
+    public boolean canInteractWithBlock(Level level, GameProfile player, BlockPos pos, BlockState state) {
+        if (state.is(ModBlockTags.ALLOWS_CLAIM_INTERACTIONS)) return true;
+        return level.isClientSide() || getId(level, pos).map(id ->
+            checkFlags((ServerLevel) level, pos, id) && isPlayerAllowed(level, player, id) || isBlockAllowed(level, id, pos)).orElse(true);
     }
 
     private boolean checkFlags(ServerLevel level, BlockPos pos, TeamId id) {

@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.common.teams;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
@@ -52,10 +53,11 @@ public class VanillaTeamProvider implements TeamProvider {
         return Optional.ofNullable(color).map(ChatFormatting::getColor).map(Color::new).or(() -> Optional.of(MinecraftColors.AQUA));
     }
 
+
     @Override
-    public Set<UUID> getMembers(Level level, UUID id) {
+    public Set<UUID> getMembers(Level level, UUID team) {
         if (!(level instanceof ServerLevel serverLevel)) return Set.of();
-        String name = TEAM_CACHE.inverse().get(id);
+        String name = TEAM_CACHE.inverse().get(team);
         if (name == null) return Set.of();
 
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
@@ -68,12 +70,17 @@ public class VanillaTeamProvider implements TeamProvider {
     }
 
     @Override
-    public boolean isMember(Level level, UUID id, Player player) {
+    public boolean isMember(Level level, UUID id, GameProfile player) {
         String name = TEAM_CACHE.inverse().get(id);
         if (name == null) return false;
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
         if (playerTeam == null) return false;
-        return playerTeam.getPlayers().contains(player.getGameProfile().getName());
+        return playerTeam.getPlayers().contains(player.getName());
+    }
+
+    @Override
+    public Set<UUID> getTeams(Level level, GameProfile player) {
+        return Set.of();
     }
 
     @Override
@@ -84,8 +91,8 @@ public class VanillaTeamProvider implements TeamProvider {
     }
 
     @Override
-    public boolean canModifySettings(Player player, UUID teamId) {
-        return isMember(player.level(), teamId, player);
+    public boolean canModifySettings(Level level, UUID teamId, GameProfile player) {
+        return isMember(level, teamId, player);
     }
 
     @Override

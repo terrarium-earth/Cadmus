@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.protections.types;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
 import earth.terrarium.cadmus.common.flags.Flags;
@@ -41,13 +42,12 @@ public final class EntityInteractProtection implements Protection {
     }
 
     public boolean canInteractWithEntity(Player player, Entity entity) {
-        if (entity.getType().is(ModEntityTypeTags.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) return true;
-        return player.level().isClientSide() || getId(player.level(), entity.chunkPosition()).map(id ->
-            isPlayerAllowed(player, id)).orElse(true);
+        return canInteractWithEntity(player.level(), player.getGameProfile(), entity);
     }
 
-    public boolean canInteractWithEntity(Level level, UUID player, Entity entity) {
-        Player playerEntity = level.getPlayerByUUID(player);
-        return playerEntity == null || canInteractWithEntity(playerEntity, entity);
+    public boolean canInteractWithEntity(Level level, GameProfile player, Entity entity) {
+        if (entity.getType().is(ModEntityTypeTags.ALLOWS_CLAIM_INTERACTIONS_ENTITIES)) return true;
+        return level.isClientSide() || getId(level, entity.chunkPosition()).map(id ->
+            isPlayerAllowed(level, player, id)).orElse(true);
     }
 }

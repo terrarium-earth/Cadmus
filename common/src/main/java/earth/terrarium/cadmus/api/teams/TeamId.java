@@ -51,7 +51,7 @@ public record TeamId(ResourceLocation provider, UUID id) {
 
     public static TeamId fromCommand(CommandContext<CommandSourceStack> context) {
         TeamId teamId = new TeamId(context.getArgument("provider", ResourceLocation.class), context.getArgument("id", UUID.class));
-        if(!TeamApi.API.getProvider(teamId.provider).canModifySettings(context.getSource().getPlayer(), teamId.id)) {
+        if(!TeamApi.API.getProvider(teamId.provider).canModifySettings(context.getSource().getLevel(), teamId.id, context.getSource().getPlayer().getGameProfile())) {
             throw new IllegalArgumentException("Member cannot modify team settings");
         };
         return teamId;

@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.api.claims;
 
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.network.Packet;
 import earth.terrarium.cadmus.api.ApiHelper;
 import earth.terrarium.cadmus.api.teams.TeamApi;
@@ -42,15 +43,6 @@ public interface ClaimApi {
     void claim(Level level, TeamId id, Object2BooleanMap<ChunkPos> positions);
 
     /**
-     * Unclaims a chunk as long as its owned by a team the player can modify.
-     *
-     * @param level     The level.
-     * @param player    The player.
-     * @param pos       The chunk position to unclaim.
-     */
-    void unclaim(Level level, Player player, ChunkPos pos);
-
-    /**
      * Unclaims a chunk for a specific team. If the team doesn't own the chunk it will not have an effect
      *
      * @param level The level.
@@ -62,25 +54,54 @@ public interface ClaimApi {
     /**
      * Unclaims a set of chunks.
      *
-     * @param level     The level.
+     * @param level     The level where the claim is.
      * @param id        The team ID.
      * @param positions The chunk positions to unclaim.
      */
     void unclaim(Level level, TeamId id, Set<ChunkPos> positions);
 
     /**
+     * Unclaims a chunk as long as its owned by a team the player can modify.
+     *
+     * @param level     The level where the claim is.
+     * @param player    The player.
+     * @param pos       The chunk position to unclaim.
+     */
+    void unclaim(Level level, GameProfile player, ChunkPos pos);
+
+    /**
+     * Unclaims a chunk as long as its owned by a team the player can modify.
+     *
+     * @param player The player.
+     * @param pos    The chunk position to unclaim.
+     */
+    default void unclaim(Player player, ChunkPos pos) {
+        unclaim(player.level(), player.getGameProfile(), pos);
+    }
+
+    /**
      * Unclaims a set of chunks for all teams the player has permission to act on the behalf of.
      *
-     * @param level     The level.
+     * @param level     The level where the claim is.
      * @param player    The player
      * @param positions The chunk positions to unclaim.
      */
-    default void unclaim(Level level, Player player, Set<ChunkPos> positions) {
+    default void unclaim(Level level, GameProfile player, Set<ChunkPos> positions) {
         Set<TeamId> teams = new HashSet<>();
         positions.forEach(position -> getClaim(level, position).map(ClaimData::team).ifPresent(teams::add));
         teams.forEach(id -> {
-            if (TeamApi.API.isMember(level, id, player)) unclaim(level, id, positions);
+            if (TeamApi.API.isMember(level, player, id)) unclaim(level, id, positions);
         });
+    }
+
+    /**
+     * Unclaims a chunk as long as its owned by a team the player can modify.
+     *
+     * @param player    The player.
+     * @param positions The chunk positions to unclaim.
+     */
+    default void unclaim(Player player, Set<ChunkPos> positions) {
+        unclaim(player.level(), player.getGameProfile(), positions);
     }
 
     /**
@@ -92,11 +113,21 @@ public interface ClaimApi {
     void clear(Level level, TeamId id);
 
     /**
-     * Clears all claims in the level for the given player.
+     * Clears all claims owned by the player in the level that the player is in.
      *
      * @param player The player.
      */
-    void clear(Player player);
+    default void clear(Player player) {
+        clear(player.level(), player.getGameProfile());
+    }
+
+    /**
+     * Clears all claims in the level for the given player.
+     *
+     * @param level The level.
+     * @param player The player.
+     */
+    void clear(Level level, GameProfile player);
 
     /**
      * Completely clears all claims in every level.
@@ -171,9 +202,20 @@ public interface ClaimApi {
      * @return A map of chunk positions to chunk load status.
      */
     default Optional<Object2BooleanMap<ChunkPos>> getOwnedClaims(Player player) {
+        return getOwnedClaims(player.level(), player.getGameProfile());
+    }
+
+    /**
+     * Gets all claims for the given player. If the player is on a team, retrieves the team's claims, otherwise retrieves the player's claims.
+     *
+     * @param level The level to get the claims from.
+     * @param player The player to get the claims from.
+     * @return A map of chunk positions to chunk load status.
+     */
+    default Optional<Object2BooleanMap<ChunkPos>> getOwnedClaims(Level level, GameProfile player) {
         var map = new Object2BooleanArrayMap<ChunkPos>();
-        for (TeamId team : TeamApi.API.getTeamsList(player)) {
-            this.getOwnedClaims(player.level(), team).ifPresent(map::putAll);
+        for (TeamId team : TeamApi.API.getTeamsList(level, player)) {
+            this.getOwnedClaims(level, team).ifPresent(map::putAll);
         }
         return Optional.of(map);
     }
