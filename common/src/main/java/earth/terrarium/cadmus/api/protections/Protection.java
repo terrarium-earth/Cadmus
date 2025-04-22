@@ -1,11 +1,14 @@
 package earth.terrarium.cadmus.api.protections;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.flags.FlagApi;
+import earth.terrarium.cadmus.api.claims.ClaimData;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
@@ -18,7 +21,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface Protection {
 
@@ -57,56 +59,64 @@ public interface Protection {
      */
     GameRules.Key<GameRules.BooleanValue> gameRule();
 
+    private boolean hasPermission(MinecraftServer server, GameProfile profile) {
+        return Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(server, profile, permission());
+    }
+
     private boolean hasPermission(Player player) {
-        return Cadmus.IS_PROMETHEUS_LOADED && PrometheusCompat.hasPermission(player, permission());
+        return hasPermission(player.getServer(), player.getGameProfile());
     }
 
     private boolean gameRuleEnabled(Level level) {
         return level.getGameRules().getBoolean(gameRule());
     }
 
-    private boolean settingEnabled(MinecraftServer server, UUID id) {
+    private boolean settingEnabled(MinecraftServer server, TeamId id) {
         return CadmusSaveData.getClaimSettingOrDefault(server, id, setting());
     }
 
-    private boolean flagEnabled(MinecraftServer server, UUID id) {
-        return FlagApi.API.isAdminTeam(server, id) &&
-            flag().get(server, id);
+    private boolean flagEnabled(MinecraftServer server, TeamId id) {
+        return id.provider().equals(AdminTeamProvider.ID) &&
+            flag().get(server, id.id());
     }
 
-    default Optional<UUID> getId(Level level, BlockPos pos) {
+    default Optional<TeamId> getId(Level level, BlockPos pos) {
         return getId(level, new ChunkPos(pos));
     }
 
-    default Optional<UUID> getId(Level level, ChunkPos pos) {
-        return ClaimApi.API.getClaim(level, pos).map(Pair::left);
+    default Optional<TeamId> getId(Level level, ChunkPos pos) {
+        return ClaimApi.API.getClaim(level, pos).map(ClaimData::team);
     }
 
-    default boolean isPlayerAllowed(Player player, UUID id) {
-        if (CadmusSaveData.canBypass(player.getServer(), player.getUUID())) return true;
+    default boolean isPlayerAllowed(Player player, TeamId id) {
+        return isPlayerAllowed(player.level(), player.getGameProfile(), id);
+    }
 
-        if (FlagApi.API.isAdminTeam(player.getServer(), id)) {
-            return flagEnabled(player.getServer(), id);
+    default boolean isPlayerAllowed(Level level, GameProfile player, TeamId id) {
+        if (CadmusSaveData.canBypass(level.getServer(), player.getId())) return true;
+
+        if (id.provider().equals(AdminTeamProvider.ID)) {
+            return flagEnabled(level.getServer(), id);
         }
 
-        if (hasPermission(player)) return true;
-        if (gameRuleEnabled(player.level())) return true;
+        if (hasPermission(level.getServer(), player)) return true;
+        if (gameRuleEnabled(level)) return true;
 
-        if (settingEnabled(player.getServer(), id)) return true;
-        return TeamApi.API.isMember(player.level(), id, player);
+        if (settingEnabled(level.getServer(), id)) return true;
+        return TeamApi.API.isMember(level, player, id);
     }
 
-    default boolean isEntityAllowed(Entity entity, UUID id) {
+    default boolean isEntityAllowed(Entity entity, TeamId id) {
         if (flagEnabled(entity.getServer(), id)) return false;
         if (gameRuleEnabled(entity.level())) return true;
         return settingEnabled(entity.getServer(), id);
     }
 
-    default boolean isBlockAllowed(Level level, UUID id, BlockPos pos) {
+    default boolean isBlockAllowed(Level level, TeamId id, BlockPos pos) {
         return isBlockAllowed(level, id, level.getBlockState(pos));
     }
 
-    default boolean isBlockAllowed(Level level, UUID id, BlockState state) {
+    default boolean isBlockAllowed(Level level, TeamId id, BlockState state) {
         return CadmusSaveData.isBlockAllowed(level.getServer(), id, state.getBlock());
     }
 }

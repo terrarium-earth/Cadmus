@@ -69,8 +69,8 @@ public class FlagApiImpl implements FlagApi {
     @SuppressWarnings("unchecked")
     public <T> Optional<Flag<T>> getFlag(ServerLevel level, ChunkPos pos, String flagName) {
         if (!FLAGS.containsKey(flagName)) throw new IllegalArgumentException("Flag not registered: " + flagName);
-        return Optional.ofNullable((Flag<T>) ClaimApi.API.getClaim(level, pos).map(claim ->
-            getFlag(level.getServer(), claim.first(), flagName)).orElse(null));
+        return Optional.ofNullable((Flag<T>) ClaimApi.API.getClaim(level, pos).filter(claim -> claim.team().isAdmin()).map(claim ->
+            getFlag(level.getServer(), claim.team().id(), flagName)).orElse(null));
     }
 
     @Override

@@ -10,20 +10,21 @@ import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.UUID;
 
 public record RemoveClaimPacket(
-    UUID id,
+    TeamId id,
     ChunkPos pos
 ) implements Packet<RemoveClaimPacket> {
 
     public static final ClientboundPacketType<RemoveClaimPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("remove_claim"),
         ObjectByteCodec.create(
-            ByteCodec.UUID.fieldOf(RemoveClaimPacket::id),
+            TeamId.BYTE_CODEC.fieldOf(RemoveClaimPacket::id),
             ExtraByteCodecs.CHUNK_POS.fieldOf(RemoveClaimPacket::pos),
             RemoveClaimPacket::new
         ),

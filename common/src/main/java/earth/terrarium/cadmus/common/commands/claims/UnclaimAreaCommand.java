@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,7 +14,6 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class UnclaimAreaCommand {
@@ -50,10 +48,9 @@ public class UnclaimAreaCommand {
         Set<ChunkPos> finalPositions = new HashSet<>();
         Set<ChunkPos> positions = ChunkPos.rangeClosed(startPos, endPos).collect(Collectors.toUnmodifiableSet());
 
-        UUID id = TeamApi.API.getId(player);
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresent(claim -> {
-                if (claim.left().equals(id)) {
+                if (TeamApi.API.isMember(source.getLevel(), player.getGameProfile(), claim.team())) {
                     finalPositions.add(pos);
                 }
             })
@@ -62,12 +59,11 @@ public class UnclaimAreaCommand {
         ClaimApi.API.unclaim(player, finalPositions);
 
         int claimsCount = ClaimCommand.getClaimsCount(player, false);
-        int maxClaims = ClaimLimitApi.API.getMaxClaims(player);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_chunks_area",
             startPos.x, startPos.z,
             endPos.x, endPos.z,
-            claimsCount, maxClaims
+            claimsCount
         ), false);
     }
 }

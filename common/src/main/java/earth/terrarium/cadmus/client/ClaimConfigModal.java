@@ -2,6 +2,7 @@ package earth.terrarium.cadmus.client;
 
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.BulkClaimSettingsPacket;
@@ -26,6 +27,7 @@ import java.util.Map;
 public class ClaimConfigModal extends BaseModal {
     private final Map<String, RadioState<TriState>> settings = new HashMap<>();
     private final State<Color> color;
+    private final TeamId selectedTeam;
     private final boolean canModifyColor;
 
     protected ClaimConfigModal(ClaimMapScreen background) {
@@ -37,8 +39,9 @@ public class ClaimConfigModal extends BaseModal {
             case FALSE -> 2;
         })));
 
-        this.color = State.of(background.teamColor);
-        this.canModifyColor = background.canModifyColor;
+        this.color = State.of(background.getColor());
+        this.selectedTeam = background.selected.get();
+        this.canModifyColor = background.canModifyColor();
     }
 
     @Override
@@ -77,11 +80,11 @@ public class ClaimConfigModal extends BaseModal {
             button.withCallback(() -> {
                 var finalSettings = new HashMap<String, TriState>();
                 this.settings.forEach((key, value) -> finalSettings.put(key, value.get()));
-                var packet = new BulkClaimSettingsPacket(finalSettings);
+                var packet = new BulkClaimSettingsPacket(selectedTeam, finalSettings);
                 NetworkHandler.CHANNEL.sendToServer(packet);
 
                 if (canModifyColor) {
-                    NetworkHandler.CHANNEL.sendToServer(new ClaimColorPacket(color.get()));
+                    NetworkHandler.CHANNEL.sendToServer(new ClaimColorPacket(selectedTeam, color.get()));
                     ((ClaimMapScreen) this.background).updateColor(color.get());
                 }
             });

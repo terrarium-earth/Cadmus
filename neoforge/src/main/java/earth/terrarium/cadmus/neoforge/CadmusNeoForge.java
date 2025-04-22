@@ -50,7 +50,7 @@ public class CadmusNeoForge {
     private void onRightClick(PlayerInteractEvent.RightClickItem event) {
         if (!event.getLevel().isClientSide()) {
             ClaimApi.API.getClaim(event.getLevel(), event.getEntity().chunkPosition()).ifPresent(claim -> {
-                if (!Flags.USE.get(event.getLevel().getServer(), claim.first())) {
+                if (!Flags.USE.get(event.getLevel().getServer(), claim.team().id())) {
                     event.setCanceled(true);
                 }
             });

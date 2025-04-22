@@ -11,9 +11,11 @@ import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.flags.types.ColorFlag;
 import earth.terrarium.cadmus.api.flags.types.StringFlag;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.flags.Flags;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -113,7 +115,7 @@ public class AdminClaimCommands {
         FlagApi.API.setFlag(source.getServer(), id, Flags.DISPLAY_NAME.id(), new StringFlag(Flags.DISPLAY_NAME.id(), team));
         FlagApi.API.setFlag(source.getServer(), id, Flags.COLOR.id(), new ColorFlag(Flags.COLOR.id(), Color.DEFAULT));
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.admin.create", team), false);
-        TeamApi.API.syncTeamInfo(source.getServer(), id, true);
+        TeamApi.API.syncTeamInfo(source.getServer(), new TeamId(AdminTeamProvider.ID, id), true);
     }
 
     private static void remove(CommandSourceStack source, String team) throws CommandSyntaxException {
@@ -131,7 +133,7 @@ public class AdminClaimCommands {
 
         ClaimCommand.checkClaimed(source.getLevel(), pos);
 
-        ClaimApi.API.claim(source.getLevel(), id, pos, false);
+        ClaimApi.API.claim(source.getLevel(), new TeamId(AdminTeamProvider.ID, id), pos, false);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.claimed_admin_chunk_at",
@@ -143,7 +145,7 @@ public class AdminClaimCommands {
         UUID id = FlagApi.API.getIdFromName(source.getServer(), team).orElse(null);
         if (id == null) throw AdminClaimCommands.ADMIN_TEAM_DOES_NOT_EXIST.create();
 
-        ClaimApi.API.unclaim(source.getLevel(), id, pos);
+        ClaimApi.API.unclaim(source.getLevel(), new TeamId(AdminTeamProvider.ID, id), pos);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_admin_chunk_at",
@@ -153,11 +155,12 @@ public class AdminClaimCommands {
 
     private static void unclaimAll(CommandSourceStack source, String team) throws CommandSyntaxException {
         UUID id = FlagApi.API.getIdFromName(source.getServer(), team).orElse(null);
+        TeamId adminID = TeamId.ofAdmin(id);
         if (id == null) throw AdminClaimCommands.ADMIN_TEAM_DOES_NOT_EXIST.create();
 
-        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), id, false);
-        ClaimApi.API.clear(source.getLevel(), id);
-        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), id, false);
+        int oldClaimsCount = ClaimCommand.getClaimsCount(source.getLevel(), adminID, false);
+        ClaimApi.API.clear(source.getLevel(), adminID);
+        int diff = oldClaimsCount - ClaimCommand.getClaimsCount(source.getLevel(), adminID, false);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.unclaimed_all_admin",
             diff

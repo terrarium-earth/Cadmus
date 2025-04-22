@@ -11,6 +11,7 @@ import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
@@ -24,14 +25,14 @@ import java.util.UUID;
 
 public record SyncClaimsPacket(
     ResourceKey<Level> dimension,
-    Map<UUID, Object2BooleanMap<ChunkPos>> claims
+    Map<TeamId, Object2BooleanMap<ChunkPos>> claims
 ) implements Packet<SyncClaimsPacket> {
 
     public static final ClientboundPacketType<SyncClaimsPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("sync_claims"),
         ObjectByteCodec.create(
             ExtraByteCodecs.resourceKey(Registries.DIMENSION).fieldOf(SyncClaimsPacket::dimension),
-            ByteCodec.mapOf(ByteCodec.UUID,
+            ByteCodec.mapOf(TeamId.BYTE_CODEC,
                 ByteCodec.mapOf(ExtraByteCodecs.CHUNK_POS, ByteCodec.BOOLEAN)
                     .<Object2BooleanMap<ChunkPos>>map(Object2BooleanOpenHashMap::new, map -> map
                     )).fieldOf(SyncClaimsPacket::claims),

@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.protections.types;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
 import earth.terrarium.cadmus.common.flags.Flags;
@@ -39,13 +40,12 @@ public final class BlockBreakProtection implements Protection {
         return CadmusGameRules.DO_CLAIMED_BLOCK_BREAKING;
     }
 
-    public boolean canBreakBlock(Player player, BlockPos pos) {
-        return player.level().isClientSide() || getId(player.level(), pos).map(id ->
-            isPlayerAllowed(player, id) || isBlockAllowed(player.level(), id, pos)).orElse(true);
+    public boolean canBreakBlock(Level level, GameProfile player, BlockPos pos) {
+        return level.isClientSide() || getId(level, pos).map(id ->
+            isPlayerAllowed(level, player, id) || isBlockAllowed(level, id, pos)).orElse(true);
     }
 
-    public boolean canBreakBlock(Level level, UUID player, BlockPos pos) {
-        Player playerEntity = level.getPlayerByUUID(player);
-        return playerEntity == null || canBreakBlock(playerEntity, pos);
+    public boolean canBreakBlock(Player player, BlockPos pos) {
+        return canBreakBlock(player.level(), player.getGameProfile(), pos);
     }
 }

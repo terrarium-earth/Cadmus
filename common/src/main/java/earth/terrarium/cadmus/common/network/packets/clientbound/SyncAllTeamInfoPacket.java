@@ -9,6 +9,7 @@ import com.teamresourceful.resourcefullib.common.network.base.NetworkHandle;
 import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 
@@ -16,13 +17,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public record SyncAllTeamInfoPacket(
-    Map<UUID, TeamInfo> teamInfo
+    Map<TeamId, TeamInfo> teamInfo
 ) implements Packet<SyncAllTeamInfoPacket> {
 
     public static final ClientboundPacketType<SyncAllTeamInfoPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("sync_all_team_info"),
         ObjectByteCodec.create(
-            new MapCodec<>(ByteCodec.UUID, TeamInfo.BYTE_CODEC).fieldOf(SyncAllTeamInfoPacket::teamInfo),
+            new MapCodec<>(TeamId.BYTE_CODEC, TeamInfo.BYTE_CODEC).fieldOf(SyncAllTeamInfoPacket::teamInfo),
             SyncAllTeamInfoPacket::new
         ),
         NetworkHandle.handle(packet -> {

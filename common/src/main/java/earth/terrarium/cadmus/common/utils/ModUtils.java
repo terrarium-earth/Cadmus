@@ -1,13 +1,13 @@
 package earth.terrarium.cadmus.common.utils;
 
 import com.teamresourceful.resourcefullib.common.color.Color;
-import com.teamresourceful.resourcefullib.common.color.ConstantColors;
 import com.teamresourceful.resourcefullib.common.exceptions.NotImplementedException;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.protections.ProtectionApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
@@ -49,12 +49,13 @@ public class ModUtils {
      * Sends all claims, packet splitting in batches of {@link #MAX_CHUNKS_PER_PACKET} to the player joining the server.
      */
     public static void sendJoinPackets(ServerPlayer player) {
+        CadmusSaveData.addUniquePlayer(player);
         if (!NetworkHandler.CHANNEL.canSendToPlayer(player, SyncClaimsPacket.TYPE)) return;
         for (var level : player.server.getAllLevels()) {
-            Object2ObjectMap<UUID, Object2BooleanMap<ChunkPos>> allClaims = ClaimApi.API.getAllClaimsByOwner(player.serverLevel());
+            Object2ObjectMap<TeamId, Object2BooleanMap<ChunkPos>> allClaims = ClaimApi.API.getAllClaimsByOwner(player.serverLevel());
             if (allClaims.isEmpty()) continue;
 
-            Object2ObjectMap<UUID, Object2BooleanMap<ChunkPos>> batch = new Object2ObjectOpenHashMap<>();
+            Object2ObjectMap<TeamId, Object2BooleanMap<ChunkPos>> batch = new Object2ObjectOpenHashMap<>();
             int count = 0;
 
             for (var entry : allClaims.entrySet()) {
@@ -86,30 +87,31 @@ public class ModUtils {
 
     /**
      * Checks if the player has permission to modify the setting. if not, returns the component with the error message.
-     * @param player the player to check
+     *
+     * @param player  the player to check
      * @param setting the setting to check
      * @return null if the player has permission, otherwise the component with the error message.
      */
-    public static Component canUsePermission(Player player, String setting) {
+    public static Component canUsePermission(Player player, TeamId id, String setting) {
         if (setting.equals("cadmus.color")) {
-            return canModifyColor(player);
+            return canModifyColor(player, id);
         }
         var protection = ProtectionApi.API.getProtection(setting);
         if (protection == null) {
             return ConstantComponents.NO_PERMISSION_ROLE;
         }
         if (!player.hasPermissions(2)) {
-            if (!TeamApi.API.canModifySettings(player)) {
+            if (!TeamApi.API.canModifySettings(player, id)) {
                 return ConstantComponents.NO_PERMISSION_TEAM;
-            } else if (!PrometheusCompat.hasPermission(player, protection.permission())) {
+            } else if (player.getServer() == null || !PrometheusCompat.hasPermission(player.getServer(), player.getGameProfile(), protection.permission())) {
                 return ConstantComponents.NO_PERMISSION_ROLE;
             }
         }
         return null;
     }
 
-    public static Component canModifyColor(Player player) {
-        if (!player.hasPermissions(2) && !TeamApi.API.canModifySettings(player)) {
+    public static Component canModifyColor(Player player, TeamId id) {
+        if (!player.hasPermissions(2) && !TeamApi.API.canModifySettings(player, id)) {
             return ConstantComponents.NO_PERMISSION_TEAM;
         }
         return null;

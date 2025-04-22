@@ -37,8 +37,7 @@ final class EntityDamageProtectionImpl {
 
         event.setCanceled(!lightning.level().isClientSide() &&
             ClaimApi.API.getClaim(lightning.level(), lightning.chunkPosition()).map(claim ->
-                FlagApi.API.isAdminTeam(lightning.level().getServer(), claim.first()) &&
-                    !Flags.LIGHTNING.get(lightning.getServer(), claim.first())
+                claim.team().isAdmin() && !Flags.LIGHTNING.get(lightning.getServer(), claim.team().id())
             ).orElse(false));
     }
 

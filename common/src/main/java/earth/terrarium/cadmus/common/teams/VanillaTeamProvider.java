@@ -2,14 +2,17 @@ package earth.terrarium.cadmus.common.teams;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.authlib.GameProfile;
 import com.teamresourceful.resourcefullib.common.color.Color;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
-import earth.terrarium.cadmus.api.teams.Team;
+import earth.terrarium.cadmus.api.teams.TeamProvider;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Optionull;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,9 +26,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class VanillaTeam implements Team {
-
+public class VanillaTeamProvider implements TeamProvider {
+    public static final ResourceLocation ID = Cadmus.id("vanilla_teams");
     private static final BiMap<String, UUID> TEAM_CACHE = HashBiMap.create();
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
+    }
 
     @Override
     public Optional<Component> getName(Level level, UUID id) {
@@ -45,10 +53,11 @@ public class VanillaTeam implements Team {
         return Optional.ofNullable(color).map(ChatFormatting::getColor).map(Color::new).or(() -> Optional.of(MinecraftColors.AQUA));
     }
 
+
     @Override
-    public Set<UUID> getMembers(Level level, UUID id) {
+    public Set<UUID> getMembers(Level level, UUID team) {
         if (!(level instanceof ServerLevel serverLevel)) return Set.of();
-        String name = TEAM_CACHE.inverse().get(id);
+        String name = TEAM_CACHE.inverse().get(team);
         if (name == null) return Set.of();
 
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
@@ -61,24 +70,29 @@ public class VanillaTeam implements Team {
     }
 
     @Override
-    public boolean isMember(Level level, UUID id, Player player) {
+    public boolean isMember(Level level, UUID id, GameProfile player) {
         String name = TEAM_CACHE.inverse().get(id);
         if (name == null) return false;
         PlayerTeam playerTeam = level.getScoreboard().getPlayerTeam(name);
         if (playerTeam == null) return false;
-        return playerTeam.getPlayers().contains(player.getGameProfile().getName());
+        return playerTeam.getPlayers().contains(player.getName());
     }
 
     @Override
-    public Optional<UUID> getId(Player player) {
+    public Set<UUID> getTeams(Level level, GameProfile player) {
+        return Set.of();
+    }
+
+    @Override
+    public Set<UUID> getTeams(Player player) {
         PlayerTeam team = player.getScoreboard().getPlayersTeam(player.getGameProfile().getName());
-        if (team == null) return Optional.empty();
-        return Optional.of(gerOrCreateId(team));
+        if (team == null) return Set.of();
+        return Set.of(gerOrCreateId(team));
     }
 
     @Override
-    public boolean canModifySettings(Player player) {
-        return true;
+    public boolean canModifySettings(Level level, UUID teamId, GameProfile player) {
+        return isMember(level, teamId, player);
     }
 
     @Override
@@ -92,17 +106,5 @@ public class VanillaTeam implements Team {
 
     public UUID remove(PlayerTeam team) {
         return TEAM_CACHE.remove(team.getName());
-    }
-
-    public void transferClaims(MinecraftServer server, PlayerTeam team, String playerName) {
-        UUID id = TEAM_CACHE.get(team.getName());
-        ServerPlayer player = server.getPlayerList().getPlayerByName(playerName);
-        if (player == null) return;
-
-        server.getAllLevels().forEach(level ->
-            ClaimApi.API.getOwnedClaims(level, player.getUUID()).ifPresent(claims ->
-                ClaimApi.API.claim(level, id, claims)));
-
-        server.getAllLevels().forEach(level -> ClaimApi.API.clear(level, player.getUUID()));
     }
 }

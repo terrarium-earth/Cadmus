@@ -1,9 +1,12 @@
 package earth.terrarium.cadmus.common.protections.types;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
+import earth.terrarium.cadmus.common.tags.ModBlockTags;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import net.minecraft.core.BlockPos;
@@ -45,7 +48,7 @@ public final class BlockPlaceProtection implements Protection {
 
     public boolean canPlaceBlock(@NotNull Entity entity, BlockPos pos, BlockState state) {
         if (entity.level().isClientSide()) return true;
-        UUID id = getId(entity.level(), pos).orElse(null);
+        TeamId id = getId(entity.level(), pos).orElse(null);
         if (id == null) return true;
         if (isBlockAllowed(entity.level(), id, state)) return true;
 
@@ -54,14 +57,18 @@ public final class BlockPlaceProtection implements Protection {
             isEntityAllowed(entity, id);
     }
 
-    public boolean canPlaceBlock(Level level, UUID player, BlockPos pos, BlockState state) {
-        Player playerEntity = level.getPlayerByUUID(player);
-        return playerEntity == null || canPlaceBlock(playerEntity, pos, state);
+    public boolean canPlaceBlock(Level level, GameProfile player, BlockPos pos, BlockState state) {
+        if (level.isClientSide()) return true;
+        TeamId id = getId(level, pos).orElse(null);
+        if (id == null) return true;
+        if (isBlockAllowed(level, id, state)) return true;
+
+        return isPlayerAllowed(level, player, id);
     }
 
     public boolean canPlaceBlock(Level level, BlockPos pos, BlockState state) {
         if (level.isClientSide()) return true;
-        UUID id = getId(level, pos).orElse(null);
+        TeamId id = getId(level, pos).orElse(null);
         if (id == null) return true;
         if (isBlockAllowed(level, id, state)) return true;
         return CadmusSaveData.getClaimSettingOrDefault(level.getServer(), id, ClaimSettings.CAN_NON_PLAYERS_PLACE_BLOCKS);

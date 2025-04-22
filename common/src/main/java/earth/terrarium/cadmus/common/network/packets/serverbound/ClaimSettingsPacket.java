@@ -9,29 +9,28 @@ import com.teamresourceful.resourcefullib.common.network.base.ServerboundPacketT
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.protections.ProtectionApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
-import earth.terrarium.cadmus.common.constants.ConstantComponents;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 
-public record ClaimSettingsPacket(String setting, TriState value) implements Packet<ClaimSettingsPacket> {
+public record ClaimSettingsPacket(TeamId id, String setting, TriState value) implements Packet<ClaimSettingsPacket> {
     public static final ServerboundPacketType<ClaimSettingsPacket> TYPE = CodecPacketType.Server.create(
         Cadmus.id("claim_settings"),
         ObjectByteCodec.create(
+            TeamId.BYTE_CODEC.fieldOf(ClaimSettingsPacket::id),
             ByteCodec.STRING_COMPONENT.fieldOf(ClaimSettingsPacket::setting),
             TriState.BYTE_CODEC.fieldOf(ClaimSettingsPacket::value),
             ClaimSettingsPacket::new
         ),
         NetworkHandle.handle((packet, player) -> {
             if (player.getCommandSenderWorld().isClientSide()) return;
-            var error = ModUtils.canUsePermission(player, packet.setting);
+            var error = ModUtils.canUsePermission(player, packet.id, packet.setting);
             if (error != null) {
                 player.displayClientMessage(error, false);
                 return;
             }
-            CadmusSaveData.setClaimSetting(player.getServer(), TeamApi.API.getId(player), packet.setting, packet.value);
+            CadmusSaveData.setClaimSetting(player.getServer(), packet.id, packet.setting, packet.value);
         })
     );
 

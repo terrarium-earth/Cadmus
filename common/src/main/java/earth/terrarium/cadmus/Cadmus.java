@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.claims.limit.ClaimLimitApiImpl;
 import earth.terrarium.cadmus.common.claims.limit.VanillaClaimLimiter;
@@ -12,7 +13,9 @@ import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
 import earth.terrarium.cadmus.common.protections.Protections;
-import earth.terrarium.cadmus.common.teams.VanillaTeam;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
+import earth.terrarium.cadmus.common.teams.IndividualTeamProvider;
+import earth.terrarium.cadmus.common.teams.VanillaTeamProvider;
 import earth.terrarium.cadmus.common.utils.AdminUtils;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
 import earth.terrarium.cadmus.common.utils.ModUtils;
@@ -42,7 +45,9 @@ public class Cadmus {
         Protections.init();
         ClaimSettings.init();
         Flags.init();
-        TeamApi.API.register(new VanillaTeam(), 0);
+        TeamApi.API.register(IndividualTeamProvider.ID, new IndividualTeamProvider());
+        TeamApi.API.register(VanillaTeamProvider.ID, new VanillaTeamProvider());
+        TeamApi.API.register(AdminTeamProvider.ID, new AdminTeamProvider());
         ClaimLimitApi.API.register(new VanillaClaimLimiter());
         if (IS_PROMETHEUS_LOADED) PrometheusCompat.init();
     }
@@ -58,7 +63,7 @@ public class Cadmus {
         ModUtils.sendJoinPackets(player);
         TeamApi.API.syncAllTeamInfo(player);
         TeamApi.API.displayTeamName(player);
-        ClaimLimitApiImpl.API.calculate(player.server, player.getUUID(), true);
+        TeamApi.API.getTeamsList(player).forEach(team -> ClaimLimitApiImpl.API.calculate(player.server, team, true));
     }
 
     public static void onServerStarted(MinecraftServer server) {

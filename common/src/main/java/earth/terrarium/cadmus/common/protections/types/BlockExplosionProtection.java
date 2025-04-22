@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.common.protections.types;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.flags.Flags;
 import earth.terrarium.cadmus.common.protections.ClaimSettings;
 import earth.terrarium.cadmus.common.utils.CadmusGameRules;
@@ -44,7 +45,7 @@ public final class BlockExplosionProtection implements Protection {
 
     public boolean canExplodeBlock(Level level, BlockPos pos, Explosion explosion) {
         if (level.isClientSide()) return true;
-        UUID id = getId(level, pos).orElse(null);
+        TeamId id = getId(level, pos).orElse(null);
         if (id == null) return true;
         if (isBlockAllowed(level, id, pos)) return true;
         LivingEntity entity = explosion.getIndirectSourceEntity();

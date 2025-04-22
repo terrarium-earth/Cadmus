@@ -3,6 +3,7 @@ package earth.terrarium.cadmus.client.compat.journeymap;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
 import journeymap.api.v2.client.display.IOverlayListener;
@@ -26,7 +27,7 @@ import java.util.UUID;
 
 public class ClaimedChunkDisplay {
 
-    public static PolygonOverlay create(ChunkPos pos, UUID id, boolean chunkLoaded, ResourceKey<Level> dimension) {
+    public static PolygonOverlay create(ChunkPos pos, TeamId id, boolean chunkLoaded, ResourceKey<Level> dimension) {
         Component name = TeamApi.API.getName(CadmusClient.level(), id);
         int color = Optionull.mapOrDefault(
             TeamApi.API.getColor(CadmusClient.level(), id),

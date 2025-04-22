@@ -8,7 +8,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.flags.Flag;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
+import earth.terrarium.cadmus.common.teams.AdminTeamProvider;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -78,7 +80,7 @@ public class FlagCommands {
             Flag<?> oldFlagValue = FlagApi.API.getFlag(source.getServer(), id, flagName);
             FlagApi.API.setFlag(source.getServer(), id, flagName, flag);
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.admin.set_flag", flagName, oldFlagValue, flag), false);
-            TeamApi.API.syncTeamInfo(source.getServer(), id, true);
+            TeamApi.API.syncTeamInfo(source.getServer(), TeamId.ofAdmin(id), true);
         });
     }
 
@@ -89,7 +91,7 @@ public class FlagCommands {
         FlagApi.API.getIdFromName(source.getServer(), team).ifPresent(id -> {
             FlagApi.API.removeFlag(source.getServer(), id, flagName);
             source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.admin.remove_flag", flagName), false);
-            TeamApi.API.syncTeamInfo(source.getServer(), id, true);
+            TeamApi.API.syncTeamInfo(source.getServer(), TeamId.ofAdmin(id), true);
         });
     }
 

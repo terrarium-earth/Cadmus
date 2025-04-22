@@ -6,17 +6,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
-import earth.terrarium.cadmus.Cadmus;
-import earth.terrarium.cadmus.api.protections.Protection;
 import earth.terrarium.cadmus.api.protections.ProtectionApi;
-import earth.terrarium.cadmus.api.teams.TeamApi;
-import earth.terrarium.cadmus.common.compat.prometheus.PrometheusCompat;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.utils.CadmusSaveData;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.List;
@@ -35,36 +34,41 @@ public class ClaimSettingsCommand {
             dispatcher.register(Commands.literal("claim")
                 .then(Commands.literal("settings")
                     .then(Commands.literal(setting)
-                        .then(Commands.argument("value", StringArgumentType.string())
-                            .suggests(TRI_STATE_SUGGESTION_PROVIDER)
-                            .executes(context -> {
-                                ServerPlayer player = context.getSource().getPlayerOrException();
-                                checkPermissions(player, setting);
-                                String value = StringArgumentType.getString(context, "value");
-                                set(context.getSource(), setting, value);
-                                return 1;
-                            })
+                        .then(Commands.argument("provider", ResourceLocationArgument.id()).suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                            .then(Commands.argument("id", UuidArgument.uuid()).suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                                .then(Commands.argument("value", StringArgumentType.string())
+                                    .suggests(TRI_STATE_SUGGESTION_PROVIDER)
+                                    .executes(context -> {
+                                        ServerPlayer player = context.getSource().getPlayerOrException();
+                                        TeamId teamId = TeamId.fromCommand(context);
+                                        checkPermissions(player, teamId, setting);
+                                        String value = StringArgumentType.getString(context, "value");
+                                        set(context.getSource(), teamId, setting, value);
+                                        return 1;
+                                    })
+                                )
+                                .executes(context -> {
+                                    get(context.getSource(), TeamId.fromCommand(context), setting);
+                                    return 1;
+                                })
+                            )
                         )
-                        .executes(context -> {
-                            get(context.getSource(), setting);
-                            return 1;
-                        })
                     )
                 )
             )
         );
     }
 
-    private static void set(CommandSourceStack source, String setting, String value) throws CommandSyntaxException {
+    private static void set(CommandSourceStack source, TeamId id, String setting, String value) throws CommandSyntaxException {
         TriState state = stringToState(value);
         ServerPlayer player = source.getPlayerOrException();
-        CadmusSaveData.setClaimSetting(source.getServer(), TeamApi.API.getId(player), setting, state);
+        CadmusSaveData.setClaimSetting(source.getServer(), id, setting, state);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.set", setting, value), false);
     }
 
-    private static void get(CommandSourceStack source, String setting) throws CommandSyntaxException {
+    private static void get(CommandSourceStack source, TeamId id, String setting) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), TeamApi.API.getId(player), setting);
+        TriState state = CadmusSaveData.getClaimSetting(source.getServer(), id, setting);
         source.sendSuccess(() -> ModUtils.translatableWithStyle("command.cadmus.setting.get", setting, stateToString(state)), false);
     }
 
@@ -85,8 +89,8 @@ public class ClaimSettingsCommand {
         };
     }
 
-    public static void checkPermissions(ServerPlayer player, String protection) throws CommandSyntaxException {
-        var error = ModUtils.canUsePermission(player, protection);
+    public static void checkPermissions(ServerPlayer player, TeamId id, String protection) throws CommandSyntaxException {
+        var error = ModUtils.canUsePermission(player, id, protection);
         if (error != null) {
             throw new SimpleCommandExceptionType(error).create();
         }

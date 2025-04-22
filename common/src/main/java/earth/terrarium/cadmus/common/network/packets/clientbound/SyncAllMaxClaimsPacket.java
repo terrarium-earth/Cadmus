@@ -11,6 +11,7 @@ import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 
 import java.util.AbstractMap;
@@ -18,14 +19,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public record SyncAllMaxClaimsPacket(
-    Map<UUID, IntIntPair> maxClaimsByTeam
+    Map<TeamId, IntIntPair> maxClaimsByTeam
 ) implements Packet<SyncAllMaxClaimsPacket> {
 
     public static final ClientboundPacketType<SyncAllMaxClaimsPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("sync_all_max_claims"),
         ObjectByteCodec.create(
             new MapCodec<>(
-                ByteCodec.UUID,
+                TeamId.BYTE_CODEC,
                 new PairCodec<>(ByteCodec.VAR_INT, ByteCodec.VAR_INT)
                     .map(entry -> IntIntPair.of(entry.getKey(), entry.getValue()),
                         pair -> new AbstractMap.SimpleEntry<>(pair.leftInt(), pair.rightInt())

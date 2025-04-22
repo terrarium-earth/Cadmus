@@ -33,7 +33,7 @@ public class CadmusFabric implements ModInitializer {
             if (!level.isClientSide()) {
                 var claim = ClaimApi.API.getClaim(level, player.chunkPosition());
                 if (claim.isPresent()) {
-                    if (!Flags.USE.get(level.getServer(), claim.get().first())) {
+                    if (!Flags.USE.get(level.getServer(), claim.get().team().id())) {
                         return InteractionResultHolder.fail(stack);
                     }
                 }

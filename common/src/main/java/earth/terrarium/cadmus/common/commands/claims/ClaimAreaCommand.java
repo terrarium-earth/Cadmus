@@ -6,18 +6,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
-import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.utils.ModUtils;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ClaimAreaCommand {
@@ -25,29 +26,35 @@ public class ClaimAreaCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("claim")
             .then(Commands.literal("area")
-                .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
-                    .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
-                        .then(Commands.argument("chunkload", BoolArgumentType.bool())
-                            .executes(context -> {
-                                ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
-                                ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                                boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
-                                claim(context.getSource(), startPos, endPos, chunkload);
-                                return 1;
-                            }))
-                        .executes(context -> {
-                            ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
-                            ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
-                            claim(context.getSource(), startPos, endPos, false);
-                            return 1;
-                        })
+                .then(Commands.argument("provider", ResourceLocationArgument.id()).suggests(TeamId.TEAM_PROVIDER_SUGGESTION_PROVIDER)
+                    .then(Commands.argument("id", UuidArgument.uuid()).suggests(TeamId.TEAM_UUID_SUGGESTION_PROVIDER)
+                        .then(Commands.argument("startPos", ColumnPosArgument.columnPos())
+                            .then(Commands.argument("endPos", ColumnPosArgument.columnPos())
+                                .then(Commands.argument("chunkload", BoolArgumentType.bool())
+                                    .executes(context -> {
+                                        ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
+                                        ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
+                                        boolean chunkload = BoolArgumentType.getBool(context, "chunkload");
+                                        TeamId id = TeamId.fromCommand(context);
+                                        claim(context.getSource(), id, startPos, endPos, chunkload);
+                                        return 1;
+                                    }))
+                                .executes(context -> {
+                                    ChunkPos startPos = ColumnPosArgument.getColumnPos(context, "startPos").toChunkPos();
+                                    ChunkPos endPos = ColumnPosArgument.getColumnPos(context, "endPos").toChunkPos();
+                                    TeamId id = TeamId.fromCommand(context);
+                                    claim(context.getSource(), id, startPos, endPos, false);
+                                    return 1;
+                                })
+                            )
+                        )
                     )
                 )
             )
         );
     }
 
-    private static void claim(CommandSourceStack source, ChunkPos startPos, ChunkPos endPos, boolean chunkload) throws CommandSyntaxException {
+    private static void claim(CommandSourceStack source, TeamId id, ChunkPos startPos, ChunkPos endPos, boolean chunkload) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         int dist = startPos.getChessboardDistance(endPos);
         if (dist > 50) {
@@ -60,17 +67,16 @@ public class ClaimAreaCommand {
         Object2BooleanMap<ChunkPos> finalPositions = new Object2BooleanOpenHashMap<>();
         Set<ChunkPos> positions = ChunkPos.rangeClosed(startPos, endPos).collect(Collectors.toUnmodifiableSet());
 
-        UUID id = TeamApi.API.getId(player);
         positions.forEach(pos ->
             ClaimApi.API.getClaim(source.getLevel(), pos).ifPresentOrElse(claim -> {
-                if (claim.left().equals(id) && claim.rightBoolean()) {
+                if (claim.team().equals(id) && claim.isChunkLoaded()) {
                     finalPositions.put(pos, chunkload);
                 }
             }, () -> finalPositions.put(pos, chunkload))
         );
 
         int claimsCount = ClaimCommand.getClaimsCount(player, chunkload) + finalPositions.size();
-        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(player) : ClaimLimitApi.API.getMaxClaims(player);
+        int maxClaims = chunkload ? ClaimLimitApi.API.getMaxChunkLoadedClaims(id) : ClaimLimitApi.API.getMaxClaims(id);
         if (claimsCount > maxClaims) {
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.not_enough_claims",
@@ -78,7 +84,7 @@ public class ClaimAreaCommand {
             )).create();
         }
 
-        ClaimApi.API.claim(player, finalPositions);
+        ClaimApi.API.claim(source.getLevel(), id, finalPositions);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             chunkload ?

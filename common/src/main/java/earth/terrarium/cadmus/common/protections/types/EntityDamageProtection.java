@@ -1,5 +1,6 @@
 package earth.terrarium.cadmus.common.protections.types;
 
+import com.mojang.authlib.GameProfile;
 import earth.terrarium.cadmus.api.flags.FlagApi;
 import earth.terrarium.cadmus.api.flags.types.BooleanFlag;
 import earth.terrarium.cadmus.api.protections.Protection;
@@ -45,29 +46,28 @@ public final class EntityDamageProtection implements Protection {
     }
 
     public boolean canDamageEntity(Player player, Entity entity) {
+        return canDamageEntity(player.level(), player.getGameProfile(), entity);
+    }
+
+    public boolean canDamageEntity(Level level, GameProfile player, Entity entity) {
         if (entity.getType().is(ModEntityTypeTags.ALLOWS_CLAIM_DAMAGE_ENTITIES)) return true;
-        return player.level().isClientSide() || getId(player.level(), entity.chunkPosition()).map(id ->
-            checkFlags(player.getServer(), entity, id) && isPlayerAllowed(player, id)).orElse(true);
+        return level.isClientSide() || getId(level, entity.chunkPosition()).map(team ->
+            checkFlags(level.getServer(), entity, team.id()) && isPlayerAllowed(level, player, team)).orElse(true);
     }
 
-    public boolean canDamageEntity(Level level, UUID player, Entity entity) {
-        Player playerEntity = level.getPlayerByUUID(player);
-        return playerEntity == null || canDamageEntity(playerEntity, entity);
-    }
+    private boolean checkFlags(MinecraftServer server, Entity entity, UUID teamId) {
+        if (!FlagApi.API.isAdminTeam(server, teamId)) return true;
 
-    private boolean checkFlags(MinecraftServer server, Entity entity, UUID id) {
-        if (!FlagApi.API.isAdminTeam(server, id)) return true;
-
-        if (entity instanceof Player) return Flags.PVP.get(server, id);
+        if (entity instanceof Player) return Flags.PVP.get(server, teamId);
 
         if (entity instanceof Enemy || entity.getType().is(ModEntityTypeTags.MONSTERS)) {
-            return Flags.MONSTER_DAMAGE.get(server, id);
+            return Flags.MONSTER_DAMAGE.get(server, teamId);
         } else {
             if (entity instanceof Mob || entity.getType().is(ModEntityTypeTags.CREATURES)) {
-                return Flags.CREATURE_DAMAGE.get(server, id);
+                return Flags.CREATURE_DAMAGE.get(server, teamId);
             }
 
-            return Flags.ENTITY_DAMAGE.get(server, id);
+            return Flags.ENTITY_DAMAGE.get(server, teamId);
         }
     }
 }

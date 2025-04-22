@@ -7,23 +7,30 @@ import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.utils.TriState;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
+import earth.terrarium.cadmus.api.claims.ClaimData;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
 import earth.terrarium.cadmus.api.client.events.CadmusClientEvents;
 import earth.terrarium.cadmus.api.events.CadmusEvents;
 import earth.terrarium.cadmus.api.teams.TeamApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommand;
 import earth.terrarium.cadmus.common.commands.claims.ClaimCommandType;
 import earth.terrarium.cadmus.common.constants.ConstantComponents;
 import earth.terrarium.cadmus.common.network.NetworkHandler;
 import earth.terrarium.cadmus.common.network.packets.serverbound.RequestClaimSettingsPacket;
+import earth.terrarium.cadmus.common.protections.SettingsData;
+import earth.terrarium.cadmus.common.teams.IndividualTeamProvider;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 import earth.terrarium.olympus.client.components.Widgets;
 import earth.terrarium.olympus.client.components.buttons.Button;
+import earth.terrarium.olympus.client.components.dropdown.DropdownState;
 import earth.terrarium.olympus.client.components.map.MapRenderer;
 import earth.terrarium.olympus.client.components.map.MapWidget;
 import earth.terrarium.olympus.client.components.renderers.WidgetRenderers;
 import earth.terrarium.olympus.client.constants.MinecraftColors;
+import earth.terrarium.olympus.client.ui.OverlayAlignment;
 import earth.terrarium.olympus.client.ui.UIConstants;
+import earth.terrarium.olympus.client.ui.UIIcons;
 import earth.terrarium.olympus.client.ui.modals.DeleteConfirmModal;
 import earth.terrarium.olympus.client.utils.State;
 import it.unimi.dsi.fastutil.Pair;
@@ -42,10 +49,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class ClaimMapScreen extends BaseCursorScreen {
     public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
@@ -56,11 +60,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     public static final int WIDTH = MAP_SIZE + PADDING * 2 + 2;
     public static final int HEIGHT = MAP_SIZE + PADDING * 4 + 2 + BANNER_HEIGHT + BUTTON_HEIGHT;
 
-    public boolean canModifyColor = false;
-    public Color teamColor;
-
     private final Map<ChunkPos, ClaimTile> claims = new HashMap<>();
-    private final Map<String, TriState> settings = new HashMap<>();
 
     private final LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
     private final ClientLevel level = player.clientLevel;
@@ -69,11 +69,8 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     private MapWidget mapWidget;
     private Button settingsButton;
-    private UUID id;
-    private int claimedCount;
-    private int maxClaims;
-    private int chunkLoadedCount;
-    private int maxChunkLoaded;
+    private final Map<TeamId, TeamData> teams = new HashMap<>();
+    public static final DropdownState<TeamId> selected = DropdownState.of(new TeamId(IndividualTeamProvider.ID, Minecraft.getInstance().player.getUUID()));
 
     private float chunkScale;
     private float pixelScale;
@@ -90,12 +87,21 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     public void refresh() {
-        this.id = TeamApi.API.getId(this.player);
-        this.teamColor = CadmusClient.TEAM_INFO.get(id).color();
-        this.claimedCount = ClaimCommand.getClaimsCount(player, false);
-        this.maxClaims = ClaimLimitApi.API.getMaxClaims(player);
-        this.chunkLoadedCount = ClaimCommand.getClaimsCount(player, true);
-        this.maxChunkLoaded = ClaimLimitApi.API.getMaxChunkLoadedClaims(player);
+        teams.clear();
+        TeamApi.API.getTeamsList(this.player).forEach(teamId -> {
+            if (selected.get() == null) selected.set(teamId);
+            TeamInfo info = CadmusClient.TEAM_INFO.get(teamId);
+            teams.put(teamId, new TeamData(
+                info.name(),
+                ClaimCommand.getClaimsCount(level, teamId, false),
+                ClaimLimitApi.API.getMaxClaims(teamId),
+                ClaimCommand.getClaimsCount(level, teamId, true),
+                ClaimLimitApi.API.getMaxChunkLoadedClaims(teamId),
+                new HashMap<>(),
+                State.of(info.color()),
+                State.empty()
+            ));
+        });
 
         int renderDistanceScale = this.getScaledRenderDistance();
         this.chunkScale = renderDistanceScale / 16f;
@@ -113,8 +119,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
     @Override
     protected void init() {
-        NetworkHandler.CHANNEL.sendToServer(new RequestClaimSettingsPacket());
-
         int x = (this.width - WIDTH) / 2;
         int y = (this.height - HEIGHT) / 2;
 
@@ -138,6 +142,19 @@ public class ClaimMapScreen extends BaseCursorScreen {
             })
             .setTooltip(Tooltip.create(UIConstants.REFRESH));
 
+        frame.addChild(Widgets.button()
+            .withRenderer(WidgetRenderers.icon(UIIcons.TRASH).withColor(MinecraftColors.RED))
+            .withTexture(null)
+            .withCallback(this::unclaimAll)
+            .withTooltip(ConstantComponents.UNCLAIM_ALL)
+            .withSize(11),
+            (settings) -> {
+                settings.padding(28, 2);
+                settings.alignHorizontallyRight();
+                settings.alignVerticallyTop();
+            }
+        );
+
         frame.addChild(new StringWidget(ConstantComponents.MAP_TITLE, font), (settings) -> {
             settings.padding(4);
             settings.alignHorizontallyLeft();
@@ -153,19 +170,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
         mapWidget.withSize(MAP_SIZE);
 
-        frame.addChild(
-            Widgets.button()
-                .withCallback(this::unclaimAll)
-                .withTexture(UIConstants.DANGER_BUTTON)
-                .withSize(MAP_SIZE / 2, BUTTON_HEIGHT)
-                .withRenderer(WidgetRenderers.text(ConstantComponents.UNCLAIM_ALL).withColor(MinecraftColors.WHITE)),
-            (settings) -> {
-                settings.padding(PADDING);
-                settings.alignHorizontallyLeft();
-                settings.alignVerticallyBottom();
-            }
-        );
-
         settingsButton = frame.addChild(
             Widgets.button()
                 .withCallback(() -> minecraft.setScreen(new ClaimConfigModal(this)))
@@ -178,7 +182,27 @@ public class ClaimMapScreen extends BaseCursorScreen {
             }
         );
 
-        settingsButton.active = !settings.isEmpty();
+        frame.addChild(
+            Widgets.dropdown(
+                selected,
+                teams.keySet().stream().toList(),
+                teamId -> Optional.ofNullable(teams.get(teamId)).map(team -> Component.literal(team.name)).orElse(ConstantComponents.UNKNOWN.copy()),
+                button -> {
+                    button.withSize(MAP_SIZE / 2, BUTTON_HEIGHT);
+                    if (teams.size() <= 1) {
+                        button.asDisabled();
+                    }
+                },
+                dropdown -> dropdown.withAlignment(OverlayAlignment.TOP_RIGHT)
+            ),
+            (settings) -> {
+                settings.padding(PADDING);
+                settings.alignHorizontallyLeft();
+                settings.alignVerticallyBottom();
+            }
+        );
+
+        settingsButton.active = getData().settings().isEmpty();
 
         frame.arrangeElements();
         frame.visitWidgets(this::addRenderableWidget);
@@ -205,14 +229,20 @@ public class ClaimMapScreen extends BaseCursorScreen {
         int right = mapWidget.getX() + mapWidget.getWidth() - PADDING;
         int top = mapWidget.getY() + mapWidget.getHeight() - PADDING - font.lineHeight;
 
-        String claimedCount = String.format("%d/%d", this.claimedCount, this.maxClaims);
-        String chunkLoadedCount = String.format("%d/%d", this.chunkLoadedCount, this.maxChunkLoaded);
+        TeamData data = getData();
+        String claimedCount = String.format("%d/%d", data.claimed, data.maxClaims);
+        String chunkLoadedCount = String.format("%d/%d", data.loaded, data.maxLoaded);
 
         graphics.drawString(font, claimedCount, left, top, 0xFFFFFF, true);
         graphics.drawString(font, chunkLoadedCount, right - font.width(chunkLoadedCount), top, 0xFFFFFF, true);
 
         graphics.drawString(font, ConstantComponents.MAX_CLAIMS, left, top - 10, 0xFFFFFF, true);
         graphics.drawString(font, ConstantComponents.MAX_CHUNK_LOADED_CLAIMS, right - font.width(ConstantComponents.MAX_CHUNK_LOADED_CLAIMS), top - 10, 0xFFFFFF, true);
+    }
+
+    private TeamData getData() {
+        TeamData teamData = teams.get(selected.get());
+        return teamData == null ? TeamData.EMPTY : teamData;
     }
 
     @Override
@@ -297,7 +327,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
                 float y = mapWidget.getY() + (j * pixelScale);
 
                 if (isHovering(mouseX, mouseY, x, y)) {
-                    drawClaimSquare(graphics, x, y, pixelScale, pixelScale, color(this.teamColor, 127),
+                    drawClaimSquare(graphics, x, y, pixelScale, pixelScale, color(getColor(), 127),
                         true, true, true, true, true, true, true, true);
                     return;
                 }
@@ -316,7 +346,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         float width = Math.max(pixelScale, ((selectionEndX + 1 - selectionStartX)) * pixelScale);
         float height = Math.max(pixelScale, ((selectionEndZ + 1 - selectionStartZ)) * pixelScale);
 
-        drawClaimSquare(graphics, x, y, width, height, color(this.teamColor, 127),
+        drawClaimSquare(graphics, x, y, width, height, color(getColor(), 127),
             true, true, true, true, true, true, true, true);
     }
 
@@ -328,10 +358,10 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
                 var claim = ClaimApi.API.getClaim(level, pos);
                 if (claim.isEmpty()) continue;
-                UUID id = claim.get().left();
+                TeamId id = claim.get().team();
 
-                Component name = getName(id, claim.get().rightBoolean());
-                int color = color(CadmusClient.TEAM_INFO.get(id).color(), 127);
+                Component name = getName(id, claim.get().isChunkLoaded());
+                int color = color(CadmusClient.TEAM_INFO.getOrDefault(id, new TeamInfo("", Color.DEFAULT)).color(), 127);
 
                 boolean north = checkSide(i, j, 0, -1);
                 boolean east = checkSide(i, j, 1, 0);
@@ -343,7 +373,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
                 boolean southWest = checkSide(i, j, -1, 1);
                 boolean northWest = checkSide(i, j, -1, -1);
 
-                this.claims.put(pos, new ClaimTile(id, name, color, pos, i, j, north, east, south, west, northEast, southEast, southWest, northWest));
+                this.claims.put(pos, new ClaimTile(id.id(), name, color, pos, i, j, north, east, south, west, northEast, southEast, southWest, northWest));
             }
         }
     }
@@ -351,9 +381,9 @@ public class ClaimMapScreen extends BaseCursorScreen {
     private boolean checkSide(int x, int z, int offsetX, int offsetZ) {
         ChunkPos pos = new ChunkPos(playerChunkX + x + offsetX, playerChunkZ + z + offsetZ);
 
-        return ClaimApi.API.getClaim(level, pos).map(pair -> {
+        return ClaimApi.API.getClaim(level, pos).map(claim -> {
             ChunkPos currentPos = new ChunkPos(playerChunkX + x, playerChunkZ + z);
-            return !pair.left().equals(ClaimApi.API.getClaim(level, currentPos).map(Pair::left).orElse(null));
+            return !claim.team().equals(ClaimApi.API.getClaim(level, currentPos).map(ClaimData::team).orElse(null));
         }).orElse(true);
     }
 
@@ -404,7 +434,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         y *= scale;
         try (var pose = new CloseablePoseStack(graphics)) {
             pose.translate(left + x, top + y, 0);
-            pose.mulPose(Axis.ZP.rotationDegrees(player.getYRot()));
+            pose.mulPose(Axis.ZP.rotationDegrees(player.getYRot() + 180));
             pose.translate(-4, -4, 2);
             graphics.blit(MAP_ICONS, 0, 0, 40, 0, 8, 8, 128, 128);
         }
@@ -417,7 +447,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         if (startPos.equals(endPos)) {
             if (button == 0 && !this.claims.containsKey(startPos)) {
                 claim(startPos, hasShiftDown());
-            } else if (button == 1 && this.claims.containsKey(startPos) && this.claims.get(startPos).id().equals(this.id)) {
+            } else if (button == 1 && this.claims.containsKey(startPos) && this.claims.get(startPos).id().equals(selected.get().id())) {
                 unclaim(startPos);
             }
         } else {
@@ -446,7 +476,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
         return (color & 0x00FFFFFF) | (alpha << 24);
     }
 
-    private Component getName(UUID id, boolean chunkLoad) {
+    private Component getName(TeamId id, boolean chunkLoad) {
         return Component.translatable("text.cadmus.claimed_by", TeamApi.API.getName(level, id)).withStyle(ChatFormatting.GRAY)
             .append(CommonComponents.SPACE)
             .append(chunkLoad ?
@@ -467,23 +497,23 @@ public class ClaimMapScreen extends BaseCursorScreen {
 
 
     private void claim(ChunkPos pos, boolean chunkLoad) {
-        CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, "%s %s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ(), chunkLoad));
+        CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, selected.get(), "%s %s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ(), chunkLoad));
     }
 
     private void unclaim(ChunkPos pos) {
-        CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()));
+        CadmusClient.sendTeamlessClaimCommand(ClaimCommandType.UNCLAIM, "%s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ()));
     }
 
     private void claimArea(ChunkPos startPos, ChunkPos endPos, boolean chunkLoad) {
-        CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, "%s %s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ(), chunkLoad));
+        CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM_AREA, selected.get(), "%s %s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ(), chunkLoad));
     }
 
     private void unclaimArea(ChunkPos startPos, ChunkPos endPos) {
-        CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_AREA, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()));
+        CadmusClient.sendTeamlessClaimCommand(ClaimCommandType.UNCLAIM_AREA, "%s %s %s %s".formatted(startPos.getMaxBlockX(), startPos.getMaxBlockZ(), endPos.getMaxBlockX(), endPos.getMaxBlockZ()));
     }
 
     private void unclaimAll() {
-        DeleteConfirmModal.open(ConstantComponents.UNCLAIM_MODAL_TITLE, ConstantComponents.UNCLAIM_MODAL_DESCRIPTION, ConstantComponents.UNCLAIM_MODAL_CONFIRM, () -> CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM_ALL, ""));
+        DeleteConfirmModal.open(ConstantComponents.UNCLAIM_MODAL_TITLE, ConstantComponents.UNCLAIM_MODAL_DESCRIPTION, ConstantComponents.UNCLAIM_MODAL_CONFIRM, () -> CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM, selected.get(), selected.get().asArg()));
     }
 
     private static void update() {
@@ -493,19 +523,30 @@ public class ClaimMapScreen extends BaseCursorScreen {
         }
     }
 
-    public void updateSettings(Map<String, TriState> settings, boolean canModifyColor) {
-        this.settings.putAll(settings);
-        settingsButton.active = !settings.isEmpty();
-        this.canModifyColor = canModifyColor;
+    public void updateSettings(Map<TeamId, SettingsData> settings) {
+        settings.forEach((teamId, settingsData) -> {
+            var team = teams.get(teamId);
+            if (team != null) {
+                team.settings.putAll(settingsData.settings());
+                team.modifyColor.set(settingsData.canModifyColor());
+            }
+        });
     }
 
     public void updateColor(Color color) {
-        this.teamColor = color;
-        CadmusClient.TEAM_INFO.put(TeamApi.API.getId(player), new TeamInfo(CadmusClient.TEAM_INFO.get(id).name(), color));
+        CadmusClient.TEAM_INFO.put(selected.get(), new TeamInfo(CadmusClient.TEAM_INFO.get(selected.get()).name(), color));
     }
 
     public Map<String, TriState> getSettings() {
-        return settings;
+        return getData().settings;
+    }
+
+    public Color getColor() {
+        return getData().color.get();
+    }
+
+    public boolean canModifyColor() {
+        return getData().modifyColor.get();
     }
 
     private record ClaimTile(
@@ -518,7 +559,10 @@ public class ClaimMapScreen extends BaseCursorScreen {
         boolean south, boolean west,
         boolean northEast, boolean southEast,
         boolean southWest, boolean northWest
-    ) {
+    ) {}
+
+    private record TeamData(String name, int claimed, int maxClaims, int loaded, int maxLoaded, Map<String, TriState> settings, State<Color> color, State<Boolean> modifyColor) {
+        public static final TeamData EMPTY = new TeamData("empty", 0, 0,0, 0, new HashMap<>(), State.of(Color.DEFAULT), State.of(false));
     }
 
     static {

@@ -9,11 +9,12 @@ import com.teamresourceful.resourcefullib.common.network.base.PacketType;
 import com.teamresourceful.resourcefullib.common.network.defaults.CodecPacketType;
 import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.limit.ClaimLimitApi;
+import earth.terrarium.cadmus.api.teams.TeamId;
 
 import java.util.UUID;
 
 public record SyncMaxClaimsPacket(
-    UUID id,
+    TeamId id,
     int maxClaims,
     int maxChunkLoaded
 ) implements Packet<SyncMaxClaimsPacket> {
@@ -21,7 +22,7 @@ public record SyncMaxClaimsPacket(
     public static final ClientboundPacketType<SyncMaxClaimsPacket> TYPE = CodecPacketType.Client.create(
         Cadmus.id("sync_max_claims"),
         ObjectByteCodec.create(
-            ByteCodec.UUID.fieldOf(SyncMaxClaimsPacket::id),
+            TeamId.BYTE_CODEC.fieldOf(SyncMaxClaimsPacket::id),
             ByteCodec.VAR_INT.fieldOf(SyncMaxClaimsPacket::maxClaims),
             ByteCodec.VAR_INT.fieldOf(SyncMaxClaimsPacket::maxChunkLoaded),
             SyncMaxClaimsPacket::new
