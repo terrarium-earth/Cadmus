@@ -87,7 +87,7 @@ public class TeamApiImpl implements TeamApi {
 
     @Override
     public Color getColor(Level level, TeamId id) {
-        return Optional.ofNullable(getProvider(id.provider())).flatMap(it -> it.getColor(level, id.id())).orElseGet(() -> ModUtils.uuidToColor(id.id()));
+        return Optional.ofNullable(getProvider(id.provider())).flatMap(it -> it.getColor(level, id.id())).orElseGet(() -> Optional.ofNullable(CadmusClient.TEAM_INFO.get(id).color()).orElse(ModUtils.uuidToColor(id.id())));
     }
 
     @Override

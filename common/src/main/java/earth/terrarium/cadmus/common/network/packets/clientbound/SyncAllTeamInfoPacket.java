@@ -1,6 +1,5 @@
 package earth.terrarium.cadmus.common.network.packets.clientbound;
 
-import com.teamresourceful.bytecodecs.base.ByteCodec;
 import com.teamresourceful.bytecodecs.base.object.ObjectByteCodec;
 import com.teamresourceful.bytecodecs.defaults.MapCodec;
 import com.teamresourceful.resourcefullib.common.network.Packet;
@@ -14,7 +13,6 @@ import earth.terrarium.cadmus.client.CadmusClient;
 import earth.terrarium.cadmus.common.teams.TeamInfo;
 
 import java.util.Map;
-import java.util.UUID;
 
 public record SyncAllTeamInfoPacket(
     Map<TeamId, TeamInfo> teamInfo

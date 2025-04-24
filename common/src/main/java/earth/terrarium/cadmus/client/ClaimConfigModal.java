@@ -87,6 +87,7 @@ public class ClaimConfigModal extends BaseModal {
                     NetworkHandler.CHANNEL.sendToServer(new ClaimColorPacket(selectedTeam, color.get()));
                     ((ClaimMapScreen) this.background).updateColor(color.get());
                 }
+                onClose();
             });
         }), layoutSettings -> {
             layoutSettings.alignHorizontallyRight();

@@ -68,8 +68,8 @@ public class CadmusSaveData extends SaveHandler {
             });
         });
 
-        CompoundTag uniquePlayersTag = tag.getCompound("uniquePlayers");
-        uniquePlayersTag.getAllKeys().forEach(uuid -> uniquePlayers.add(UUID.fromString(uuid)));
+        ListTag uniquePlayersTag = tag.getList("uniquePlayers", Tag.TAG_STRING);
+        uniquePlayersTag.forEach(uuid -> uniquePlayers.add(UUID.fromString(uuid.getAsString())));
     }
 
     @Override

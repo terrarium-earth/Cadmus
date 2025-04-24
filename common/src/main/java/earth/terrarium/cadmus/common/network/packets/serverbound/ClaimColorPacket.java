@@ -25,6 +25,7 @@ public record ClaimColorPacket(TeamId id, Color color) implements Packet<ClaimCo
             if (player.getCommandSenderWorld().isClientSide()) return;
             if (ModUtils.canModifyColor(player, packet.id()) != null) return;
             CadmusSaveData.setTeamColor(player.getServer(), packet.id(), packet.color());
+            TeamApi.API.syncAllTeamInfo(player.getServer());
         })
     );
 

@@ -44,7 +44,7 @@ public class IndividualTeamProvider implements TeamProvider {
 
     @Override
     public boolean isMember(Level level, UUID id, GameProfile player) {
-        return id.equals(player);
+        return id.equals(player.getId());
     }
 
     @Override

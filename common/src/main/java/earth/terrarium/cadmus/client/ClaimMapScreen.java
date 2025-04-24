@@ -542,7 +542,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     public Color getColor() {
-        return getData().color.get();
+        return CadmusClient.TEAM_INFO.get(selected.get()).color();
     }
 
     public boolean canModifyColor() {
