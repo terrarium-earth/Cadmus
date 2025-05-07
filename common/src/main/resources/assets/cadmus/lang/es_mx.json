@@ -1,0 +1,122 @@
+{
+  "key.categories.project_odyssey": "Proyecto Odisea",
+  "key.cadmus.open_claim_map": "Abrir Mapa de Reclamaciones",
+
+  "command.cadmus.info.claimed_by": "§7Reclamado por: §b%s",
+  "command.cadmus.info.id": "§7ID: §b%s",
+  "command.cadmus.info.position": "§7Posición del Chunk: §b[%s, %s]",
+  "command.cadmus.info.chunk_loaded_true": "§7Chunk Cargado: §b✔",
+  "command.cadmus.info.chunk_loaded_false": "§7Chunk Cargado: §b✘",
+
+  "command.cadmus.info.claimed_chunk_at": "§7Chunk reclamado en §b[%s, %s] §6(%s/%s)",
+  "command.cadmus.info.chunk_loaded_chunk_at": "§7Chunk cargado en §b[%s, %s] §6(%s/%s)",
+  "command.cadmus.info.claimed_chunks": "§7Chunks reclamados: §b%s§7 §6(%s/%s)",
+  "command.cadmus.info.chunk_loaded_chunks": "§7Chunks cargados: §b%s§7 §6(%s/%s)",
+  "command.cadmus.info.unclaimed_chunk_at": "§7Chunk sin reclamar en: §b[%s, %s] §6(%s/%s)",
+  "command.cadmus.info.unclaimed_all": "§7Chunks sin reclamar: §b%s§7",
+  "command.cadmus.info.claimed_chunks_area": "§7Chunks reclamados desde §b[%s, %s]§7 hasta §b[%s, %s] §6(%s/%s)",
+  "command.cadmus.info.unclaimed_chunks_area": "§7Chunks sin reclamar desde §b[%s, %s]§7 hasta §b[%s, %s] §6(%s/%s)",
+  "command.cadmus.info.chunk_loaded_chunks_area": "§7Chunks cargados desde §b[%s, %s]§7 hasta §b[%s, %s] §6(%s/%s)",
+
+  "command.cadmus.info.admin_clear": "§7Se han eliminado todas las reclamaciones de todos los equipos",
+  "command.cadmus.info.claimed_admin_chunk_at": "§7Chunk administrativo reclamado en §b[%s, %s]",
+  "command.cadmus.info.unclaimed_admin_chunk_at": "§7Chunk administrativo sin reclamar en §b[%s, %s]",
+  "command.cadmus.info.unclaimed_all_admin": "§7Chunks administrativos sin reclamar: §b%s§7",
+  "command.cadmus.info.claimed_admin_chunks_area": "§7Chunks administrativos reclamados desde §b[%s, %s]§7 hasta §b[%s, %s]",
+
+  "command.cadmus.bypass.enable": "§7Se ha habilitado el bypass para %s",
+  "command.cadmus.bypass.disable": "§7Se ha deshabilitado el bypass para %s",
+
+  "command.cadmus.setting.get": "§b%s§7 está configurado en §b%s",
+  "command.cadmus.setting.set": "§7Se ha configurado %s§7 en §b%s",
+  "command.cadmus.setting.add_allowed_block": "§7Se ha añadido §b%s§7 a los bloques permitidos",
+  "command.cadmus.setting.remove_allowed_block": "§7Se ha eliminado §b%s§7 de los bloques permitidos",
+  "command.cadmus.setting.list_allowed_blocks": "§b%s",
+
+  "command.cadmus.admin.create": "§7Se ha creado el equipo administrativo §b%s",
+  "command.cadmus.admin.remove": "§7Se ha eliminado el equipo administrativo §b%s",
+  "command.cadmus.admin.set_flag": "§7Se ha establecido la bandera §b%s§7 de §6%s§7 a §6%s",
+  "command.cadmus.admin.remove_flag": "§7Se ha eliminado la bandera §b%s",
+  "command.cadmus.admin.list_flags": "§b%s:§6 %s",
+
+  "command.cadmus.exception.already_claimed": "Este Chunk ya está reclamado por %s",
+  "command.cadmus.exception.maxed_out_claims": "Has alcanzado el máximo de reclamaciones §6(%s/%s)",
+  "command.cadmus.exception.not_enough_claims": "No tienes suficientes reclamaciones disponibles §6(%s/%s)",
+  "command.cadmus.exception.not_claimed": "Este Chunk no está reclamado",
+  "command.cadmus.exception.not_owner": "No eres el propietario de esta reclamación",
+  "command.cadmus.exception.area_too_large": "El área es demasiado grande §6(%s/%s)",
+
+  "command.cadmus.exception.invalid_state": "Valor inválido. Los valores válidos son: true, false, default.",
+  "command.cadmus.exception.block_not_added": "Este bloque no está en la lista de bloques permitidos.",
+
+  "command.cadmus.exception.no_permission_team": "No tienes permiso en tu equipo para gestionar esta configuración.",
+  "command.cadmus.exception.no_permission_role": "Tu rol no tiene permiso para gestionar configuraciones.",
+
+  "command.cadmus.exception.team_does_not_exist": "Este equipo no existe.",
+
+  "command.cadmus.exception.admin_team_already_exists": "Este equipo administrativo ya existe.",
+  "command.cadmus.exception.admin_team_does_not_exist": "Este equipo administrativo no existe.",
+  "command.cadmus.exception.admin_team_has_no_flags": "Este equipo administrativo no tiene banderas.",
+
+  "message.cadmus.wilderness": "Tierra Salvaje",
+
+  "text.cadmus.chunkload_selected": "Cargar Chunk Seleccionado",
+  "text.cadmus.claimed_by": "Reclamado por %s",
+  "text.cadmus.chunk_loaded": "[Chunk cargado]",
+
+  "gamerule.maxClaims": "Máximo de Reclamaciones",
+  "gamerule.maxChunkLoadedClaims": "Máximo de Chunks Cargados",
+  "gamerule.doClaimedBlockBreaking": "Romper Bloques Reclamados",
+  "gamerule.doClaimedBlockPlacing": "Colocar Bloques Reclamados",
+  "gamerule.doClaimedBlockInteractions": "Interacciones con Bloques Reclamados",
+  "gamerule.doClaimedBlockExplosions": "Explosiones de Bloques Reclamados",
+  "gamerule.doClaimedEntityExplosions": "Explosiones de Entidades Reclamadas",
+  "gamerule.doClaimedEntityInteractions": "Interacciones con Entidades Reclamadas",
+  "gamerule.doClaimedEntityDamage": "Daño a Entidades Reclamadas",
+  "gamerule.doClaimedMobGriefing": "Destrozos de Mobs Reclamados",
+  "gamerule.doClaimedItemPickup": "Recoger Objetos Reclamados",
+
+  "gamerule.maxClaims.description": "Máximo de Chunks Reclamados",
+  "gamerule.maxChunkLoadedClaims.description": "Máximo de Chunks Cargados Reclamados",
+  "gamerule.doClaimedBlockBreaking.description": "Romper Bloques Reclamados",
+  "gamerule.doClaimedBlockPlacing.description": "Colocar Bloques Reclamados",
+  "gamerule.doClaimedBlockInteractions.description": "Interacciones con Bloques Reclamados",
+  "gamerule.doClaimedBlockExplosions.description": "Explosiones de Bloques Reclamados",
+  "gamerule.doClaimedEntityExplosions.description": "Explosiones de Entidades Reclamadas",
+  "gamerule.doClaimedEntityInteractions.description": "Interacciones con Entidades Reclamadas",
+  "gamerule.doClaimedEntityDamage.description": "Daño a Entidades Reclamadas",
+  "gamerule.doClaimedMobGriefing.description": "Destrozos de Mobs Reclamados",
+  "gamerule.doClaimedItemPickup.description": "Recoger Objetos Reclamados",
+
+  "option.prometheus.cadmus/v1": "Cadmus",
+
+  "cadmus.block_breaking.permission":  "Romper Bloques Reclamados",
+  "cadmus.block_placing.permission":  "Colocar Bloques Reclamados",
+  "cadmus.block_interactions.permission":  "Interacciones con Bloques Reclamados",
+  "cadmus.block_explosions.permission":  "Explosiones de Bloques Reclamados",
+  "cadmus.entity_explosions.permission":  "Explosiones de Entidades Reclamadas",
+  "cadmus.entity_interactions.permission":  "Interacciones con Entidades Reclamadas",
+  "cadmus.entity_damage.permission":  "Daño a Entidades Reclamadas",
+  "cadmus.mob_griefing.permission":  "Destrozos de Mobs Reclamados",
+  "cadmus.item_pickup.permission":  "Recoger Objetos Reclamados",
+
+  "cadmus.personal.block_breaking":  "Romper Bloques Personales",
+  "cadmus.personal.block_placing":  "Colocar Bloques Personales",
+  "cadmus.personal.block_interactions":  "Interacciones con Bloques Personales",
+  "cadmus.personal.block_explosions":  "Explosiones de Bloques Personales",
+  "cadmus.personal.entity_explosions":  "Explosiones de Entidades Personales",
+  "cadmus.personal.entity_interactions":  "Interacciones con Entidades Personales",
+  "cadmus.personal.entity_damage":  "Daño a Entidades Personales",
+  "cadmus.personal.mob_griefing":  "Destrozos de Mobs Personales",
+  "cadmus.personal.item_pickup":  "Recoger Objetos Personales",
+
+  "gui.cadmus.claim_map.title": "Mapa de Reclamaciones",
+  "gui.cadmus.claim_map.clear_claimed_chunks": "Limpiar Chunks Reclamados",
+  "gui.cadmus.claim_map.close": "Cerrar",
+  "gui.cadmus.claim_map.max_claims": "Máximo de Reclamaciones",
+  "gui.cadmus.claim_map.max_chunk_loaded_claims": "Máximo de Chunks Cargados Reclamados",
+  "gui.cadmus.claim_map.loading": "Cargando...",
+
+  "rei.sections.project_odyssey": "Proyecto Odisea",
+  "rei.cadmus.cadmus.tooltip": "Abrir Mapa de Reclamaciones"
+}
