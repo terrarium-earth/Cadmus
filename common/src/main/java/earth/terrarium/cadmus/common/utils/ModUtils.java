@@ -3,7 +3,10 @@ package earth.terrarium.cadmus.common.utils;
 import com.teamresourceful.resourcefullib.common.color.Color;
 import com.teamresourceful.resourcefullib.common.exceptions.NotImplementedException;
 import com.teamresourceful.resourcefullib.common.utils.CommonUtils;
+import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfo;
+import com.teamresourceful.resourcefullib.common.utils.modinfo.ModInfoUtils;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import earth.terrarium.cadmus.Cadmus;
 import earth.terrarium.cadmus.api.claims.ClaimApi;
 import earth.terrarium.cadmus.api.protections.ProtectionApi;
 import earth.terrarium.cadmus.api.teams.TeamApi;
@@ -103,7 +106,8 @@ public class ModUtils {
         if (!player.hasPermissions(2)) {
             if (!TeamApi.API.canModifySettings(player, id)) {
                 return ConstantComponents.NO_PERMISSION_TEAM;
-            } else if (player.getServer() == null || !PrometheusCompat.hasPermission(player.getServer(), player.getGameProfile(), protection.permission())) {
+
+            } else if (player.getServer() == null || (Cadmus.IS_PROMETHEUS_LOADED && !PrometheusCompat.hasPermission(player.getServer(), player.getGameProfile(), protection.permission()))) {
                 return ConstantComponents.NO_PERMISSION_ROLE;
             }
         }
