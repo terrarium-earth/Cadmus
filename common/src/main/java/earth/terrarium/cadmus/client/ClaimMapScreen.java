@@ -1,7 +1,5 @@
 package earth.terrarium.cadmus.client;
 
-import com.mojang.math.Axis;
-import com.teamresourceful.resourcefullib.client.CloseablePoseStack;
 import com.teamresourceful.resourcefullib.client.screens.BaseCursorScreen;
 import com.teamresourceful.resourcefullib.client.utils.ScreenUtils;
 import com.teamresourceful.resourcefullib.common.color.Color;
@@ -33,7 +31,6 @@ import earth.terrarium.olympus.client.ui.UIConstants;
 import earth.terrarium.olympus.client.ui.UIIcons;
 import earth.terrarium.olympus.client.ui.modals.DeleteConfirmModal;
 import earth.terrarium.olympus.client.utils.State;
-import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -45,14 +42,12 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class ClaimMapScreen extends BaseCursorScreen {
-    public static final ResourceLocation MAP_ICONS = ResourceLocation.withDefaultNamespace("textures/map/decorations/player.png");
     public static final int MAP_SIZE = 192;
     public static final int BANNER_HEIGHT = 15;
     public static final int BUTTON_HEIGHT = 24;
@@ -220,8 +215,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         } else {
             drawSelection(graphics);
         }
-
-        renderPlayerAvatar(graphics);
     }
 
     private void drawClaimLabels(GuiGraphics graphics) {
@@ -419,27 +412,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         graphics.fill(roundedX, roundedY, roundedWidth, roundedHeight, 2, color & 0x33ffffff);
     }
 
-    private void renderPlayerAvatar(GuiGraphics graphics) {
-        float left = (this.width) / 2f;
-        float top = (this.height) / 2f;
-
-        double playerX = player.getX();
-        double playerZ = player.getZ();
-        double x = (playerX % 16) + (playerX >= 0 ? -8 : 8);
-        double y = (playerZ % 16) + (playerZ >= 0 ? -8 : 8);
-
-        float scale = MAP_SIZE / (getMapScale() * 2f + 16);
-
-        x *= scale;
-        y *= scale;
-        try (var pose = new CloseablePoseStack(graphics)) {
-            pose.translate(left + x, top + y, 0);
-            pose.mulPose(Axis.ZP.rotationDegrees(player.getYRot() + 180));
-            pose.translate(-4, -4, 2);
-            graphics.blit(MAP_ICONS, 0, 0, 40, 0, 8, 8, 128, 128);
-        }
-    }
-
     private void doAction(int startX, int endX, int startZ, int endZ, int button) {
         if (startX == 0 && startZ == 0) return;
         ChunkPos startPos = new ChunkPos(startX, startZ);
@@ -490,12 +462,6 @@ public class ClaimMapScreen extends BaseCursorScreen {
         return scale - (scale % 16) + 16;
     }
 
-    public int getMapScale() {
-        int scale = Minecraft.getInstance().options.renderDistance().get() * 8;
-        return scale - scale % 16 + 16;
-    }
-
-
     private void claim(ChunkPos pos, boolean chunkLoad) {
         CadmusClient.sendClaimCommand(ClaimCommandType.CLAIM, selected.get(), "%s %s %s".formatted(pos.getMaxBlockX(), pos.getMaxBlockZ(), chunkLoad));
     }
@@ -513,7 +479,7 @@ public class ClaimMapScreen extends BaseCursorScreen {
     }
 
     private void unclaimAll() {
-        DeleteConfirmModal.open(ConstantComponents.UNCLAIM_MODAL_TITLE, ConstantComponents.UNCLAIM_MODAL_DESCRIPTION, ConstantComponents.UNCLAIM_MODAL_CONFIRM, () -> CadmusClient.sendClaimCommand(ClaimCommandType.UNCLAIM, selected.get(), selected.get().asArg()));
+        DeleteConfirmModal.open(ConstantComponents.UNCLAIM_MODAL_TITLE, ConstantComponents.UNCLAIM_MODAL_DESCRIPTION, ConstantComponents.UNCLAIM_MODAL_CONFIRM, () -> CadmusClient.sendTeamlessClaimCommand(ClaimCommandType.UNCLAIM, selected.get().asArg()));
     }
 
     private static void update() {

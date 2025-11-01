@@ -18,12 +18,14 @@ dependencies {
 
     val minecraftVersion: String by project
     val neoforgeVersion: String by project
-    val reiVersion: String by project
+    val xaerosWorldMapVersion: String by project
+    val xaerosMiniMapVersion: String by project
+    val byteCodecsVersion: String by project
 
     neoForge(group = "net.neoforged", name = "neoforge", version = neoforgeVersion)
 
-    forgeRuntimeLibrary("com.teamresourceful:bytecodecs:1.0.2")
+    forgeRuntimeLibrary(group = "com.teamresourceful", name = "bytecodecs", version = byteCodecsVersion)
 
-    modLocalRuntime(group = "maven.modrinth", name = "xaeros-world-map", version = "1.39.0_NeoForge_1.21")
-    modLocalRuntime(group = "maven.modrinth", name = "xaeros-minimap", version = "24.3.0_NeoForge_1.21")
+    modLocalRuntime(group = "maven.modrinth", name = "xaeros-world-map", version = "${xaerosWorldMapVersion}_NeoForge_$minecraftVersion")
+    modLocalRuntime(group = "maven.modrinth", name = "xaeros-minimap", version = "${xaerosMiniMapVersion}_NeoForge_$minecraftVersion")
 }

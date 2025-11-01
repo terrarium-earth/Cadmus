@@ -9,7 +9,6 @@ import earth.terrarium.prometheus.api.permissions.PermissionApi;
 import earth.terrarium.prometheus.api.roles.options.RoleOptionsApi;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 public class PrometheusCompat {
 

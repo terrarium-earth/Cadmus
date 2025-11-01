@@ -57,24 +57,26 @@ subprojects {
     }
 
     dependencies {
+        val minecraftVersion: String by project
+        val minecraftVersionFull: String by project
         val prometheusVersion: String by project
+        val resourcefulLibVersion: String by project
+        val olympusVersion: String by project
         val reiVersion: String by project
         val journeymapVersion: String by project
         val journeymapApiVersion: String by project
+        val parchmentVersion: String by project
 
         "minecraft"("::$minecraftVersion")
 
         @Suppress("UnstableApiUsage")
         "mappings"(project.the<LoomGradleExtensionAPI>().layered {
-            val parchmentVersion: String by project
-
             officialMojangMappings()
-
-            parchment(create(group = "org.parchmentmc.data", name = "parchment-1.21", version = parchmentVersion))
+            parchment(create(group = "org.parchmentmc.data", name = "parchment-$minecraftVersion", version = parchmentVersion))
         })
 
-        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = "3.0.12")
-        val olympus = "modImplementation"(group = "earth.terrarium.olympus", name = "olympus-$modLoader-$minecraftVersion", version = "1.0.9") {
+        "modApi"(group = "com.teamresourceful.resourcefullib", name = "resourcefullib-$modLoader-$minecraftVersion", version = resourcefulLibVersion)
+        val olympus = "modImplementation"(group = "earth.terrarium.olympus", name = "olympus-$modLoader-$minecraftVersion", version = olympusVersion) {
             isTransitive = false
         }
 
@@ -94,7 +96,7 @@ subprojects {
             "modCompileOnly"(group = "me.shedaniel", name = "RoughlyEnoughItems-default-plugin-$modLoader", version = reiVersion)
             "include"(olympus)
 
-            // "modRuntimeOnly"(group = "maven.modrinth", name = "journeymap", version = "$journeymapVersion+$modLoader")
+            // "modRuntimeOnly"(group = "maven.modrinth", name = "journeymap", version = "${minecraft_version_full}-$journeymapVersion+$modLoader")
             // "modRuntimeOnly"(group = "maven.modrinth", name = "common-network", version = project.properties["commonNetwork${modLoader}Version"] as String)
         }
     }
