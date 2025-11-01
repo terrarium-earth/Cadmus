@@ -12,6 +12,10 @@ repositories {
 }
 
 dependencies {
-    modCompileOnly(group = "tech.thatgravyboat", name = "commonats", version = "2.0")
-    modCompileOnly(group = "maven.modrinth", name = "xaeros-world-map", version = "1.39.0_Fabric_1.21")
+    val xaerosWorldMapVersion: String by project
+    val commonatsVersion: String by project
+    val minecraftVersion: String by project
+
+    modCompileOnly(group = "tech.thatgravyboat", name = "commonats", version = commonatsVersion)
+    modCompileOnly(group = "maven.modrinth", name = "xaeros-world-map", version = "${xaerosWorldMapVersion}_Fabric_$minecraftVersion")
 }
