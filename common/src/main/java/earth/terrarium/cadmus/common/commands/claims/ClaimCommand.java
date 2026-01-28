@@ -37,12 +37,6 @@ public class ClaimCommand {
                                 TeamId id = TeamId.fromCommand(context);
                                 claim(context.getSource(), id, pos, chunkload);
                                 return 1;
-                            })
-                            .executes(context -> {
-                                ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
-                                TeamId id = TeamId.fromCommand(context);
-                                claim(context.getSource(), id, pos, false);
-                                return 1;
                             }))
                         .executes(context -> {
                             TeamId id = TeamId.fromCommand(context);
@@ -66,10 +60,10 @@ public class ClaimCommand {
             )).create();
         }
 
-        checkClaimed(source.getLevel(), pos);
+        checkClaimed(source.getLevel(), pos, id);
 
         ClaimApi.API.claim(source.getLevel(), id, pos, chunkload);
-
+        System.out.println(chunkload);
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             chunkload ?
                 "command.cadmus.info.chunk_loaded_chunk_at" :
@@ -79,9 +73,9 @@ public class ClaimCommand {
         ), false);
     }
 
-    public static void checkClaimed(ServerLevel level, ChunkPos pos) throws CommandSyntaxException {
+    public static void checkClaimed(ServerLevel level, ChunkPos pos, TeamId teamId) throws CommandSyntaxException {
         var claim = ClaimApi.API.getClaim(level, pos);
-        if (claim.isPresent()) {
+        if (claim.isPresent() && !claim.get().team().equals(teamId)) {
             Component name = TeamApi.API.getName(level, claim.get().team());
             throw new SimpleCommandExceptionType(ModUtils.translatableWithStyle(
                 "command.cadmus.exception.already_claimed",

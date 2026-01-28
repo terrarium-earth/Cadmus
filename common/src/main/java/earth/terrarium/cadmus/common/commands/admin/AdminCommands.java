@@ -138,7 +138,7 @@ public class AdminCommands {
     private static void claim(CommandSourceStack source, ChunkPos pos, boolean chunkload, ResourceLocation provider, UUID id) throws CommandSyntaxException {
         TeamId teamId = new TeamId(provider, id);
         if (!TeamApi.API.teamExists(source.getServer(), teamId)) throw TEAM_DOES_NOT_EXIST.create();
-        ClaimCommand.checkClaimed(source.getLevel(), pos);
+        ClaimCommand.checkClaimed(source.getLevel(), pos, teamId);
 
         ClaimApi.API.claim(source.getLevel(), teamId, pos, chunkload);
 
