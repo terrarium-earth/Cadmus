@@ -131,9 +131,10 @@ public class AdminClaimCommands {
         UUID id = FlagApi.API.getIdFromName(source.getServer(), team).orElse(null);
         if (id == null) throw AdminClaimCommands.ADMIN_TEAM_DOES_NOT_EXIST.create();
 
-        ClaimCommand.checkClaimed(source.getLevel(), pos);
+        TeamId teamId = new TeamId(AdminTeamProvider.ID, id);
+        ClaimCommand.checkClaimed(source.getLevel(), pos, teamId);
 
-        ClaimApi.API.claim(source.getLevel(), new TeamId(AdminTeamProvider.ID, id), pos, false);
+        ClaimApi.API.claim(source.getLevel(), teamId, pos, false);
 
         source.sendSuccess(() -> ModUtils.translatableWithStyle(
             "command.cadmus.info.claimed_admin_chunk_at",
