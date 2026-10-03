@@ -51,7 +51,7 @@ jobs:
           files: ./neoforge/build/libs/!(*-@(dev|sources|dev-shadow)).jar
           name: "[NeoForge] Cadmus ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
-          version-type: release
+          version-type: beta
           changelog-file: changelog.md
           loaders: neoforge
           game-versions: ${{ steps.properties.outputs.minecraftVersion }}
@@ -74,7 +74,7 @@ jobs:
           files: ./fabric/build/libs/!(*-@(dev|sources|dev-shadow)).jar
           name: "[Fabric] Cadmus ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
-          version-type: release
+          version-type: beta
           changelog-file: changelog.md
           loaders: fabric
           game-versions: ${{ steps.properties.outputs.minecraftVersion }}
