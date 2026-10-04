@@ -49,7 +49,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           files: ./neoforge/build/libs/!(*-@(dev|sources|dev-shadow)).jar
-          name: "[NeoForge] Cadmus ${{ steps.properties.outputs.version }}"
+          name: "[NeoForge] Odyssey Claims ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
           version-type: beta
           changelog-file: changelog.md
@@ -72,7 +72,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
 
           files: ./fabric/build/libs/!(*-@(dev|sources|dev-shadow)).jar
-          name: "[Fabric] Cadmus ${{ steps.properties.outputs.version }}"
+          name: "[Fabric] Odyssey Claims ${{ steps.properties.outputs.version }}"
           version: ${{ steps.properties.outputs.version }}
           version-type: beta
           changelog-file: changelog.md
