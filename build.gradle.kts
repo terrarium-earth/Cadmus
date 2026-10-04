@@ -8,10 +8,12 @@ plugins {
     java
     id("maven-publish")
     id("com.teamresourceful.resourcefulgradle") version "0.0.+"
-    id("dev.architectury.loom") version "1.7-SNAPSHOT" apply false
-    id("architectury-plugin") version "3.4-SNAPSHOT"
-    id("com.github.johnrengelman.shadow") version "7.1.2" apply false
+    id("dev.architectury.loom") version "1.17-SNAPSHOT" apply false
+    id("architectury-plugin") version "3.5-SNAPSHOT"
+    id("com.gradleup.shadow") version "9.6.1" apply false
 }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 architectury {
     val minecraftVersion: String by project
@@ -22,7 +24,7 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "dev.architectury.loom")
     apply(plugin = "architectury-plugin")
-    apply(plugin = "com.github.johnrengelman.shadow")
+    apply(plugin = "com.gradleup.shadow")
 
     val minecraftVersion: String by project
     val modLoader = project.name
@@ -123,7 +125,7 @@ subprojects {
             platformSetupLoomIde()
         }
 
-        val shadowCommon by configurations.creating {
+        val shadowCommon = configurations.create("shadowCommon") {
             isCanBeConsumed = false
             isCanBeResolved = true
         }
@@ -188,11 +190,11 @@ resourcefulGradle {
 
             source.set(file("templates/embed.json.template"))
             injectedValues.set(mapOf(
-                    "minecraft" to minecraftVersion,
-                    "version" to version,
-                    "changelog" to StringEscapeUtils.escapeJava(changelog),
-                    "fabric_link" to fabricLink,
-                    "forge_link" to forgeLink,
+                "minecraft" to minecraftVersion,
+                "version" to version,
+                "changelog" to StringEscapeUtils.escapeJava(changelog),
+                "fabric_link" to fabricLink.orEmpty(),
+                "forge_link" to forgeLink.orEmpty(),
             ))
         }
     }
